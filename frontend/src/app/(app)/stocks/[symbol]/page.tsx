@@ -61,7 +61,7 @@ export default function StockDetailPage() {
   return (
     <div className="flex flex-col gap-6">
       <StockHeader stock={stock} />
-      <ActionButtons />
+      <ActionButtons symbol={stock.symbol} price={stock.price} />
 
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-3">

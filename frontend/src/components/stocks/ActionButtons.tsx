@@ -1,27 +1,27 @@
 'use client'
 
 import { useState } from 'react'
+import TradeModal from '@/components/trade/TradeModal'
+import type { OrderSide } from '@/types/order'
 
-// Buy/Sell open the real trade modals in phase-2/fe-trade-modals — these are inert placeholders
-// until that slice wires them up. Watchlist toggling here is local-only (no REST endpoint yet).
-export default function ActionButtons() {
+// Watchlist toggling here is local-only (no REST endpoint yet).
+export default function ActionButtons({ symbol, price }: { symbol: string; price: number }) {
   const [watchlisted, setWatchlisted] = useState(false)
+  const [tradeSide, setTradeSide] = useState<OrderSide | null>(null)
 
   return (
     <div className="flex flex-wrap gap-2">
       <button
         type="button"
-        disabled
-        title="Trade modals land in phase-2/fe-trade-modals"
-        className="rounded-md bg-[var(--color-profit)] px-4 py-2 text-sm font-medium text-white opacity-50"
+        onClick={() => setTradeSide('BUY')}
+        className="rounded-md bg-[var(--color-profit)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
       >
         Buy
       </button>
       <button
         type="button"
-        disabled
-        title="Trade modals land in phase-2/fe-trade-modals"
-        className="rounded-md bg-[var(--color-loss)] px-4 py-2 text-sm font-medium text-white opacity-50"
+        onClick={() => setTradeSide('SELL')}
+        className="rounded-md bg-[var(--color-loss)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
       >
         Sell
       </button>
@@ -44,6 +44,15 @@ export default function ActionButtons() {
       >
         Research this stock
       </button>
+
+      {tradeSide && (
+        <TradeModal
+          symbol={symbol}
+          side={tradeSide}
+          price={price}
+          onClose={() => setTradeSide(null)}
+        />
+      )}
     </div>
   )
 }
