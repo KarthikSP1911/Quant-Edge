@@ -26,3 +26,14 @@ export function formatPeRatio(peRatio: number | null): string {
   if (peRatio === null) return '—'
   return peRatio.toFixed(1)
 }
+
+export function formatSignedCurrency(value: number | null): string {
+  if (value === null) return '—'
+  const sign = value > 0 ? '+' : value < 0 ? '-' : ''
+  return `${sign}${Math.abs(value).toLocaleString('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`
+}
