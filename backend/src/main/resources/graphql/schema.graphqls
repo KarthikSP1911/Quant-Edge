@@ -1,0 +1,84 @@
+type Company {
+    id: ID!
+    symbol: String!
+    name: String!
+    sector: String!
+    industry: String!
+    description: String
+    logoUrl: String
+    exchange: String!
+}
+
+type Quote {
+    currentPrice: Float!
+    high: Float!
+    low: Float!
+    open: Float!
+    previousClose: Float!
+    timestamp: Int!
+}
+
+type Candle {
+    datetime: String!
+    open: Float!
+    high: Float!
+    low: Float!
+    close: Float!
+    volume: Float!
+}
+
+type StockDetail {
+    company: Company!
+    quote: Quote!
+    candles: [Candle!]!
+}
+
+type WatchlistItem {
+    company: Company!
+    addedAt: String!
+}
+
+enum OrderSide {
+    BUY
+    SELL
+}
+
+type PortfolioPosition {
+    company: Company!
+    quantity: Int!
+    averageCost: Float!
+    currentPrice: Float!
+    marketValue: Float!
+    gainLoss: Float!
+    gainLossPercent: Float!
+}
+
+type PortfolioSummary {
+    cashBalance: Float!
+    positions: [PortfolioPosition!]!
+    totalMarketValue: Float!
+    totalAccountValue: Float!
+}
+
+type Transaction {
+    id: ID!
+    symbol: String!
+    side: OrderSide!
+    quantity: Int!
+    price: Float!
+    executedAt: String!
+}
+
+type Dashboard {
+    portfolio: PortfolioSummary!
+    watchlistPreview: [WatchlistItem!]!
+    recentTransactions: [Transaction!]!
+}
+
+type Query {
+    companies: [Company!]!
+    company(symbol: String!): Company
+    stockDetail(symbol: String!, interval: String = "1day", outputSize: Int = 30): StockDetail
+    watchlist: [WatchlistItem!]!
+    dashboard: Dashboard!
+}
