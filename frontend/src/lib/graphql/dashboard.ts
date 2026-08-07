@@ -1,24 +1,4 @@
-// MOCK — the `dashboard` GraphQL query doesn't exist yet (see backend/docs/api-contract.md:
-// no dashboard/portfolio slice has landed). There is also no `portfolios`/`transactions` data
-// yet to read from. Holdings quantities and recent activity below are invented, but every
-// symbol/price is cross-referenced from `fetchCompanies` in `lib/graphql/companies.ts` so the
-// numbers stay internally consistent with the rest of the app until the real contract lands.
-//
-// Starting balance follows CLAUDE.md's "AI-powered stock research, quantified" simulated-trading
-// framing: every new account starts with $10,000 in cash.
-
-import { fetchCompanies } from '@/lib/graphql/companies'
-import type { Company } from '@/types/company'
-
-const STARTING_CASH_BALANCE = 10000
-
-export interface Holding {
-  symbol: string
-  quantity: number
-  company: Company
-  marketValue: number
-  dayChangeValue: number
-}
+import { graphqlRequest } from './client'
 
 export interface SectorAllocation {
   sector: string
@@ -37,7 +17,6 @@ export interface RecentActivity {
 
 export interface DashboardSummary {
   cashBalance: number
-  holdings: Holding[]
   holdingsValue: number
   netWorth: number
   dayChangeValue: number
@@ -46,83 +25,108 @@ export interface DashboardSummary {
   recentActivity: RecentActivity[]
 }
 
-// symbol -> shares held, invented for the mock account
-const MOCK_HOLDING_QUANTITIES: Record<string, number> = {
-  AAPL: 12,
-  MSFT: 4,
-  NVDA: 8,
-  AMZN: 6,
-  JPM: 10,
-  V: 5,
-  KO: 20,
+const DASHBOARD_QUERY = /* GraphQL */ `
+  query Dashboard {
+    dashboard {
+      portfolio {
+        cashBalance
+        totalMarketValue
+        totalAccountValue
+        positions {
+          company {
+            sector
+          }
+          quantity
+          currentPrice
+          previousClose
+          marketValue
+        }
+      }
+      recentTransactions {
+        id
+        symbol
+        side
+        quantity
+        price
+        executedAt
+      }
+    }
+  }
+`
+
+interface RawPosition {
+  company: { sector: string }
+  quantity: number
+  currentPrice: number
+  previousClose: number
+  marketValue: number
 }
 
-// Recent activity, most-recent first. Prices/symbols must exist in MOCK_COMPANIES.
-const MOCK_RECENT_ACTIVITY: Omit<RecentActivity, 'id'>[] = [
-  { type: 'BUY', symbol: 'NVDA', quantity: 2, price: 133.1, timestamp: '2026-08-07T13:42:00Z' },
-  { type: 'SELL', symbol: 'TSLA', quantity: 3, price: 251.4, timestamp: '2026-08-06T19:05:00Z' },
-  { type: 'BUY', symbol: 'AAPL', quantity: 5, price: 224.8, timestamp: '2026-08-06T14:22:00Z' },
-  { type: 'BUY', symbol: 'KO', quantity: 20, price: 70.95, timestamp: '2026-08-04T15:10:00Z' },
-  { type: 'SELL', symbol: 'AMD', quantity: 4, price: 161.2, timestamp: '2026-08-03T18:47:00Z' },
-  { type: 'BUY', symbol: 'V', quantity: 5, price: 308.6, timestamp: '2026-08-01T16:30:00Z' },
-  { type: 'BUY', symbol: 'JPM', quantity: 10, price: 215.9, timestamp: '2026-07-30T14:05:00Z' },
-  { type: 'BUY', symbol: 'MSFT', quantity: 4, price: 418.25, timestamp: '2026-07-28T13:55:00Z' },
-]
+interface RawTransaction {
+  id: string
+  symbol: string
+  side: 'BUY' | 'SELL'
+  quantity: number
+  price: number
+  executedAt: string
+}
 
-export async function fetchDashboardSummary(): Promise<DashboardSummary> {
-  await new Promise((resolve) => setTimeout(resolve, 250))
+interface DashboardQueryResponse {
+  dashboard: {
+    portfolio: {
+      cashBalance: number
+      totalMarketValue: number
+      totalAccountValue: number
+      positions: RawPosition[]
+    }
+    recentTransactions: RawTransaction[]
+  }
+}
 
-  const companies = await fetchCompanies({})
-  const companyBySymbol = new Map(companies.map((company) => [company.symbol, company]))
-
-  const holdings: Holding[] = Object.entries(MOCK_HOLDING_QUANTITIES)
-    .map(([symbol, quantity]) => {
-      const company = companyBySymbol.get(symbol)
-      if (!company || company.price === null) return null
-      const marketValue = company.price * quantity
-      const changePercent = company.changePercent ?? 0
-      // dayChangeValue derived from today's move: value now minus value at yesterday's close
-      const priorClosePrice = company.price / (1 + changePercent / 100)
-      const dayChangeValue = (company.price - priorClosePrice) * quantity
-      return { symbol, quantity, company, marketValue, dayChangeValue }
-    })
-    .filter((holding): holding is Holding => holding !== null)
-
-  const holdingsValue = holdings.reduce((sum, holding) => sum + holding.marketValue, 0)
-  const dayChangeValue = holdings.reduce((sum, holding) => sum + holding.dayChangeValue, 0)
-  const priorHoldingsValue = holdingsValue - dayChangeValue
-  const dayChangePercent = priorHoldingsValue > 0 ? (dayChangeValue / priorHoldingsValue) * 100 : 0
-
-  const netWorth = STARTING_CASH_BALANCE + holdingsValue
-
+function computeAllocation(positions: RawPosition[], totalMarketValue: number): SectorAllocation[] {
   const bySector = new Map<string, number>()
-  for (const holding of holdings) {
+  for (const position of positions) {
     bySector.set(
-      holding.company.sector,
-      (bySector.get(holding.company.sector) ?? 0) + holding.marketValue,
+      position.company.sector,
+      (bySector.get(position.company.sector) ?? 0) + position.marketValue,
     )
   }
-  const allocation: SectorAllocation[] = Array.from(bySector.entries())
+  return Array.from(bySector.entries())
     .map(([sector, value]) => ({
       sector,
       value,
-      percent: holdingsValue > 0 ? (value / holdingsValue) * 100 : 0,
+      percent: totalMarketValue > 0 ? (value / totalMarketValue) * 100 : 0,
     }))
     .sort((a, b) => b.value - a.value)
+}
 
-  const recentActivity: RecentActivity[] = MOCK_RECENT_ACTIVITY.map((activity, index) => ({
-    id: `${activity.symbol}-${index}`,
-    ...activity,
+export async function fetchDashboardSummary(): Promise<DashboardSummary> {
+  const data = await graphqlRequest<DashboardQueryResponse>(DASHBOARD_QUERY)
+  const { cashBalance, totalMarketValue, totalAccountValue, positions } = data.dashboard.portfolio
+
+  const dayChangeValue = positions.reduce(
+    (sum, position) => sum + (position.currentPrice - position.previousClose) * position.quantity,
+    0,
+  )
+  const priorHoldingsValue = totalMarketValue - dayChangeValue
+  const dayChangePercent = priorHoldingsValue > 0 ? (dayChangeValue / priorHoldingsValue) * 100 : 0
+
+  const recentActivity: RecentActivity[] = data.dashboard.recentTransactions.map((transaction) => ({
+    id: transaction.id,
+    type: transaction.side,
+    symbol: transaction.symbol,
+    quantity: transaction.quantity,
+    price: transaction.price,
+    timestamp: transaction.executedAt,
   }))
 
   return {
-    cashBalance: STARTING_CASH_BALANCE,
-    holdings,
-    holdingsValue,
-    netWorth,
+    cashBalance,
+    holdingsValue: totalMarketValue,
+    netWorth: totalAccountValue,
     dayChangeValue,
     dayChangePercent,
-    allocation,
+    allocation: computeAllocation(positions, totalMarketValue),
     recentActivity,
   }
 }

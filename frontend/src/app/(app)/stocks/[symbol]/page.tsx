@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { useCandles, useStockDetail } from '@/hooks/useStockDetail'
+import { useStockDetail } from '@/hooks/useStockDetail'
 import { computeMacd, computeRsi } from '@/lib/utils/indicators'
 import type { ChartRange } from '@/types/stock'
 import StockHeader from '@/components/stocks/StockHeader'
@@ -11,8 +11,6 @@ import IndicatorPanel from '@/components/stocks/IndicatorPanel'
 import RangeToggle from '@/components/stocks/RangeToggle'
 import OverlayToggles, { type OverlayState } from '@/components/stocks/OverlayToggles'
 import ActionButtons from '@/components/stocks/ActionButtons'
-import NewsList from '@/components/stocks/NewsList'
-import FinancialsTable from '@/components/stocks/FinancialsTable'
 import {
   StockDetailError,
   StockDetailSkeleton,
@@ -35,13 +33,9 @@ export default function StockDetailPage() {
     isPending: stockPending,
     isError: stockError,
     refetch: refetchStock,
-  } = useStockDetail(symbol)
+  } = useStockDetail(symbol, range)
 
-  const {
-    data: candles,
-    isPending: candlesPending,
-    isError: candlesError,
-  } = useCandles(symbol, range, stock?.price)
+  const candles = stock?.candles
 
   const rsi = useMemo(() => (candles ? computeRsi(candles) : []), [candles])
   const macd = useMemo(() => (candles ? computeMacd(candles) : { macd: [], signal: [] }), [candles])
@@ -69,10 +63,6 @@ export default function StockDetailPage() {
           <OverlayToggles value={overlays} onChange={setOverlays} />
         </div>
 
-        {candlesPending && (
-          <div className="h-[360px] w-full animate-pulse rounded-lg bg-[var(--color-sidebar-hover)]" />
-        )}
-        {candlesError && <StockDetailError onRetry={() => undefined} />}
         {candles && (
           <div className="rounded-lg border border-[var(--color-border)] p-2">
             <PriceChart candles={candles} overlays={{ bollinger: overlays.bollinger }} />
@@ -83,20 +73,6 @@ export default function StockDetailPage() {
         {overlays.macd && candles && (
           <IndicatorPanel title="MACD (12, 26, 9)" series={macdSeries} />
         )}
-      </div>
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <section className="rounded-lg border border-[var(--color-border)] p-4">
-          <h2 className="mb-3 text-sm font-semibold text-[var(--color-text-primary)]">
-            Financials
-          </h2>
-          <FinancialsTable financials={stock.financials} />
-        </section>
-
-        <section className="rounded-lg border border-[var(--color-border)] p-4">
-          <h2 className="mb-3 text-sm font-semibold text-[var(--color-text-primary)]">News</h2>
-          <NewsList news={stock.news} />
-        </section>
       </div>
 
       {stock.description && (

@@ -1,12 +1,7 @@
 'use client'
 
 import type { StockDetail } from '@/types/stock'
-import {
-  formatMarketCap,
-  formatPeRatio,
-  formatPrice,
-  formatChangePercent,
-} from '@/lib/utils/format'
+import { formatPrice, formatChangePercent } from '@/lib/utils/format'
 import CompanyLogo from '@/components/companies/CompanyLogo'
 
 export default function StockHeader({ stock }: { stock: StockDetail }) {
@@ -40,9 +35,6 @@ export default function StockHeader({ stock }: { stock: StockDetail }) {
           }
         >
           {formatChangePercent(stock.changePercent)}
-        </div>
-        <div className="mt-1 text-xs text-[var(--color-text-muted)]">
-          Mkt Cap {formatMarketCap(stock.marketCap)} &middot; P/E {formatPeRatio(stock.peRatio)}
         </div>
       </div>
     </div>

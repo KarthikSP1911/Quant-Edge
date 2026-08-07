@@ -3,7 +3,6 @@
 import { useMemo, useState } from 'react'
 import { useCompanies } from '@/hooks/useCompanies'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
-import { listSectors } from '@/lib/graphql/companies'
 import CompanyFilters from '@/components/companies/CompanyFilters'
 import CompanyTable from '@/components/companies/CompanyTable'
 import {
@@ -16,17 +15,26 @@ export default function CompaniesPage() {
   const [search, setSearch] = useState('')
   const [sector, setSector] = useState('All')
   const debouncedSearch = useDebouncedValue(search, 300)
-  const sectors = useMemo(() => listSectors(), [])
 
-  const {
-    data: companies,
-    isPending,
-    isError,
-    refetch,
-  } = useCompanies({
-    search: debouncedSearch,
-    sector,
-  })
+  const { data: companies, isPending, isError, refetch } = useCompanies()
+
+  const sectors = useMemo(
+    () => Array.from(new Set((companies ?? []).map((company) => company.sector))).sort(),
+    [companies],
+  )
+
+  const filteredCompanies = useMemo(() => {
+    if (!companies) return []
+    const query = debouncedSearch.trim().toLowerCase()
+    return companies.filter((company) => {
+      const matchesSector = sector === 'All' || company.sector === sector
+      const matchesSearch =
+        !query ||
+        company.symbol.toLowerCase().includes(query) ||
+        company.name.toLowerCase().includes(query)
+      return matchesSector && matchesSearch
+    })
+  }, [companies, debouncedSearch, sector])
 
   return (
     <div className="flex flex-col gap-6">
@@ -47,9 +55,9 @@ export default function CompaniesPage() {
 
       {isPending && <CompanyTableSkeleton />}
       {isError && <CompanyListError onRetry={() => refetch()} />}
-      {!isPending && !isError && companies && companies.length === 0 && <CompanyListEmpty />}
-      {!isPending && !isError && companies && companies.length > 0 && (
-        <CompanyTable companies={companies} />
+      {!isPending && !isError && filteredCompanies.length === 0 && <CompanyListEmpty />}
+      {!isPending && !isError && filteredCompanies.length > 0 && (
+        <CompanyTable companies={filteredCompanies} />
       )}
     </div>
   )

@@ -1,19 +1,23 @@
-// Mirrors the `portfolios` table (backend/docs/api-contract.md, Phase 2 — not yet defined).
-// See MOCK note in lib/graphql/portfolio.ts for why this is client-computed for now.
+// Mirrors the backend's `PortfolioSummary`/`PortfolioPosition` GraphQL types
+// (backend/src/main/resources/graphql/schema.graphqls).
 export interface Holding {
   symbol: string
   name: string
   sector: string
   logoUrl: string | null
   quantity: number
-  avgCost: number
+  averageCost: number
   currentPrice: number
-  changePercent: number | null
+  changePercent: number
+  marketValue: number
+  gainLoss: number
+  gainLossPercent: number
 }
 
 export interface PortfolioSummary {
   cashBalance: number
   totalMarketValue: number
+  totalAccountValue: number
   totalCostBasis: number
   totalUnrealizedPnl: number
   totalUnrealizedPnlPercent: number

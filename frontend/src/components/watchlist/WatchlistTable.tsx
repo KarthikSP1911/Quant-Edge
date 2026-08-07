@@ -2,20 +2,7 @@
 
 import Link from 'next/link'
 import type { Company } from '@/types/company'
-import { formatChangePercent, formatPrice } from '@/lib/utils/format'
 import CompanyLogo from '@/components/companies/CompanyLogo'
-
-function ChangeBadge({ changePercent }: { changePercent: number | null }) {
-  if (changePercent === null) {
-    return <span className="text-[var(--color-text-muted)]">—</span>
-  }
-  const positive = changePercent >= 0
-  return (
-    <span className={positive ? 'text-[var(--color-profit)]' : 'text-[var(--color-loss)]'}>
-      {formatChangePercent(changePercent)}
-    </span>
-  )
-}
 
 function CompanyIdentity({ company }: { company: Company }) {
   return (
@@ -72,8 +59,7 @@ export default function WatchlistTable({
             <tr className="border-b border-[var(--color-border)] bg-[var(--color-card-bg)] text-xs text-[var(--color-text-secondary)]">
               <th className="px-4 py-3 font-medium">Company</th>
               <th className="px-4 py-3 font-medium">Sector</th>
-              <th className="px-4 py-3 text-right font-medium">Price</th>
-              <th className="px-4 py-3 text-right font-medium">Change</th>
+              <th className="px-4 py-3 font-medium">Industry</th>
               <th className="px-4 py-3 text-right font-medium"></th>
             </tr>
           </thead>
@@ -92,12 +78,7 @@ export default function WatchlistTable({
                   </Link>
                 </td>
                 <td className="px-4 py-3 text-[var(--color-text-secondary)]">{company.sector}</td>
-                <td className="px-4 py-3 text-right text-[var(--color-text-primary)]">
-                  {formatPrice(company.price)}
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <ChangeBadge changePercent={company.changePercent} />
-                </td>
+                <td className="px-4 py-3 text-[var(--color-text-secondary)]">{company.industry}</td>
                 <td className="px-4 py-3 text-right">
                   <RemoveButton
                     onRemove={() => onRemove(company.symbol)}
@@ -120,14 +101,6 @@ export default function WatchlistTable({
           >
             <div className="flex items-center justify-between gap-3">
               <CompanyIdentity company={company} />
-              <div className="shrink-0 text-right">
-                <div className="font-medium text-[var(--color-text-primary)]">
-                  {formatPrice(company.price)}
-                </div>
-                <div className="text-xs">
-                  <ChangeBadge changePercent={company.changePercent} />
-                </div>
-              </div>
             </div>
             <div className="mt-2 flex items-center justify-between text-xs text-[var(--color-text-secondary)]">
               <span>{company.sector}</span>

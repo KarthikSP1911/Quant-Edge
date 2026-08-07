@@ -9,22 +9,6 @@ export interface Candle {
   volume: number
 }
 
-export interface NewsItem {
-  id: string
-  headline: string
-  source: string
-  publishedAt: string // ISO timestamp
-  url: string
-}
-
-export interface Financials {
-  revenueTtm: number
-  epsTtm: number
-  dividendYield: number | null
-  week52High: number
-  week52Low: number
-}
-
 export interface StockDetail {
   symbol: string
   name: string
@@ -34,9 +18,7 @@ export interface StockDetail {
   logoUrl: string | null
   exchange: string
   price: number
+  previousClose: number
   changePercent: number
-  marketCap: number
-  peRatio: number | null
-  financials: Financials
-  news: NewsItem[]
+  candles: Candle[]
 }

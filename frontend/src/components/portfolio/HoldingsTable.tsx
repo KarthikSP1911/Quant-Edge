@@ -5,18 +5,7 @@ import type { Holding } from '@/types/portfolio'
 import { formatChangePercent, formatPrice, formatSignedCurrency } from '@/lib/utils/format'
 import CompanyLogo from '@/components/companies/CompanyLogo'
 
-function computePnl(holding: Holding) {
-  const marketValue = holding.quantity * holding.currentPrice
-  const costBasis = holding.quantity * holding.avgCost
-  const pnl = marketValue - costBasis
-  const pnlPercent = costBasis === 0 ? 0 : (pnl / costBasis) * 100
-  return { marketValue, pnl, pnlPercent }
-}
-
-function ChangeBadge({ value, formatted }: { value: number | null; formatted: string }) {
-  if (value === null) {
-    return <span className="text-[var(--color-text-muted)]">—</span>
-  }
+function ChangeBadge({ value, formatted }: { value: number; formatted: string }) {
   const positive = value >= 0
   return (
     <span className={positive ? 'text-[var(--color-profit)]' : 'text-[var(--color-loss)]'}>
@@ -55,91 +44,85 @@ export default function HoldingsTable({ holdings }: { holdings: Holding[] }) {
             </tr>
           </thead>
           <tbody>
-            {holdings.map((holding) => {
-              const { marketValue, pnl, pnlPercent } = computePnl(holding)
-              return (
-                <tr
-                  key={holding.symbol}
-                  className="border-b border-[var(--color-border)] last:border-b-0"
-                >
-                  <td className="px-4 py-3">
-                    <Link
-                      href={`/stocks/${holding.symbol}`}
-                      className="block rounded-sm transition-opacity hover:opacity-80"
-                    >
-                      <HoldingIdentity holding={holding} />
-                    </Link>
-                  </td>
-                  <td className="px-4 py-3 text-right text-[var(--color-text-primary)]">
-                    {holding.quantity}
-                  </td>
-                  <td className="px-4 py-3 text-right text-[var(--color-text-primary)]">
-                    {formatPrice(holding.avgCost)}
-                  </td>
-                  <td className="px-4 py-3 text-right text-[var(--color-text-primary)]">
-                    {formatPrice(holding.currentPrice)}
-                  </td>
-                  <td className="px-4 py-3 text-right text-[var(--color-text-primary)]">
-                    {formatPrice(marketValue)}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <ChangeBadge
-                      value={pnl}
-                      formatted={`${formatSignedCurrency(pnl)} (${formatChangePercent(pnlPercent)})`}
-                    />
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <ChangeBadge
-                      value={holding.changePercent}
-                      formatted={formatChangePercent(holding.changePercent)}
-                    />
-                  </td>
-                </tr>
-              )
-            })}
+            {holdings.map((holding) => (
+              <tr
+                key={holding.symbol}
+                className="border-b border-[var(--color-border)] last:border-b-0"
+              >
+                <td className="px-4 py-3">
+                  <Link
+                    href={`/stocks/${holding.symbol}`}
+                    className="block rounded-sm transition-opacity hover:opacity-80"
+                  >
+                    <HoldingIdentity holding={holding} />
+                  </Link>
+                </td>
+                <td className="px-4 py-3 text-right text-[var(--color-text-primary)]">
+                  {holding.quantity}
+                </td>
+                <td className="px-4 py-3 text-right text-[var(--color-text-primary)]">
+                  {formatPrice(holding.averageCost)}
+                </td>
+                <td className="px-4 py-3 text-right text-[var(--color-text-primary)]">
+                  {formatPrice(holding.currentPrice)}
+                </td>
+                <td className="px-4 py-3 text-right text-[var(--color-text-primary)]">
+                  {formatPrice(holding.marketValue)}
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <ChangeBadge
+                    value={holding.gainLoss}
+                    formatted={`${formatSignedCurrency(holding.gainLoss)} (${formatChangePercent(holding.gainLossPercent)})`}
+                  />
+                </td>
+                <td className="px-4 py-3 text-right">
+                  <ChangeBadge
+                    value={holding.changePercent}
+                    formatted={formatChangePercent(holding.changePercent)}
+                  />
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
 
       {/* Mobile card list */}
       <div className="flex flex-col gap-2 sm:hidden">
-        {holdings.map((holding) => {
-          const { marketValue, pnl, pnlPercent } = computePnl(holding)
-          return (
-            <Link
-              key={holding.symbol}
-              href={`/stocks/${holding.symbol}`}
-              className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] p-3 transition-colors hover:bg-[var(--color-sidebar-hover)]"
-            >
-              <div className="flex items-center justify-between gap-3">
-                <HoldingIdentity holding={holding} />
-                <div className="shrink-0 text-right">
-                  <div className="font-medium text-[var(--color-text-primary)]">
-                    {formatPrice(marketValue)}
-                  </div>
-                  <div className="text-xs">
-                    <ChangeBadge
-                      value={pnl}
-                      formatted={`${formatSignedCurrency(pnl)} (${formatChangePercent(pnlPercent)})`}
-                    />
-                  </div>
+        {holdings.map((holding) => (
+          <Link
+            key={holding.symbol}
+            href={`/stocks/${holding.symbol}`}
+            className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] p-3 transition-colors hover:bg-[var(--color-sidebar-hover)]"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <HoldingIdentity holding={holding} />
+              <div className="shrink-0 text-right">
+                <div className="font-medium text-[var(--color-text-primary)]">
+                  {formatPrice(holding.marketValue)}
+                </div>
+                <div className="text-xs">
+                  <ChangeBadge
+                    value={holding.gainLoss}
+                    formatted={`${formatSignedCurrency(holding.gainLoss)} (${formatChangePercent(holding.gainLossPercent)})`}
+                  />
                 </div>
               </div>
-              <div className="mt-2 flex justify-between text-xs text-[var(--color-text-secondary)]">
-                <span>
-                  {holding.quantity} sh @ {formatPrice(holding.avgCost)}
-                </span>
-                <span>
-                  Day:{' '}
-                  <ChangeBadge
-                    value={holding.changePercent}
-                    formatted={formatChangePercent(holding.changePercent)}
-                  />
-                </span>
-              </div>
-            </Link>
-          )
-        })}
+            </div>
+            <div className="mt-2 flex justify-between text-xs text-[var(--color-text-secondary)]">
+              <span>
+                {holding.quantity} sh @ {formatPrice(holding.averageCost)}
+              </span>
+              <span>
+                Day:{' '}
+                <ChangeBadge
+                  value={holding.changePercent}
+                  formatted={formatChangePercent(holding.changePercent)}
+                />
+              </span>
+            </div>
+          </Link>
+        ))}
       </div>
     </>
   )

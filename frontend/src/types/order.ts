@@ -6,12 +6,13 @@ export interface TradeOrderInput {
   quantity: number
 }
 
+// Mirrors the backend's OrderResponse (POST /api/orders/buy|sell).
 export interface TradeOrderResult {
-  orderId: string
+  id: string
   symbol: string
   side: OrderSide
   quantity: number
-  price: number
-  totalValue: number
+  executionPrice: number
+  status: string
   executedAt: string
 }

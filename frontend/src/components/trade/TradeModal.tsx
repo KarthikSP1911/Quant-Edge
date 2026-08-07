@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useTradeOrder } from '@/hooks/useTradeOrder'
-import { getMockCashBalance, getMockOwnedQuantity } from '@/lib/api/orders'
+import { usePortfolio } from '@/hooks/usePortfolio'
 import { formatPrice } from '@/lib/utils/format'
 import type { OrderSide } from '@/types/order'
 
@@ -18,7 +18,8 @@ export default function TradeModal({
   onClose: () => void
 }) {
   const [quantity, setQuantity] = useState(1)
-  const mutation = useTradeOrder(price)
+  const mutation = useTradeOrder()
+  const { data: portfolio } = usePortfolio()
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -29,20 +30,21 @@ export default function TradeModal({
   }, [onClose])
 
   const totalValue = quantity * price
-  const cashBalance = getMockCashBalance()
-  const ownedQuantity = getMockOwnedQuantity(symbol)
+  const cashBalance = portfolio?.summary.cashBalance ?? 0
+  const ownedQuantity = portfolio?.holdings.find((h) => h.symbol === symbol)?.quantity ?? 0
   const isBuy = side === 'BUY'
 
   const overLimit = isBuy ? totalValue > cashBalance : quantity > ownedQuantity
   const canSubmit = quantity > 0 && !overLimit && !mutation.isPending
 
   if (mutation.isSuccess) {
+    const filledTotal = mutation.data.quantity * mutation.data.executionPrice
     return (
       <ModalShell onClose={onClose}>
         <p className="text-sm font-semibold text-[var(--color-profit)]">Order filled</p>
         <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
           {isBuy ? 'Bought' : 'Sold'} {mutation.data.quantity} sh {symbol} @{' '}
-          {formatPrice(mutation.data.price)} &middot; total {formatPrice(mutation.data.totalValue)}
+          {formatPrice(mutation.data.executionPrice)} &middot; total {formatPrice(filledTotal)}
         </p>
         <button
           type="button"

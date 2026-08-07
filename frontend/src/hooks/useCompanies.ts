@@ -1,11 +1,11 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
-import { fetchCompanies, type CompanyFilters } from '@/lib/graphql/companies'
+import { fetchCompanies } from '@/lib/graphql/companies'
 
-export function useCompanies(filters: CompanyFilters) {
+export function useCompanies() {
   return useQuery({
-    queryKey: ['companies', filters],
-    queryFn: () => fetchCompanies(filters),
+    queryKey: ['companies'],
+    queryFn: fetchCompanies,
   })
 }

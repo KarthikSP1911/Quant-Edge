@@ -1,7 +1,7 @@
 'use client'
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { fetchWatchlist, removeFromWatchlist } from '@/lib/graphql/watchlist'
+import { addToWatchlist, fetchWatchlist, removeFromWatchlist } from '@/lib/graphql/watchlist'
 import type { Company } from '@/types/company'
 
 const WATCHLIST_QUERY_KEY = ['watchlist']
@@ -10,6 +10,17 @@ export function useWatchlist() {
   return useQuery({
     queryKey: WATCHLIST_QUERY_KEY,
     queryFn: fetchWatchlist,
+  })
+}
+
+export function useAddToWatchlist() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (symbol: string) => addToWatchlist(symbol),
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: WATCHLIST_QUERY_KEY })
+    },
   })
 }
 

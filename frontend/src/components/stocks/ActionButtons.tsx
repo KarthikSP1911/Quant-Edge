@@ -2,12 +2,26 @@
 
 import { useState } from 'react'
 import TradeModal from '@/components/trade/TradeModal'
+import { useAddToWatchlist, useRemoveFromWatchlist, useWatchlist } from '@/hooks/useWatchlist'
 import type { OrderSide } from '@/types/order'
 
-// Watchlist toggling here is local-only (no REST endpoint yet).
 export default function ActionButtons({ symbol, price }: { symbol: string; price: number }) {
-  const [watchlisted, setWatchlisted] = useState(false)
   const [tradeSide, setTradeSide] = useState<OrderSide | null>(null)
+
+  const { data: watchlist } = useWatchlist()
+  const addMutation = useAddToWatchlist()
+  const removeMutation = useRemoveFromWatchlist()
+
+  const isWatched = watchlist?.some((company) => company.symbol === symbol) ?? false
+  const isToggling = addMutation.isPending || removeMutation.isPending
+
+  const toggleWatchlist = () => {
+    if (isWatched) {
+      removeMutation.mutate(symbol)
+    } else {
+      addMutation.mutate(symbol)
+    }
+  }
 
   return (
     <div className="flex flex-wrap gap-2">
@@ -27,14 +41,15 @@ export default function ActionButtons({ symbol, price }: { symbol: string; price
       </button>
       <button
         type="button"
-        onClick={() => setWatchlisted((w) => !w)}
-        className={`rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
-          watchlisted
+        disabled={isToggling}
+        onClick={toggleWatchlist}
+        className={`rounded-md border px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
+          isWatched
             ? 'border-[var(--color-accent-blue)] bg-[var(--color-accent-light)] text-[var(--color-accent-blue)]'
             : 'border-[var(--color-border)] text-[var(--color-text-primary)] hover:bg-[var(--color-sidebar-hover)]'
         }`}
       >
-        {watchlisted ? '★ Watchlisted' : '☆ Add to Watchlist'}
+        {isWatched ? '★ Watchlisted' : '☆ Add to Watchlist'}
       </button>
       <button
         type="button"
