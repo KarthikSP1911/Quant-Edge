@@ -5,10 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.quantedge.backend.cache.ChartCache;
-import com.quantedge.backend.cache.PriceCache;
 import com.quantedge.backend.dto.response.StockDetailResponse;
 import com.quantedge.backend.entity.Company;
-import com.quantedge.backend.external.FinnhubClient;
 import com.quantedge.backend.external.TwelveDataClient;
 import com.quantedge.backend.external.dto.FinnhubQuoteResponse;
 import com.quantedge.backend.external.dto.TwelveDataTimeSeriesResponse;
@@ -29,10 +27,7 @@ class StockDetailServiceTest {
     private CompanyRepository companyRepository;
 
     @Mock
-    private PriceCache priceCache;
-
-    @Mock
-    private FinnhubClient finnhubClient;
+    private QuoteService quoteService;
 
     @Mock
     private ChartCache chartCache;
@@ -62,7 +57,7 @@ class StockDetailServiceTest {
     @BeforeEach
     void setUp() {
         service = new StockDetailService(
-                companyRepository, new CompanyMapper(), priceCache, finnhubClient, chartCache, twelveDataClient);
+                companyRepository, new CompanyMapper(), quoteService, chartCache, twelveDataClient);
     }
 
     @Test
@@ -70,13 +65,13 @@ class StockDetailServiceTest {
         when(companyRepository.findBySymbol("NOPE")).thenReturn(Optional.empty());
 
         assertThat(service.getStockDetail("NOPE", "1day", 30)).isEmpty();
-        verifyNoInteractions(priceCache, finnhubClient, chartCache, twelveDataClient);
+        verifyNoInteractions(quoteService, chartCache, twelveDataClient);
     }
 
     @Test
-    void onCacheHitUsesCachedQuoteAndCandlesWithoutCallingExternalApis() {
+    void onCacheHitUsesCachedCandlesWithoutCallingTwelveData() {
         when(companyRepository.findBySymbol("AAPL")).thenReturn(Optional.of(apple));
-        when(priceCache.get("AAPL", FinnhubQuoteResponse.class)).thenReturn(Optional.of(quote));
+        when(quoteService.getQuote("AAPL")).thenReturn(quote);
         when(chartCache.get("AAPL", "1day", TwelveDataTimeSeriesResponse.class)).thenReturn(Optional.of(timeSeries));
 
         Optional<StockDetailResponse> result = service.getStockDetail("AAPL", "1day", 30);
@@ -84,21 +79,19 @@ class StockDetailServiceTest {
         assertThat(result).isPresent();
         assertThat(result.get().quote().currentPrice()).isEqualTo(190.0);
         assertThat(result.get().candles()).hasSize(1);
-        verifyNoInteractions(finnhubClient, twelveDataClient);
+        verifyNoInteractions(twelveDataClient);
     }
 
     @Test
-    void onCacheMissFetchesFromExternalApisAndPopulatesCache() {
+    void onCacheMissFetchesFromTwelveDataAndPopulatesCache() {
         when(companyRepository.findBySymbol("AAPL")).thenReturn(Optional.of(apple));
-        when(priceCache.get("AAPL", FinnhubQuoteResponse.class)).thenReturn(Optional.empty());
-        when(finnhubClient.getQuote("AAPL")).thenReturn(quote);
+        when(quoteService.getQuote("AAPL")).thenReturn(quote);
         when(chartCache.get("AAPL", "1day", TwelveDataTimeSeriesResponse.class)).thenReturn(Optional.empty());
         when(twelveDataClient.getTimeSeries("AAPL", "1day", 30)).thenReturn(timeSeries);
 
         Optional<StockDetailResponse> result = service.getStockDetail("AAPL", "1day", 30);
 
         assertThat(result).isPresent();
-        verify(priceCache).put("AAPL", quote);
         verify(chartCache).put(eq("AAPL"), eq("1day"), eq(timeSeries), any());
     }
 }

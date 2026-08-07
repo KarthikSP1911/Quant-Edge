@@ -1,12 +1,10 @@
 package com.quantedge.backend.service;
 
 import com.quantedge.backend.cache.ChartCache;
-import com.quantedge.backend.cache.PriceCache;
 import com.quantedge.backend.dto.response.CandleResponse;
 import com.quantedge.backend.dto.response.QuoteResponse;
 import com.quantedge.backend.dto.response.StockDetailResponse;
 import com.quantedge.backend.entity.Company;
-import com.quantedge.backend.external.FinnhubClient;
 import com.quantedge.backend.external.TwelveDataClient;
 import com.quantedge.backend.external.dto.FinnhubQuoteResponse;
 import com.quantedge.backend.external.dto.TwelveDataTimeSeriesResponse;
@@ -32,8 +30,7 @@ public class StockDetailService {
 
     private final CompanyRepository companyRepository;
     private final CompanyMapper companyMapper;
-    private final PriceCache priceCache;
-    private final FinnhubClient finnhubClient;
+    private final QuoteService quoteService;
     private final ChartCache chartCache;
     private final TwelveDataClient twelveDataClient;
 
@@ -42,19 +39,11 @@ public class StockDetailService {
     }
 
     private StockDetailResponse buildStockDetail(Company company, String interval, int outputSize) {
-        FinnhubQuoteResponse quote = resolveQuote(company.getSymbol());
+        FinnhubQuoteResponse quote = quoteService.getQuote(company.getSymbol());
         TwelveDataTimeSeriesResponse timeSeries = resolveTimeSeries(company.getSymbol(), interval, outputSize);
 
         return new StockDetailResponse(
                 companyMapper.toResponse(company), toQuoteResponse(quote), toCandleResponses(timeSeries));
-    }
-
-    private FinnhubQuoteResponse resolveQuote(String symbol) {
-        return priceCache.get(symbol, FinnhubQuoteResponse.class).orElseGet(() -> {
-            FinnhubQuoteResponse fetched = finnhubClient.getQuote(symbol);
-            priceCache.put(symbol, fetched);
-            return fetched;
-        });
     }
 
     private TwelveDataTimeSeriesResponse resolveTimeSeries(String symbol, String interval, int outputSize) {
