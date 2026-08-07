@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="QuantEdge mark">
+  <polygon points="16,3 3,16 16,29" fill="currentColor" fill-opacity="0.55" />
+  <polygon points="16,3 29,16 16,29" fill="currentColor" fill-opacity="0.9" />
+  <path
+    d="M16 3 L3 16 L16 29 L29 16 Z M16 3 L16 29 M16 16 L29 16 M16 16 L3 16 M9.5 9.5 L22.5 9.5"
+    stroke="currentColor"
+    stroke-width="0.6"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="none"
+  />
+</svg>

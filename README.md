@@ -1,4 +1,4 @@
-# QuantEdge
+<img src="./frontend/public/logo/logo-full.svg" alt="QuantEdge" height="40" />
 
 AI-powered stock research and simulated trading platform.
 

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import Logo from '@/components/common/Logo'
 
 const navLinks = [
   { href: '#features', label: 'Features' },
@@ -14,9 +15,8 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-page-bg)]">
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-        <Link href="/" className="text-lg font-semibold tracking-tight">
-          <span className="text-[var(--color-text-primary)]">Quant</span>
-          <span className="text-[var(--color-accent-blue)]">Edge</span>
+        <Link href="/" aria-label="QuantEdge home">
+          <Logo variant="full" size={24} />
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">

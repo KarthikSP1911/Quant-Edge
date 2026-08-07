@@ -1,3 +1,5 @@
+import Logo from '@/components/common/Logo'
+
 const columns = [
   {
     heading: 'Product',
@@ -28,10 +30,7 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-6 py-12">
         <div className="flex flex-col gap-10 sm:flex-row sm:justify-between">
           <div>
-            <span className="text-lg font-semibold tracking-tight">
-              <span className="text-[var(--color-text-primary)]">Quant</span>
-              <span className="text-[var(--color-accent-blue)]">Edge</span>
-            </span>
+            <Logo variant="full" size={22} />
             <p className="mt-2 max-w-xs text-sm text-[var(--color-text-secondary)]">
               Simulated trading with real market data.
             </p>
