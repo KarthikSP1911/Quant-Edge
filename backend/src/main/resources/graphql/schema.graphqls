@@ -48,6 +48,8 @@ type PortfolioPosition {
     quantity: Int!
     averageCost: Float!
     currentPrice: Float!
+    previousClose: Float!
+    changePercent: Float!
     marketValue: Float!
     gainLoss: Float!
     gainLossPercent: Float!
@@ -81,4 +83,5 @@ type Query {
     stockDetail(symbol: String!, interval: String = "1day", outputSize: Int = 30): StockDetail
     watchlist: [WatchlistItem!]!
     dashboard: Dashboard!
+    portfolio: PortfolioSummary!
 }
