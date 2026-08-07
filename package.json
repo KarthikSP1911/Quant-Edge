@@ -1,0 +1,25 @@
+{
+  "name": "quantedge",
+  "version": "0.0.0",
+  "private": true,
+  "description": "AI-powered stock research and simulated trading platform.",
+  "scripts": {
+    "postinstall": "lefthook install",
+    "format": "prettier --write \"*.{json,md,yml,yaml}\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KarthikSP1911/Quant-Edge.git"
+  },
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/KarthikSP1911/Quant-Edge/issues"
+  },
+  "homepage": "https://github.com/KarthikSP1911/Quant-Edge#readme",
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.1",
+    "@commitlint/config-conventional": "^21.2.0",
+    "lefthook": "^2.1.10",
+    "prettier": "^3.9.6"
+  }
+}

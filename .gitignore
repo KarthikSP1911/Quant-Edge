@@ -1,0 +1,16 @@
+# Root-level Node tooling (lefthook, commitlint, prettier)
+node_modules/
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+
+# Env
+.env
+.env.local
+.env.*.local
