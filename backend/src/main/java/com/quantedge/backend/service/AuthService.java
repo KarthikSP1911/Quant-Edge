@@ -8,6 +8,9 @@ import com.quantedge.backend.dto.auth.TokenResponse;
 import com.quantedge.backend.entity.User;
 import com.quantedge.backend.enums.AuthProvider;
 import com.quantedge.backend.enums.Role;
+import com.quantedge.backend.exception.EmailAlreadyInUseException;
+import com.quantedge.backend.exception.InvalidCredentialsException;
+import com.quantedge.backend.exception.InvalidTokenException;
 import com.quantedge.backend.repository.UserRepository;
 import com.quantedge.backend.security.JwtService;
 import com.quantedge.backend.security.OneTimeCodeService;
@@ -29,7 +32,7 @@ public class AuthService {
 
     public TokenResponse register(RegisterRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Email already in use");
+            throw new EmailAlreadyInUseException("Email already in use");
         }
         var user = User.builder()
                 .name(request.getName())
@@ -53,7 +56,7 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         var user = userRepository
                 .findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
+                .orElseThrow(() -> new InvalidCredentialsException("Invalid email or password"));
 
         var accessToken = jwtService.generateAccessToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
@@ -70,7 +73,7 @@ public class AuthService {
         if (userEmail != null) {
             var user = userRepository
                     .findByEmail(userEmail)
-                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                    .orElseThrow(() -> new InvalidTokenException("Invalid refresh token"));
             if (jwtService.isRefreshTokenValid(refreshToken, user)) {
                 var accessToken = jwtService.generateAccessToken(user);
                 var newRefreshToken = jwtService.generateRefreshToken(user);
@@ -80,13 +83,13 @@ public class AuthService {
                         .build();
             }
         }
-        throw new IllegalArgumentException("Invalid refresh token");
+        throw new InvalidTokenException("Invalid refresh token");
     }
 
     public TokenResponse exchangeCode(OAuth2CallbackRequest request) {
         User user = oneTimeCodeService.exchangeCode(request.getCode());
         if (user == null) {
-            throw new IllegalArgumentException("Invalid or expired code");
+            throw new InvalidTokenException("Invalid or expired code");
         }
         var accessToken = jwtService.generateAccessToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);

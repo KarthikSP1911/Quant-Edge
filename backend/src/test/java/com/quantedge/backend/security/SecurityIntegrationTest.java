@@ -69,7 +69,7 @@ public class SecurityIntegrationTest {
 
     @Test
     void testPublicEndpointAccessibleWithoutToken() throws Exception {
-        RegisterRequest request = new RegisterRequest("New User", "new@example.com", "password");
+        RegisterRequest request = new RegisterRequest("New User", "new@example.com", "password123");
         ObjectMapper mapper = new ObjectMapper();
 
         mockMvc.perform(post("/api/auth/register")

@@ -11,6 +11,7 @@ import com.quantedge.backend.dto.auth.TokenResponse;
 import com.quantedge.backend.entity.User;
 import com.quantedge.backend.enums.AuthProvider;
 import com.quantedge.backend.enums.Role;
+import com.quantedge.backend.exception.EmailAlreadyInUseException;
 import com.quantedge.backend.repository.UserRepository;
 import com.quantedge.backend.security.JwtService;
 import com.quantedge.backend.security.OneTimeCodeService;
@@ -80,7 +81,7 @@ class AuthServiceTest {
         RegisterRequest request = new RegisterRequest("Test User", "test@example.com", "password");
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
 
-        assertThrows(IllegalArgumentException.class, () -> authService.register(request));
+        assertThrows(EmailAlreadyInUseException.class, () -> authService.register(request));
     }
 
     @Test
