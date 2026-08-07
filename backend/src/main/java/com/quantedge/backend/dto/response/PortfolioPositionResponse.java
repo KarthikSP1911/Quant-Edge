@@ -7,6 +7,8 @@ public record PortfolioPositionResponse(
         int quantity,
         BigDecimal averageCost,
         BigDecimal currentPrice,
+        BigDecimal previousClose,
+        BigDecimal changePercent,
         BigDecimal marketValue,
         BigDecimal gainLoss,
         BigDecimal gainLossPercent) {}

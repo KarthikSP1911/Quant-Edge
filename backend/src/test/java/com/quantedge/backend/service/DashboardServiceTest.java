@@ -71,8 +71,27 @@ class DashboardServiceTest {
         assertThat(response.portfolio().positions()).hasSize(1);
         assertThat(response.portfolio().positions().get(0).marketValue()).isEqualByComparingTo("1200.00");
         assertThat(response.portfolio().positions().get(0).gainLoss()).isEqualByComparingTo("200.00");
+        assertThat(response.portfolio().positions().get(0).previousClose()).isEqualByComparingTo("117.00");
+        assertThat(response.portfolio().positions().get(0).changePercent()).isEqualByComparingTo("2.5600");
         assertThat(response.portfolio().totalMarketValue()).isEqualByComparingTo("1200.00");
         assertThat(response.portfolio().totalAccountValue()).isEqualByComparingTo("1700.00");
+    }
+
+    @Test
+    void getPortfolioSummaryReturnsSameShapeAsDashboardsPortfolioPanel() {
+        Portfolio position = Portfolio.builder()
+                .user(user)
+                .company(apple)
+                .quantity(2)
+                .averageCost(new BigDecimal("50.00"))
+                .build();
+        when(portfolioRepository.findByUser(user)).thenReturn(List.of(position));
+        when(quoteService.getQuote("AAPL")).thenReturn(new FinnhubQuoteResponse(60.0, 65.0, 55.0, 58.0, 55.0, 1L));
+
+        var summary = dashboardService.getPortfolioSummary(user);
+
+        assertThat(summary.positions()).hasSize(1);
+        assertThat(summary.totalAccountValue()).isEqualByComparingTo("620.00");
     }
 
     @Test

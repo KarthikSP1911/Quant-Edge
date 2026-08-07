@@ -8,7 +8,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.quantedge.backend.dto.response.CompanyResponse;
-import com.quantedge.backend.dto.response.DashboardResponse;
 import com.quantedge.backend.dto.response.PortfolioPositionResponse;
 import com.quantedge.backend.dto.response.PortfolioSummaryResponse;
 import com.quantedge.backend.entity.User;
@@ -33,7 +32,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class DashboardResolverTest {
+class PortfolioResolverTest {
 
     @Autowired
     private WebApplicationContext context;
@@ -61,8 +60,8 @@ class DashboardResolverTest {
 
         userRepository.deleteAll();
         User user = userRepository.save(User.builder()
-                .name("Dashboard Test User")
-                .email("dashboard@example.com")
+                .name("Portfolio Test User")
+                .email("portfolio-resolver@example.com")
                 .passwordHash(passwordEncoder.encode("password"))
                 .role(Role.USER)
                 .authProvider(AuthProvider.LOCAL)
@@ -77,7 +76,7 @@ class DashboardResolverTest {
     }
 
     @Test
-    void dashboardReturnsComposedPortfolioWatchlistAndTransactions() throws Exception {
+    void portfolioQueryReturnsPositionsAndAccountValue() throws Exception {
         CompanyResponse company = new CompanyResponse(
                 UUID.randomUUID(), "AAPL", "Apple Inc.", "Technology", "Consumer Electronics", null, null, "NASDAQ");
         PortfolioPositionResponse position = new PortfolioPositionResponse(
@@ -90,21 +89,20 @@ class DashboardResolverTest {
                 new BigDecimal("1200.00"),
                 new BigDecimal("200.00"),
                 new BigDecimal("20.0000"));
-        PortfolioSummaryResponse portfolio = new PortfolioSummaryResponse(
+        PortfolioSummaryResponse summary = new PortfolioSummaryResponse(
                 new BigDecimal("500.00"), List.of(position), new BigDecimal("1200.00"), new BigDecimal("1700.00"));
-        when(dashboardService.getDashboard(any())).thenReturn(new DashboardResponse(portfolio, List.of(), List.of()));
+        when(dashboardService.getPortfolioSummary(any())).thenReturn(summary);
 
-        String graphQlRequest = "{\"query\":\"{ dashboard { portfolio { totalAccountValue "
-                + "positions { company { symbol } marketValue } } } }\"}";
+        String graphQlRequest =
+                "{\"query\":\"{ portfolio { totalAccountValue positions { company { symbol } changePercent } } }\"}";
 
         mockMvc.perform(post("/graphql")
                         .header("Authorization", "Bearer " + validToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(graphQlRequest))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.portfolio.totalAccountValue").value(1700.0))
                 .andExpect(
-                        jsonPath("$.data.dashboard.portfolio.totalAccountValue").value(1700.0))
-                .andExpect(jsonPath("$.data.dashboard.portfolio.positions[0].company.symbol")
-                        .value("AAPL"));
+                        jsonPath("$.data.portfolio.positions[0].company.symbol").value("AAPL"));
     }
 }

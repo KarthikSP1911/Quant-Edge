@@ -8,6 +8,7 @@ import com.quantedge.backend.dto.response.WatchlistItemResponse;
 import com.quantedge.backend.entity.OrderExecution;
 import com.quantedge.backend.entity.Portfolio;
 import com.quantedge.backend.entity.User;
+import com.quantedge.backend.external.dto.FinnhubQuoteResponse;
 import com.quantedge.backend.mapper.CompanyMapper;
 import com.quantedge.backend.repository.OrderExecutionRepository;
 import com.quantedge.backend.repository.PortfolioRepository;
@@ -36,7 +37,7 @@ public class DashboardService {
     private final CompanyMapper companyMapper;
 
     public DashboardResponse getDashboard(User user) {
-        PortfolioSummaryResponse portfolio = buildPortfolioSummary(user);
+        PortfolioSummaryResponse portfolio = getPortfolioSummary(user);
         List<WatchlistItemResponse> watchlistPreview = watchlistService.list(user).stream()
                 .limit(WATCHLIST_PREVIEW_SIZE)
                 .toList();
@@ -48,7 +49,7 @@ public class DashboardService {
         return new DashboardResponse(portfolio, watchlistPreview, recentTransactions);
     }
 
-    private PortfolioSummaryResponse buildPortfolioSummary(User user) {
+    public PortfolioSummaryResponse getPortfolioSummary(User user) {
         List<PortfolioPositionResponse> positions = portfolioRepository.findByUser(user).stream()
                 .map(this::toPositionResponse)
                 .toList();
@@ -65,8 +66,16 @@ public class DashboardService {
 
     private PortfolioPositionResponse toPositionResponse(Portfolio portfolio) {
         String symbol = portfolio.getCompany().getSymbol();
-        BigDecimal currentPrice =
-                BigDecimal.valueOf(quoteService.getQuote(symbol).currentPrice()).setScale(2, RoundingMode.HALF_UP);
+        FinnhubQuoteResponse quote = quoteService.getQuote(symbol);
+        BigDecimal currentPrice = BigDecimal.valueOf(quote.currentPrice()).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal previousClose = BigDecimal.valueOf(quote.previousClose()).setScale(2, RoundingMode.HALF_UP);
+        BigDecimal changePercent = previousClose.compareTo(BigDecimal.ZERO) == 0
+                ? BigDecimal.ZERO
+                : currentPrice
+                        .subtract(previousClose)
+                        .divide(previousClose, 4, RoundingMode.HALF_UP)
+                        .multiply(BigDecimal.valueOf(100));
+
         BigDecimal quantity = BigDecimal.valueOf(portfolio.getQuantity());
         BigDecimal marketValue = currentPrice.multiply(quantity);
         BigDecimal costBasis = portfolio.getAverageCost().multiply(quantity);
@@ -80,6 +89,8 @@ public class DashboardService {
                 portfolio.getQuantity(),
                 portfolio.getAverageCost(),
                 currentPrice,
+                previousClose,
+                changePercent,
                 marketValue,
                 gainLoss,
                 gainLossPercent);
