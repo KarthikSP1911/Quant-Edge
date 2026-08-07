@@ -2,7 +2,6 @@ package com.quantedge.backend.service;
 
 import com.quantedge.backend.dto.auth.LoginRequest;
 import com.quantedge.backend.dto.auth.OAuth2CallbackRequest;
-import com.quantedge.backend.dto.auth.RefreshRequest;
 import com.quantedge.backend.dto.auth.RegisterRequest;
 import com.quantedge.backend.dto.auth.TokenResponse;
 import com.quantedge.backend.entity.User;
@@ -69,8 +68,7 @@ public class AuthService {
         return issueTokens(user);
     }
 
-    public TokenResponse refresh(RefreshRequest request) {
-        String refreshToken = request.getRefreshToken();
+    public TokenResponse refresh(String refreshToken) {
         String userEmail;
         try {
             userEmail = jwtService.extractUsernameFromRefreshToken(refreshToken);
@@ -97,8 +95,10 @@ public class AuthService {
         return issueTokens(user);
     }
 
-    public void logout(RefreshRequest request) {
-        refreshTokenService.revoke(request.getRefreshToken());
+    public void logout(String refreshToken) {
+        if (refreshToken != null) {
+            refreshTokenService.revoke(refreshToken);
+        }
     }
 
     private TokenResponse issueTokens(User user) {

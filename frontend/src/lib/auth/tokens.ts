@@ -1,7 +1,9 @@
-export const setTokens = (accessToken: string, refreshToken: string) => {
+// The refresh token is no longer handled here: the backend sets it as an httpOnly cookie
+// (see AuthController), so client-side JS never has access to it.
+
+export const setAccessToken = (accessToken: string) => {
   if (typeof window !== 'undefined') {
     localStorage.setItem('accessToken', accessToken)
-    localStorage.setItem('refreshToken', refreshToken)
   }
 }
 
@@ -12,16 +14,8 @@ export const getAccessToken = () => {
   return null
 }
 
-export const getRefreshToken = () => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('refreshToken')
-  }
-  return null
-}
-
-export const clearTokens = () => {
+export const clearAccessToken = () => {
   if (typeof window !== 'undefined') {
     localStorage.removeItem('accessToken')
-    localStorage.removeItem('refreshToken')
   }
 }

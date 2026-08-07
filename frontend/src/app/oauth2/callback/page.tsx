@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { setTokens } from '@/lib/auth/tokens'
+import { setAccessToken } from '@/lib/auth/tokens'
 
 export default function OAuth2CallbackPage() {
   const router = useRouter()
@@ -22,6 +22,7 @@ export default function OAuth2CallbackPage() {
           headers: {
             'Content-Type': 'application/json',
           },
+          credentials: 'include',
           body: JSON.stringify({ code }),
         })
 
@@ -30,7 +31,7 @@ export default function OAuth2CallbackPage() {
         }
 
         const data = await response.json()
-        setTokens(data.accessToken, data.refreshToken)
+        setAccessToken(data.accessToken)
         router.push('/dashboard')
       } catch {
         setError('Authentication failed. Please try again.')

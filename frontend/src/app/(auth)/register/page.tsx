@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { setTokens } from '@/lib/auth/tokens'
+import { setAccessToken } from '@/lib/auth/tokens'
 import Link from 'next/link'
 
 export default function RegisterPage() {
@@ -18,6 +18,7 @@ export default function RegisterPage() {
       const response = await fetch('http://localhost:8080/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ name, email, password }),
       })
 
@@ -26,7 +27,7 @@ export default function RegisterPage() {
       }
 
       const data = await response.json()
-      setTokens(data.accessToken, data.refreshToken)
+      setAccessToken(data.accessToken)
       router.push('/dashboard')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed')

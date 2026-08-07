@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.quantedge.backend.dto.auth.LoginRequest;
-import com.quantedge.backend.dto.auth.RefreshRequest;
 import com.quantedge.backend.dto.auth.RegisterRequest;
 import com.quantedge.backend.dto.auth.TokenResponse;
 import com.quantedge.backend.entity.User;
@@ -137,14 +136,12 @@ class AuthServiceTest {
 
     @Test
     void refresh_Success() {
-        RefreshRequest request = new RefreshRequest("refresh");
-
         when(jwtService.extractUsernameFromRefreshToken("refresh")).thenReturn("test@example.com");
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
         when(jwtService.generateAccessToken(testUser)).thenReturn("new-access");
         when(jwtService.generateRefreshToken(testUser)).thenReturn("new-refresh");
 
-        TokenResponse response = authService.refresh(request);
+        TokenResponse response = authService.refresh("refresh");
 
         assertNotNull(response);
         assertEquals("new-access", response.getAccessToken());
@@ -155,14 +152,24 @@ class AuthServiceTest {
 
     @Test
     void refresh_RejectsReusedOrUnknownToken() {
-        RefreshRequest request = new RefreshRequest("refresh");
-
         when(jwtService.extractUsernameFromRefreshToken("refresh")).thenReturn("test@example.com");
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
         doThrow(new com.quantedge.backend.exception.InvalidTokenException("Refresh token reuse detected"))
                 .when(refreshTokenService)
                 .consume("refresh");
 
-        assertThrows(com.quantedge.backend.exception.InvalidTokenException.class, () -> authService.refresh(request));
+        assertThrows(com.quantedge.backend.exception.InvalidTokenException.class, () -> authService.refresh("refresh"));
+    }
+
+    @Test
+    void logout_RevokesToken() {
+        authService.logout("refresh");
+        verify(refreshTokenService).revoke("refresh");
+    }
+
+    @Test
+    void logout_NullTokenIsNoOp() {
+        authService.logout(null);
+        verify(refreshTokenService, never()).revoke(any());
     }
 }

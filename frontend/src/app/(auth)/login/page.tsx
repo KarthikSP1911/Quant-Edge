@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { setTokens } from '@/lib/auth/tokens'
+import { setAccessToken } from '@/lib/auth/tokens'
 import Link from 'next/link'
 
 export default function LoginPage() {
@@ -17,6 +17,7 @@ export default function LoginPage() {
       const response = await fetch('http://localhost:8080/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ email, password }),
       })
 
@@ -25,7 +26,7 @@ export default function LoginPage() {
       }
 
       const data = await response.json()
-      setTokens(data.accessToken, data.refreshToken)
+      setAccessToken(data.accessToken)
       router.push('/dashboard')
     } catch {
       setError('Invalid email or password')
