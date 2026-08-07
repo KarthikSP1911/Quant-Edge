@@ -14,6 +14,8 @@ import com.quantedge.backend.exception.InvalidTokenException;
 import com.quantedge.backend.repository.UserRepository;
 import com.quantedge.backend.security.JwtService;
 import com.quantedge.backend.security.OneTimeCodeService;
+import com.quantedge.backend.security.RefreshTokenService;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,6 +31,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final OneTimeCodeService oneTimeCodeService;
+    private final RefreshTokenService refreshTokenService;
 
     public TokenResponse register(RegisterRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
@@ -43,12 +46,7 @@ public class AuthService {
                 .build();
         userRepository.save(user);
 
-        var accessToken = jwtService.generateAccessToken(user);
-        var refreshToken = jwtService.generateRefreshToken(user);
-        return TokenResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
+        return issueTokens(user);
     }
 
     public TokenResponse login(LoginRequest request) {
@@ -58,32 +56,27 @@ public class AuthService {
                 .findByEmail(request.getEmail())
                 .orElseThrow(() -> new InvalidCredentialsException("Invalid email or password"));
 
-        var accessToken = jwtService.generateAccessToken(user);
-        var refreshToken = jwtService.generateRefreshToken(user);
-        return TokenResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
+        return issueTokens(user);
     }
 
     public TokenResponse refresh(RefreshRequest request) {
         String refreshToken = request.getRefreshToken();
-        String userEmail = jwtService.extractUsernameFromRefreshToken(refreshToken);
-
-        if (userEmail != null) {
-            var user = userRepository
-                    .findByEmail(userEmail)
-                    .orElseThrow(() -> new InvalidTokenException("Invalid refresh token"));
-            if (jwtService.isRefreshTokenValid(refreshToken, user)) {
-                var accessToken = jwtService.generateAccessToken(user);
-                var newRefreshToken = jwtService.generateRefreshToken(user);
-                return TokenResponse.builder()
-                        .accessToken(accessToken)
-                        .refreshToken(newRefreshToken)
-                        .build();
-            }
+        String userEmail;
+        try {
+            userEmail = jwtService.extractUsernameFromRefreshToken(refreshToken);
+        } catch (JwtException e) {
+            throw new InvalidTokenException("Invalid refresh token");
         }
-        throw new InvalidTokenException("Invalid refresh token");
+
+        var user = userRepository
+                .findByEmail(userEmail)
+                .orElseThrow(() -> new InvalidTokenException("Invalid refresh token"));
+
+        // Validates the token is a known, unexpired, not-yet-used record and marks it consumed;
+        // presenting it again is treated as theft and revokes every active session for the user.
+        refreshTokenService.consume(refreshToken);
+
+        return issueTokens(user);
     }
 
     public TokenResponse exchangeCode(OAuth2CallbackRequest request) {
@@ -91,8 +84,17 @@ public class AuthService {
         if (user == null) {
             throw new InvalidTokenException("Invalid or expired code");
         }
+        return issueTokens(user);
+    }
+
+    public void logout(RefreshRequest request) {
+        refreshTokenService.revoke(request.getRefreshToken());
+    }
+
+    private TokenResponse issueTokens(User user) {
         var accessToken = jwtService.generateAccessToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
+        refreshTokenService.store(user, refreshToken);
         return TokenResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)

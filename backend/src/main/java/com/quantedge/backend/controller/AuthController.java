@@ -40,6 +40,12 @@ public class AuthController {
         return ResponseEntity.ok(authService.refresh(request));
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@Valid @RequestBody RefreshRequest request) {
+        authService.logout(request);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/oauth2/callback")
     public ResponseEntity<TokenResponse> oauth2Callback(@Valid @RequestBody OAuth2CallbackRequest request) {
         return ResponseEntity.ok(authService.exchangeCode(request));

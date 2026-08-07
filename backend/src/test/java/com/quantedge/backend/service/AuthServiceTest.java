@@ -15,7 +15,9 @@ import com.quantedge.backend.exception.EmailAlreadyInUseException;
 import com.quantedge.backend.repository.UserRepository;
 import com.quantedge.backend.security.JwtService;
 import com.quantedge.backend.security.OneTimeCodeService;
+import com.quantedge.backend.security.RefreshTokenService;
 import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,6 +45,9 @@ class AuthServiceTest {
     @Mock
     private OneTimeCodeService oneTimeCodeService;
 
+    @Mock
+    private RefreshTokenService refreshTokenService;
+
     @InjectMocks
     private AuthService authService;
 
@@ -51,6 +56,7 @@ class AuthServiceTest {
     @BeforeEach
     void setUp() {
         testUser = User.builder()
+                .id(UUID.randomUUID())
                 .email("test@example.com")
                 .passwordHash("hashed")
                 .name("Test User")
@@ -106,7 +112,6 @@ class AuthServiceTest {
 
         when(jwtService.extractUsernameFromRefreshToken("refresh")).thenReturn("test@example.com");
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
-        when(jwtService.isRefreshTokenValid("refresh", testUser)).thenReturn(true);
         when(jwtService.generateAccessToken(testUser)).thenReturn("new-access");
         when(jwtService.generateRefreshToken(testUser)).thenReturn("new-refresh");
 
@@ -115,5 +120,20 @@ class AuthServiceTest {
         assertNotNull(response);
         assertEquals("new-access", response.getAccessToken());
         assertEquals("new-refresh", response.getRefreshToken());
+        verify(refreshTokenService).consume("refresh");
+        verify(refreshTokenService).store(testUser, "new-refresh");
+    }
+
+    @Test
+    void refresh_RejectsReusedOrUnknownToken() {
+        RefreshRequest request = new RefreshRequest("refresh");
+
+        when(jwtService.extractUsernameFromRefreshToken("refresh")).thenReturn("test@example.com");
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+        doThrow(new com.quantedge.backend.exception.InvalidTokenException("Refresh token reuse detected"))
+                .when(refreshTokenService)
+                .consume("refresh");
+
+        assertThrows(com.quantedge.backend.exception.InvalidTokenException.class, () -> authService.refresh(request));
     }
 }
