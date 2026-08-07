@@ -33,8 +33,14 @@ type StockDetail {
     candles: [Candle!]!
 }
 
+type WatchlistItem {
+    company: Company!
+    addedAt: String!
+}
+
 type Query {
     companies: [Company!]!
     company(symbol: String!): Company
     stockDetail(symbol: String!, interval: String = "1day", outputSize: Int = 30): StockDetail
+    watchlist: [WatchlistItem!]!
 }
