@@ -41,18 +41,20 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
             return;
         }
 
-        User user = userRepository.findByEmail(email).orElseGet(() -> {
-            // Auto-link logic is implicit: if user exists, we just issue token for them.
-            // If they don't exist, we create them as GOOGLE auth_provider.
-            User newUser = User.builder()
-                    .email(email)
-                    .name(name != null ? name : email)
-                    .role(Role.USER)
-                    .authProvider(AuthProvider.GOOGLE)
-                    .providerId(providerId)
-                    .build();
-            return userRepository.save(newUser);
-        });
+        User user = userRepository
+                .findByEmail(email)
+                .map(existing -> linkVerifiedGoogleIdentity(existing, providerId))
+                .orElseGet(() -> {
+                    User newUser = User.builder()
+                            .email(email)
+                            .name(name != null ? name : email)
+                            .role(Role.USER)
+                            .authProvider(AuthProvider.GOOGLE)
+                            .providerId(providerId)
+                            .emailVerified(true)
+                            .build();
+                    return userRepository.save(newUser);
+                });
 
         // Issue one-time code
         String code = oneTimeCodeService.generateCode(user);
@@ -63,5 +65,24 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 .toUriString();
 
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
+    }
+
+    /**
+     * Google has just proven ownership of this email address. If the matching account is an
+     * unverified LOCAL account, it may have been pre-registered by someone else using this
+     * user's email address with an attacker-controlled password (a pre-account-hijack). Since
+     * the real owner has now proven ownership via Google, invalidate any existing password so
+     * that attacker-controlled credentials stop working, and mark the account verified/linked.
+     * Already-verified accounts (including ones the true owner registered and verified
+     * themselves) are left untouched.
+     */
+    private User linkVerifiedGoogleIdentity(User existing, String providerId) {
+        if (existing.getAuthProvider() == AuthProvider.LOCAL && !existing.isEmailVerified()) {
+            existing.setPasswordHash(null);
+            existing.setEmailVerified(true);
+            existing.setProviderId(providerId);
+            return userRepository.save(existing);
+        }
+        return existing;
     }
 }

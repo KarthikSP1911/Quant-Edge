@@ -60,6 +60,10 @@ public class User implements UserDetails {
     @Column(name = "provider_id")
     private String providerId;
 
+    @Column(name = "email_verified", nullable = false)
+    @Builder.Default
+    private boolean emailVerified = false;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
