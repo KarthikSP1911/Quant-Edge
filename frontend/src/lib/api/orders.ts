@@ -22,10 +22,7 @@ export function getMockOwnedQuantity(symbol: string): number {
   return mockOwnedQuantities[symbol] ?? 0
 }
 
-export async function placeOrder(
-  input: TradeOrderInput,
-  price: number,
-): Promise<TradeOrderResult> {
+export async function placeOrder(input: TradeOrderInput, price: number): Promise<TradeOrderResult> {
   await new Promise((resolve) => setTimeout(resolve, SIMULATED_LATENCY_MS))
 
   const totalValue = input.quantity * price
