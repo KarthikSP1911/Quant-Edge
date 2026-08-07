@@ -13,12 +13,14 @@ import com.quantedge.backend.exception.InvalidCredentialsException;
 import com.quantedge.backend.exception.InvalidTokenException;
 import com.quantedge.backend.repository.UserRepository;
 import com.quantedge.backend.security.JwtService;
+import com.quantedge.backend.security.LoginRateLimiter;
 import com.quantedge.backend.security.OneTimeCodeService;
 import com.quantedge.backend.security.RefreshTokenService;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +34,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final OneTimeCodeService oneTimeCodeService;
     private final RefreshTokenService refreshTokenService;
+    private final LoginRateLimiter loginRateLimiter;
 
     public TokenResponse register(RegisterRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
@@ -50,12 +53,19 @@ public class AuthService {
     }
 
     public TokenResponse login(LoginRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+        loginRateLimiter.checkAllowed(request.getEmail());
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+        } catch (AuthenticationException e) {
+            loginRateLimiter.recordFailure(request.getEmail());
+            throw e;
+        }
         var user = userRepository
                 .findByEmail(request.getEmail())
                 .orElseThrow(() -> new InvalidCredentialsException("Invalid email or password"));
 
+        loginRateLimiter.recordSuccess(request.getEmail());
         return issueTokens(user);
     }
 

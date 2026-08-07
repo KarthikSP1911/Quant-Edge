@@ -48,6 +48,9 @@ class AuthServiceTest {
     @Mock
     private RefreshTokenService refreshTokenService;
 
+    @Mock
+    private com.quantedge.backend.security.LoginRateLimiter loginRateLimiter;
+
     @InjectMocks
     private AuthService authService;
 
@@ -104,6 +107,32 @@ class AuthServiceTest {
         assertEquals("access", response.getAccessToken());
         assertEquals("refresh", response.getRefreshToken());
         verify(authenticationManager).authenticate(any());
+        verify(loginRateLimiter).checkAllowed("test@example.com");
+        verify(loginRateLimiter).recordSuccess("test@example.com");
+    }
+
+    @Test
+    void login_LockedOutRejectsWithoutCallingAuthenticationManager() {
+        LoginRequest request = new LoginRequest("test@example.com", "password");
+        doThrow(new com.quantedge.backend.exception.RateLimitExceededException("Too many attempts"))
+                .when(loginRateLimiter)
+                .checkAllowed("test@example.com");
+
+        assertThrows(
+                com.quantedge.backend.exception.RateLimitExceededException.class, () -> authService.login(request));
+        verify(authenticationManager, never()).authenticate(any());
+    }
+
+    @Test
+    void login_FailedAuthenticationRecordsFailure() {
+        LoginRequest request = new LoginRequest("test@example.com", "wrong-password");
+        when(authenticationManager.authenticate(any()))
+                .thenThrow(new org.springframework.security.authentication.BadCredentialsException("bad creds"));
+
+        assertThrows(
+                org.springframework.security.authentication.BadCredentialsException.class,
+                () -> authService.login(request));
+        verify(loginRateLimiter).recordFailure("test@example.com");
     }
 
     @Test
