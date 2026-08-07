@@ -65,6 +65,7 @@ Profit/up      #16A34A
 Loss/down      #DC2626
 Warning        #F59E0B
 ```
+
 Logo: "Quant" in #0F172A + "Edge" in #2563EB. No tagline under the logo.
 
 ## Build Phases
@@ -91,6 +92,88 @@ Logo: "Quant" in #0F172A + "Edge" in #2563EB. No tagline under the logo.
 - Run the build and tests before every commit. Do not commit broken code.
 - When a feature is done and verified, merge to `main` and delete the branch.
 - Tell me the branch name before you start work on it.
+
+## Tooling
+
+Repo-wide git hooks and linting are enforced via **Lefthook**, installed once at the repo
+root (not per-package).
+
+### Setup (run once after clone)
+
+```bash
+npm install                              # root deps: lefthook, commitlint, prettier
+                                          # postinstall auto-runs `lefthook install`
+cd frontend && npm install
+cd ../backend && ./mvnw -q -DskipTests install
+```
+
+If npm blocks lefthook's install script (`npm warn allow-scripts`), approve it manually,
+then re-run `lefthook install`:
+
+```bash
+npm approve-scripts lefthook
+npx lefthook install
+```
+
+### Git hooks (`lefthook.yml`, root)
+
+- **pre-commit** (parallel, staged-files-only):
+  - `frontend` — `eslint --fix` + `prettier --write` on staged `frontend/**/*.{ts,tsx,js,jsx}`
+  - `backend` — `./mvnw spotless:apply` on staged `backend/**/*.java` (applies to the whole
+    Maven module, not just the staged files — Spotless's Maven plugin has no clean per-file
+    apply mode, but it's fast and idempotent so this is a deliberate tradeoff, not an oversight)
+  - `general` — `prettier --write` on root-level `*.{json,md,yml,yaml}`
+  - Any file a hook reformats is shown in the commit output and re-staged automatically
+    (`stage_fixed: true`) — nothing is fixed silently off-screen.
+- **commit-msg** — runs `commitlint` against the commit message (see Commit Convention below).
+- **pre-push** (parallel):
+  - `backend-test` — `./mvnw test` (fast unit tests only; the full Testcontainers suite from
+    Phase 5 is not run here)
+  - `frontend-check` — `npm run lint && npm run typecheck`
+
+### Commit convention (`commitlint.config.js`, root)
+
+Extends `@commitlint/config-conventional`. Enforced on every commit:
+
+- **Type** (required): `feat`, `fix`, `refactor`, `test`, `chore`, `docs`, `build`, `ci`
+- **Scope** (required, not freeform): `auth`, `portfolio`, `orders`, `kafka`, `graphql`,
+  `agent`, `ui`, `db`, `docker`, `tooling`
+  (`tooling` was added beyond the original domain list for repo-wide/meta changes — CI config,
+  lint rules, build scripts — that don't belong to a single feature domain)
+- **Header max length**: 72 characters
+
+Example: `feat(orders): add stop-limit order validation`
+
+### Frontend — `/frontend`
+
+- **ESLint** (`eslint.config.mjs`): `next/core-web-vitals` + `@typescript-eslint` recommended +
+  `eslint-config-prettier` (disables formatting rules so ESLint and Prettier never fight).
+  `no-unused-vars`, `no-floating-promises`, and `no-explicit-any` are all set to **error**.
+  `no-floating-promises` requires type info, so `.ts`/`.tsx` files run with
+  `parserOptions.projectService` enabled.
+- **Prettier** (`.prettierrc.json`): no semicolons, single quotes, trailing commas, 100
+  print width.
+- Scripts: `npm run lint`, `npm run typecheck` (`tsc --noEmit`).
+
+### Backend — `/backend`
+
+- **Spotless** (`pom.xml`), formatter: **palantir-java-format** (4-space indent, matches the
+  `.editorconfig` Java convention). Bound to `mvn verify` via `spotless:check` — the build
+  **fails** on unformatted code, not just warns. Run `./mvnw spotless:apply` to fix locally.
+- **Checkstyle** (`backend/checkstyle.xml`): flags unused imports, redundant imports, and
+  enforces import ordering (static → java/javax → third-party, alphabetized within groups).
+  Bound to `mvn verify` via `checkstyle:check`, `failOnViolation=true`.
+- A `test`-scoped H2 profile (`backend/src/test/resources/application.properties`) backs the
+  fast `mvn test` run used by pre-push, so `mvn test` doesn't require a live Postgres instance.
+  Full-schema integration coverage against real Postgres still happens via Testcontainers in
+  Phase 5.
+
+### Root-level
+
+- **`.editorconfig`** — 2-space indent for JS/TS/JSON/YAML/CSS/HTML, 4-space for Java, UTF-8,
+  LF line endings, trim trailing whitespace (Markdown excluded, since trailing double-spaces
+  are a valid hard-break there).
+- **`.gitattributes`** — normalizes all text files to LF on checkout; `.bat`/`.cmd` keep CRLF.
 
 ## Working Agreement
 
