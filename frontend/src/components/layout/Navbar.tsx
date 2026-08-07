@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import Logo from '@/components/common/Logo'
+import Logo from '@/components/shared/Logo'
 
 const navLinks = [
   { href: '#features', label: 'Features' },
