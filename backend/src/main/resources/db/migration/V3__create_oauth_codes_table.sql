@@ -1,0 +1,9 @@
+CREATE TABLE oauth_codes (
+    id UUID PRIMARY KEY,
+    code VARCHAR(36) NOT NULL UNIQUE,
+    user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_oauth_codes_code ON oauth_codes (code);
