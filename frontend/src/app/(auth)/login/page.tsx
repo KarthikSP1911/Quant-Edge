@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ApiError, googleLoginUrl, login } from '@/lib/auth/api'
 import { setAccessToken } from '@/lib/auth/tokens'
@@ -11,7 +11,7 @@ const OAUTH_ERROR_MESSAGES: Record<string, string> = {
     'Your Google account did not share an email address. Please try another sign-in method.',
 }
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
@@ -98,5 +98,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   )
 }
