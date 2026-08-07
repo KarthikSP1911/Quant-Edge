@@ -1,0 +1,15 @@
+type Company {
+    id: ID!
+    symbol: String!
+    name: String!
+    sector: String!
+    industry: String!
+    description: String
+    logoUrl: String
+    exchange: String!
+}
+
+type Query {
+    companies: [Company!]!
+    company(symbol: String!): Company
+}
