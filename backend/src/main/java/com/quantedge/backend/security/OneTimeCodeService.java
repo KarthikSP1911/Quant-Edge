@@ -1,31 +1,52 @@
 package com.quantedge.backend.security;
 
+import com.quantedge.backend.entity.OAuthCode;
 import com.quantedge.backend.entity.User;
-import java.util.Map;
+import com.quantedge.backend.repository.OAuthCodeRepository;
+import com.quantedge.backend.repository.UserRepository;
+import java.time.Instant;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * DB-backed one-time code used to hand off a successful Google OAuth2 login to the frontend.
+ * Persisted (rather than kept in memory) so it survives a restart and works across multiple
+ * backend instances.
+ */
 @Service
+@RequiredArgsConstructor
 public class OneTimeCodeService {
 
-    private final Map<String, User> codeStore = new ConcurrentHashMap<>();
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private static final long CODE_TTL_SECONDS = 60;
 
+    private final OAuthCodeRepository oAuthCodeRepository;
+    private final UserRepository userRepository;
+
+    @Transactional
     public String generateCode(User user) {
         String code = UUID.randomUUID().toString();
-        codeStore.put(code, user);
-
-        // Remove code after 1 minute to prevent leaks/replay
-        scheduler.schedule(() -> codeStore.remove(code), 1, TimeUnit.MINUTES);
-
+        OAuthCode entity = OAuthCode.builder()
+                .code(code)
+                .userId(user.getId())
+                .expiresAt(Instant.now().plusSeconds(CODE_TTL_SECONDS))
+                .build();
+        oAuthCodeRepository.save(entity);
         return code;
     }
 
+    @Transactional
     public User exchangeCode(String code) {
-        return codeStore.remove(code); // Returns null if not found
+        OAuthCode entity = oAuthCodeRepository.findByCode(code).orElse(null);
+        if (entity == null) {
+            return null;
+        }
+        oAuthCodeRepository.delete(entity);
+
+        if (entity.getExpiresAt().isBefore(Instant.now())) {
+            return null;
+        }
+        return userRepository.findById(entity.getUserId()).orElse(null);
     }
 }
