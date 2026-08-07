@@ -1,11 +1,10 @@
-import CTABand from '@/components/shared/home/CTABand'
-import FeatureGrid from '@/components/shared/home/FeatureGrid'
+import FAQ from '@/components/shared/home/FAQ'
+import FeatureSections from '@/components/shared/home/FeatureSections'
 import Footer from '@/components/layout/Footer'
 import Hero from '@/components/shared/home/Hero'
-import HowItWorks from '@/components/shared/home/HowItWorks'
 import Navbar from '@/components/layout/Navbar'
-import ProductPreview from '@/components/shared/home/ProductPreview'
 import StatsBar from '@/components/shared/home/StatsBar'
+import Testimonials from '@/components/shared/home/Testimonials'
 
 export default function Home() {
   return (
@@ -14,10 +13,9 @@ export default function Home() {
       <main className="flex-1">
         <Hero />
         <StatsBar />
-        <FeatureGrid />
-        <ProductPreview />
-        <HowItWorks />
-        <CTABand />
+        <FeatureSections />
+        <Testimonials />
+        <FAQ />
       </main>
       <Footer />
     </div>
