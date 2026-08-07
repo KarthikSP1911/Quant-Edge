@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { ApiError, googleLoginUrl, register } from '@/lib/auth/api'
 import { setAccessToken } from '@/lib/auth/tokens'
 import Link from 'next/link'
 
@@ -14,28 +15,18 @@ export default function RegisterPage() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError('')
     try {
-      const response = await fetch('http://localhost:8080/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ name, email, password }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Registration failed. Email might be in use.')
-      }
-
-      const data = await response.json()
+      const data = await register({ name, email, password })
       setAccessToken(data.accessToken)
       router.push('/dashboard')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Registration failed')
+      setError(err instanceof ApiError ? err.message : 'Registration failed')
     }
   }
 
   const handleGoogleLogin = () => {
-    window.location.href = 'http://localhost:8080/oauth2/authorization/google'
+    window.location.href = googleLoginUrl()
   }
 
   return (

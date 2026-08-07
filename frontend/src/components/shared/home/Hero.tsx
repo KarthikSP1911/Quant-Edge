@@ -82,7 +82,7 @@ export default function Hero() {
               className="mt-9 flex flex-wrap items-center gap-6"
             >
               <motion.a
-                href="/signup"
+                href="/register"
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 className="rounded-full bg-[var(--color-accent-blue)] px-7 py-3.5 text-sm font-semibold text-white shadow-sm shadow-blue-600/20 transition-colors hover:bg-blue-700"

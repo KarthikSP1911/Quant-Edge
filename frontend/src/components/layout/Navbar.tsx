@@ -51,7 +51,7 @@ export default function Navbar() {
           </Link>
           <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
             <Link
-              href="/signup"
+              href="/register"
               className="rounded-md bg-[var(--color-accent-blue)] px-4 py-2 text-sm font-medium text-white shadow-sm shadow-blue-600/20 transition-colors hover:bg-blue-700"
             >
               Sign Up
@@ -110,7 +110,7 @@ export default function Navbar() {
               Login
             </Link>
             <Link
-              href="/signup"
+              href="/register"
               className="rounded-md bg-[var(--color-accent-blue)] px-4 py-2 text-center text-sm font-medium text-white transition-transform active:scale-95"
             >
               Sign Up

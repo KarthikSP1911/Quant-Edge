@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { ApiError, exchangeOAuthCode } from '@/lib/auth/api'
 import { setAccessToken } from '@/lib/auth/tokens'
 
 export default function OAuth2CallbackPage() {
@@ -15,30 +16,17 @@ export default function OAuth2CallbackPage() {
       return
     }
 
-    const exchangeCode = async () => {
+    const exchange = async () => {
       try {
-        const response = await fetch('http://localhost:8080/api/auth/oauth2/callback', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify({ code }),
-        })
-
-        if (!response.ok) {
-          throw new Error('Failed to exchange code')
-        }
-
-        const data = await response.json()
+        const data = await exchangeOAuthCode(code)
         setAccessToken(data.accessToken)
         router.push('/dashboard')
-      } catch {
-        setError('Authentication failed. Please try again.')
+      } catch (err) {
+        setError(err instanceof ApiError ? err.message : 'Authentication failed. Please try again.')
       }
     }
 
-    void exchangeCode()
+    void exchange()
   }, [router, searchParams])
 
   const code = searchParams.get('code')

@@ -1,40 +1,42 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { ApiError, googleLoginUrl, login } from '@/lib/auth/api'
 import { setAccessToken } from '@/lib/auth/tokens'
 import Link from 'next/link'
 
+const OAUTH_ERROR_MESSAGES: Record<string, string> = {
+  EmailNotProvided:
+    'Your Google account did not share an email address. Please try another sign-in method.',
+}
+
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
+  const oauthError = searchParams.get('error')
+  const [error, setError] = useState(
+    oauthError
+      ? (OAUTH_ERROR_MESSAGES[oauthError] ?? 'Google sign-in failed. Please try again.')
+      : '',
+  )
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError('')
     try {
-      const response = await fetch('http://localhost:8080/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ email, password }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Invalid credentials')
-      }
-
-      const data = await response.json()
+      const data = await login({ email, password })
       setAccessToken(data.accessToken)
       router.push('/dashboard')
-    } catch {
-      setError('Invalid email or password')
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Invalid email or password')
     }
   }
 
   const handleGoogleLogin = () => {
-    window.location.href = 'http://localhost:8080/oauth2/authorization/google'
+    window.location.href = googleLoginUrl()
   }
 
   return (
