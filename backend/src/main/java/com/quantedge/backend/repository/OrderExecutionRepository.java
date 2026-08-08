@@ -1,5 +1,6 @@
 package com.quantedge.backend.repository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -10,4 +11,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface OrderExecutionRepository extends JpaRepository<OrderExecution, UUID> {
 
     List<OrderExecution> findTop10ByOrderUserOrderByExecutedAtDesc(User user);
+
+    List<OrderExecution> findByOrderUserAndExecutedAtLessThanEqualOrderByExecutedAtAsc(User user, Instant asOf);
 }
