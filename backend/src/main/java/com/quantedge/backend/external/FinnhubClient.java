@@ -1,6 +1,7 @@
 package com.quantedge.backend.external;
 
 import com.quantedge.backend.exception.ExternalApiException;
+import com.quantedge.backend.external.dto.FinnhubBasicFinancialsResponse;
 import com.quantedge.backend.external.dto.FinnhubCompanyProfileResponse;
 import com.quantedge.backend.external.dto.FinnhubQuoteResponse;
 import org.slf4j.Logger;
@@ -11,7 +12,7 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 
 /**
- * Client for Finnhub (https://finnhub.io) real-time quotes and company profiles.
+ * Client for Finnhub (https://finnhub.io) real-time quotes, company profiles and basic financials.
  *
  * <p>Free tier is capped at 60 requests/minute — callers are responsible for staying under that
  * limit (e.g. via the Redis cache layer / price-sync scheduler); this client does not rate-limit
@@ -44,6 +45,29 @@ public class FinnhubClient {
         } catch (RestClientException ex) {
             log.warn("Finnhub quote request failed for symbol={}", symbol, ex);
             throw new ExternalApiException("Failed to fetch quote for " + symbol + " from Finnhub", ex);
+        }
+    }
+
+    /**
+     * Fetches Finnhub's "basic financials" bundle — market cap, trailing P/E and 52-week high/low.
+     * Backs the stock comparison's fundamentals rows; callers cache the result (24h) so a
+     * comparison costs at most one call per symbol per day.
+     */
+    public FinnhubBasicFinancialsResponse getBasicFinancials(String symbol) {
+        try {
+            return restClient
+                    .get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/stock/metric")
+                            .queryParam("symbol", symbol)
+                            .queryParam("metric", "all")
+                            .queryParam("token", apiKey)
+                            .build())
+                    .retrieve()
+                    .body(FinnhubBasicFinancialsResponse.class);
+        } catch (RestClientException ex) {
+            log.warn("Finnhub basic financials request failed for symbol={}", symbol, ex);
+            throw new ExternalApiException("Failed to fetch basic financials for " + symbol + " from Finnhub", ex);
         }
     }
 

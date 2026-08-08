@@ -14,6 +14,7 @@ import com.quantedge.backend.external.TwelveDataClient;
 import com.quantedge.backend.external.dto.FinnhubQuoteResponse;
 import com.quantedge.backend.external.dto.TwelveDataTimeSeriesResponse;
 import com.quantedge.backend.mapper.CompanyMapper;
+import com.quantedge.backend.mapper.MarketDataMapper;
 import com.quantedge.backend.repository.CompanyRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,7 +59,12 @@ class StockDetailServiceTest {
     @BeforeEach
     void setUp() {
         service = new StockDetailService(
-                companyRepository, new CompanyMapper(), quoteService, chartCache, twelveDataClient);
+                companyRepository,
+                new CompanyMapper(),
+                new MarketDataMapper(),
+                quoteService,
+                chartCache,
+                twelveDataClient);
     }
 
     @Test
