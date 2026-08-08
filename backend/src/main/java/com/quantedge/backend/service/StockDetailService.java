@@ -1,17 +1,15 @@
 package com.quantedge.backend.service;
 
 import com.quantedge.backend.cache.ChartCache;
-import com.quantedge.backend.dto.response.CandleResponse;
-import com.quantedge.backend.dto.response.QuoteResponse;
 import com.quantedge.backend.dto.response.StockDetailResponse;
 import com.quantedge.backend.entity.Company;
 import com.quantedge.backend.external.TwelveDataClient;
 import com.quantedge.backend.external.dto.FinnhubQuoteResponse;
 import com.quantedge.backend.external.dto.TwelveDataTimeSeriesResponse;
 import com.quantedge.backend.mapper.CompanyMapper;
+import com.quantedge.backend.mapper.MarketDataMapper;
 import com.quantedge.backend.repository.CompanyRepository;
 import java.time.Duration;
-import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -30,6 +28,7 @@ public class StockDetailService {
 
     private final CompanyRepository companyRepository;
     private final CompanyMapper companyMapper;
+    private final MarketDataMapper marketDataMapper;
     private final QuoteService quoteService;
     private final ChartCache chartCache;
     private final TwelveDataClient twelveDataClient;
@@ -43,7 +42,9 @@ public class StockDetailService {
         TwelveDataTimeSeriesResponse timeSeries = resolveTimeSeries(company.getSymbol(), interval, outputSize);
 
         return new StockDetailResponse(
-                companyMapper.toResponse(company), toQuoteResponse(quote), toCandleResponses(timeSeries));
+                companyMapper.toResponse(company),
+                marketDataMapper.toQuoteResponse(quote),
+                marketDataMapper.toCandleResponses(timeSeries));
     }
 
     private TwelveDataTimeSeriesResponse resolveTimeSeries(String symbol, String interval, int outputSize) {
@@ -54,30 +55,5 @@ public class StockDetailService {
                     chartCache.put(symbol, interval, fetched, CHART_TTL);
                     return fetched;
                 });
-    }
-
-    private QuoteResponse toQuoteResponse(FinnhubQuoteResponse quote) {
-        return new QuoteResponse(
-                quote.currentPrice(),
-                quote.high(),
-                quote.low(),
-                quote.open(),
-                quote.previousClose(),
-                quote.timestamp());
-    }
-
-    private List<CandleResponse> toCandleResponses(TwelveDataTimeSeriesResponse timeSeries) {
-        if (timeSeries.values() == null) {
-            return List.of();
-        }
-        return timeSeries.values().stream()
-                .map(candle -> new CandleResponse(
-                        candle.datetime(),
-                        Double.parseDouble(candle.open()),
-                        Double.parseDouble(candle.high()),
-                        Double.parseDouble(candle.low()),
-                        Double.parseDouble(candle.close()),
-                        Double.parseDouble(candle.volume())))
-                .toList();
     }
 }
