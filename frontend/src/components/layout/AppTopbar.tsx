@@ -8,6 +8,7 @@ const navLinks = [
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/companies', label: 'Companies' },
   { href: '/portfolio', label: 'Portfolio' },
+  { href: '/orders', label: 'Orders' },
   { href: '/watchlist', label: 'Watchlist' },
 ]
 

@@ -12,9 +12,9 @@ import com.quantedge.backend.repository.OrderRepository;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
  * double-fill guard that makes redelivery of the same price event a no-op.
  */
 @Service
-@RequiredArgsConstructor
 public class OrderMatcherService {
 
     private static final Logger log = LoggerFactory.getLogger(OrderMatcherService.class);
@@ -34,6 +33,24 @@ public class OrderMatcherService {
     private final OrderRepository orderRepository;
     private final TradeExecutionService tradeExecutionService;
     private final TradeExecutedProducer tradeExecutedProducer;
+    private final ObjectProvider<OrderMatcherService> self;
+
+    public OrderMatcherService(
+            CompanyRepository companyRepository,
+            OrderRepository orderRepository,
+            TradeExecutionService tradeExecutionService,
+            TradeExecutedProducer tradeExecutedProducer,
+            ObjectProvider<OrderMatcherService> self) {
+        this.companyRepository = companyRepository;
+        this.orderRepository = orderRepository;
+        this.tradeExecutionService = tradeExecutionService;
+        this.tradeExecutedProducer = tradeExecutedProducer;
+        // Self-injected proxy: attemptFill must be called through this so its @Transactional
+        // actually applies - calling it via `this` from matchSymbol bypasses the proxy entirely.
+        // ObjectProvider defers the lookup past construction, avoiding the circular
+        // BeanCurrentlyInCreationException a direct/@Lazy self-injected field triggers.
+        this.self = self;
+    }
 
     public void matchSymbol(String symbol, BigDecimal syncedPrice) {
         companyRepository
@@ -42,7 +59,7 @@ public class OrderMatcherService {
                         company -> {
                             List<Order> openOrders = orderRepository.findByCompanyAndStatus(company, OrderStatus.OPEN);
                             for (Order order : openOrders) {
-                                attemptFill(order.getId(), syncedPrice);
+                                self.getObject().attemptFill(order.getId(), syncedPrice);
                             }
                         },
                         () -> log.warn("Ignoring price event for unknown symbol={}", symbol));

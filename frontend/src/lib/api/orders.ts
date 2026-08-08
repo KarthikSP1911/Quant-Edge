@@ -20,3 +20,7 @@ export async function placeLimitOrder(input: PlaceOrderInput): Promise<PlacedOrd
     body: JSON.stringify(input),
   })
 }
+
+export function cancelOrder(orderId: string): Promise<void> {
+  return apiRequest<void>(`/api/orders/${orderId}/cancel`, { method: 'POST' })
+}
