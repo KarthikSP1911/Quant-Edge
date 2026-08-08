@@ -22,7 +22,7 @@ docker-compose.yml at root
 - **DB:** PostgreSQL 15+ with Flyway migrations
 - **Cache:** Redis 7+
 - **Messaging:** Apache Kafka (KRaft mode, no Zookeeper)
-- **GenAI:** Groq via Spring AI (OpenAI-compatible client)
+- **GenAI:** Groq via Spring AI (llama-3.3-70b-versatile, OpenAI-compatible client)
 - **Charts:** TradingView lightweight-charts
 - **Testing:** JUnit 5, Mockito, Testcontainers
 - **DevOps:** Docker Compose
@@ -74,8 +74,8 @@ Logo: "Quant" in #0F172A + "Edge" in #2563EB. No tagline under the logo.
 2. Core CRUD — companies, portfolio, market orders, dashboard, GraphQL reads (13)
 3. Kafka + order matching engine — limit/stop-loss/stop-limit, SSE (16)
 4. Standout features — audit log + AOP, comparison, time machine, exports (18)
-5. Testing + DevOps — 80%+ coverage, Testcontainers, Actuator (9)
-6. GenAI + research agent — Spring AI, 9 tools, 5-step agent, SSE trace (13)
+5. GenAI + research agent — Spring AI, 9 tools, 5-step agent, SSE trace (13)
+6. Testing + DevOps — 80%+ coverage, Testcontainers, Actuator (9)
 7. ML optional — FastAPI, FinBERT, price prediction (8)
 
 **Hard rule:** do not start a phase until the previous one is fully working and demo-able.
@@ -128,7 +128,7 @@ npx lefthook install
 - **commit-msg** — runs `commitlint` against the commit message (see Commit Convention below).
 - **pre-push** (parallel):
   - `backend-test` — `./mvnw test` (fast unit tests only; the full Testcontainers suite from
-    Phase 5 is not run here)
+    Phase 6 is not run here)
   - `frontend-check` — `npm run lint && npm run typecheck`
 
 ### Commit convention (`commitlint.config.js`, root)
@@ -166,7 +166,7 @@ Example: `feat(orders): add stop-limit order validation`
 - A `test`-scoped H2 profile (`backend/src/test/resources/application.properties`) backs the
   fast `mvn test` run used by pre-push, so `mvn test` doesn't require a live Postgres instance.
   Full-schema integration coverage against real Postgres still happens via Testcontainers in
-  Phase 5.
+  Phase 6.
 
 ### Root-level
 

@@ -138,6 +138,14 @@ type TimeMachineResult {
     worstDecisions: [TimeMachineDecision!]!
 }
 
+type ChatHistory {
+    id: ID!
+    role: String!
+    content: String
+    toolCalls: String
+    createdAt: String!
+}
+
 type Query {
     companies: [Company!]!
     company(symbol: String!): Company
@@ -149,4 +157,5 @@ type Query {
     filledOrders: [Order!]!
     orderHistory: [Order!]!
     portfolioTimeMachine(asOfDate: String!): TimeMachineResult!
+    chatHistory: [ChatHistory!]!
 }
