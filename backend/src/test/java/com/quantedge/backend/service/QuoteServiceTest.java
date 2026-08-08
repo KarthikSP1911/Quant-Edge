@@ -3,10 +3,11 @@ package com.quantedge.backend.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
+import java.util.Optional;
+
 import com.quantedge.backend.cache.PriceCache;
 import com.quantedge.backend.external.FinnhubClient;
 import com.quantedge.backend.external.dto.FinnhubQuoteResponse;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;

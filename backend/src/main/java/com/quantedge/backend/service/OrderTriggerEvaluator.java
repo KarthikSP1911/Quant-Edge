@@ -1,8 +1,9 @@
 package com.quantedge.backend.service;
 
+import java.math.BigDecimal;
+
 import com.quantedge.backend.entity.Order;
 import com.quantedge.backend.enums.OrderSide;
-import java.math.BigDecimal;
 
 /**
  * Trigger rules agreed for the Phase 3 matcher: limit buy fires at price &lt;= limit, limit sell at

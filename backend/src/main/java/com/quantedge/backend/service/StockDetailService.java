@@ -1,5 +1,9 @@
 package com.quantedge.backend.service;
 
+import java.time.Duration;
+import java.util.List;
+import java.util.Optional;
+
 import com.quantedge.backend.cache.ChartCache;
 import com.quantedge.backend.dto.response.CandleResponse;
 import com.quantedge.backend.dto.response.QuoteResponse;
@@ -10,9 +14,6 @@ import com.quantedge.backend.external.dto.FinnhubQuoteResponse;
 import com.quantedge.backend.external.dto.TwelveDataTimeSeriesResponse;
 import com.quantedge.backend.mapper.CompanyMapper;
 import com.quantedge.backend.repository.CompanyRepository;
-import java.time.Duration;
-import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

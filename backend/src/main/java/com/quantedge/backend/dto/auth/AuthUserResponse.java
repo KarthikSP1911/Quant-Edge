@@ -1,7 +1,8 @@
 package com.quantedge.backend.dto.auth;
 
-import com.quantedge.backend.enums.Role;
 import java.util.UUID;
+
+import com.quantedge.backend.enums.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -3,6 +3,11 @@ package com.quantedge.backend.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
+
 import com.quantedge.backend.dto.response.DashboardResponse;
 import com.quantedge.backend.dto.response.WatchlistItemResponse;
 import com.quantedge.backend.entity.Company;
@@ -15,10 +20,6 @@ import com.quantedge.backend.external.dto.FinnhubQuoteResponse;
 import com.quantedge.backend.mapper.CompanyMapper;
 import com.quantedge.backend.repository.OrderExecutionRepository;
 import com.quantedge.backend.repository.PortfolioRepository;
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.util.List;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

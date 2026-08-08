@@ -2,6 +2,7 @@ package com.quantedge.backend.cache;
 
 import java.time.Duration;
 import java.util.Optional;
+
 import org.springframework.stereotype.Component;
 
 /** Computed technical indicator cache. TTL per CLAUDE.md's Data Strategy: indicators, 24 hours. */

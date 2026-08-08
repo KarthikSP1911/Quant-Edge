@@ -1,5 +1,9 @@
 package com.quantedge.backend.entity;
 
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.UUID;
+
 import com.quantedge.backend.enums.OrderSide;
 import com.quantedge.backend.enums.OrderStatus;
 import com.quantedge.backend.enums.OrderType;
@@ -13,9 +17,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

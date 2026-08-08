@@ -1,8 +1,9 @@
 package com.quantedge.backend.repository;
 
-import com.quantedge.backend.entity.RefreshToken;
 import java.util.Optional;
 import java.util.UUID;
+
+import com.quantedge.backend.entity.RefreshToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

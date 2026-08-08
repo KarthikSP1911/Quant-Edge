@@ -1,7 +1,8 @@
 package com.quantedge.backend.security;
 
-import com.quantedge.backend.repository.UserRepository;
 import java.util.List;
+
+import com.quantedge.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

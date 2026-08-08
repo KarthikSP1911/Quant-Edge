@@ -1,5 +1,9 @@
 package com.quantedge.backend.scheduler;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.List;
+
 import com.quantedge.backend.cache.PriceCache;
 import com.quantedge.backend.entity.Company;
 import com.quantedge.backend.exception.ExternalApiException;
@@ -7,9 +11,6 @@ import com.quantedge.backend.external.FinnhubClient;
 import com.quantedge.backend.external.dto.FinnhubQuoteResponse;
 import com.quantedge.backend.kafka.producer.StockPriceProducer;
 import com.quantedge.backend.repository.CompanyRepository;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

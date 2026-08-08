@@ -1,5 +1,9 @@
 package com.quantedge.backend.service;
 
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.UUID;
+
 import com.quantedge.backend.entity.Order;
 import com.quantedge.backend.entity.OrderExecution;
 import com.quantedge.backend.enums.OrderStatus;
@@ -9,9 +13,6 @@ import com.quantedge.backend.exception.InsufficientSharesException;
 import com.quantedge.backend.kafka.producer.TradeExecutedProducer;
 import com.quantedge.backend.repository.CompanyRepository;
 import com.quantedge.backend.repository.OrderRepository;
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;

@@ -1,8 +1,9 @@
 package com.quantedge.backend.external.dto;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.List;
 
 /** Response from Twelve Data's {@code /time_series} endpoint (OHLCV candles). */
 @JsonIgnoreProperties(ignoreUnknown = true)

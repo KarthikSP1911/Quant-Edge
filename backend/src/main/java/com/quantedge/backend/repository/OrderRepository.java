@@ -1,15 +1,16 @@
 package com.quantedge.backend.repository;
 
-import com.quantedge.backend.entity.Company;
-import com.quantedge.backend.entity.Order;
-import com.quantedge.backend.entity.User;
-import com.quantedge.backend.enums.OrderStatus;
-import jakarta.persistence.LockModeType;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import com.quantedge.backend.entity.Company;
+import com.quantedge.backend.entity.Order;
+import com.quantedge.backend.entity.User;
+import com.quantedge.backend.enums.OrderStatus;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;

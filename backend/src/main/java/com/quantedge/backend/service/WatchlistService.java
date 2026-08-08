@@ -1,5 +1,7 @@
 package com.quantedge.backend.service;
 
+import java.util.List;
+
 import com.quantedge.backend.dto.response.WatchlistItemResponse;
 import com.quantedge.backend.entity.Company;
 import com.quantedge.backend.entity.User;
@@ -8,7 +10,6 @@ import com.quantedge.backend.exception.CompanyNotFoundException;
 import com.quantedge.backend.mapper.CompanyMapper;
 import com.quantedge.backend.repository.CompanyRepository;
 import com.quantedge.backend.repository.WatchlistRepository;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

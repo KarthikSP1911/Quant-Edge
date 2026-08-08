@@ -7,6 +7,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.UUID;
+
 import com.quantedge.backend.dto.response.CompanyResponse;
 import com.quantedge.backend.dto.response.DashboardResponse;
 import com.quantedge.backend.dto.response.PortfolioPositionResponse;
@@ -17,9 +21,6 @@ import com.quantedge.backend.enums.Role;
 import com.quantedge.backend.repository.UserRepository;
 import com.quantedge.backend.security.JwtService;
 import com.quantedge.backend.service.DashboardService;
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
