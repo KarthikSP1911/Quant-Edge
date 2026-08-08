@@ -146,6 +146,15 @@ type ChatHistory {
     createdAt: String!
 }
 
+type ResearchNote {
+    id: ID!
+    company: Company!
+    title: String!
+    content: String!
+    generatedBy: String!
+    createdAt: String!
+}
+
 type Query {
     companies: [Company!]!
     company(symbol: String!): Company
@@ -158,4 +167,5 @@ type Query {
     orderHistory: [Order!]!
     portfolioTimeMachine(asOfDate: String!): TimeMachineResult!
     chatHistory: [ChatHistory!]!
+    researchNotes(symbol: String): [ResearchNote!]!
 }
