@@ -250,3 +250,33 @@ type Query {
   that sale. Only SELL executions produce a ranked entry — open (unsold) positions have no
   realized outcome yet. `bestDecisions` / `worstDecisions` are each the top 5 by this metric,
   descending / ascending.
+
+### Chat Agent (Phase 5, part 1)
+
+**POST /api/chat** � Send a message to the AI Chat agent.
+Request:
+`json
+{
+  "message": "What is the price of NVDA?"
+}
+`
+Response 200:
+`json
+{
+  "response": "The current real-time price of NVDA is 105.00."
+}
+`
+_Note: The Chat Agent uses 9 specific tool functions to fulfill user requests, including placing orders, getting quotes, adding to the watchlist, etc. The chat history is saved to the DB._
+
+### Research Agent (Phase 5, part 2)
+
+**POST /api/v1/agent/research/{symbol}** � Trigger an autonomous 5-step research task for a specific symbol.
+Response 200:
+`json
+{
+  "sessionId": "UUID-of-trace-session"
+}
+`
+
+**GET /api/v1/agent/trace/{sessionId}?token=<accessToken>** � Server-Sent Events stream for the reasoning trace of the triggered research agent.
+Events are of type race, and have JSON data containing step and message properties representing the agent's progress.

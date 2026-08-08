@@ -22,7 +22,7 @@ docker-compose.yml at root
 - **DB:** PostgreSQL 15+ with Flyway migrations
 - **Cache:** Redis 7+
 - **Messaging:** Apache Kafka (KRaft mode, no Zookeeper)
-- **GenAI:** Groq via Spring AI (llama-3.3-70b-versatile, OpenAI-compatible client)
+- **GenAI:** Groq via Spring AI (openai/gpt-oss-120b, OpenAI-compatible client)
 - **Charts:** TradingView lightweight-charts
 - **Testing:** JUnit 5, Mockito, Testcontainers
 - **DevOps:** Docker Compose

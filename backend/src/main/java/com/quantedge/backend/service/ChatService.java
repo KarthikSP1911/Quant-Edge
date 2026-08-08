@@ -33,16 +33,19 @@ public class ChatService {
 
     @Transactional
     public com.quantedge.backend.dto.response.ChatResponse chat(User user, String userMessageText) {
-        // 1. Save user message
+        // 1. Create user message (do not save yet)
         ChatHistory userMessage = ChatHistory.builder()
                 .user(user)
                 .role("USER")
                 .content(userMessageText)
                 .build();
-        chatHistoryRepository.save(userMessage);
 
-        // 2. Fetch history (limit to last N messages for context if needed, but here we take all)
-        List<ChatHistory> history = chatHistoryRepository.findByUserIdOrderByCreatedAtAsc(user.getId());
+        // 2. Fetch history (limit to last 50 messages, reverse for chronological order)
+        List<ChatHistory> history = chatHistoryRepository.findTop50ByUserIdOrderByCreatedAtDesc(user.getId());
+        java.util.Collections.reverse(history);
+
+        // Append the current user message to the history for context
+        history.add(userMessage);
 
         List<Message> messages = history.stream()
                 .map(h -> {
@@ -71,6 +74,7 @@ public class ChatService {
                         "removeFromWatchlist",
                         "getUserOrders",
                         "placeOrder",
+                        "confirmPendingOrder",
                         "cancelOrder")
                 .call()
                 .chatResponse();
@@ -89,14 +93,14 @@ public class ChatService {
             }
         }
 
-        // 4. Save assistant response
+        // 4. Save both USER and ASSISTANT response
         ChatHistory assistantMessage = ChatHistory.builder()
                 .user(user)
                 .role("ASSISTANT")
                 .content(assistantText)
                 .toolCalls(toolCallsJson)
                 .build();
-        chatHistoryRepository.save(assistantMessage);
+        chatHistoryRepository.saveAll(List.of(userMessage, assistantMessage));
 
         return com.quantedge.backend.dto.response.ChatResponse.builder()
                 .response(assistantText)

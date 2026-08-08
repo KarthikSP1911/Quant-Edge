@@ -1,6 +1,8 @@
-package com.quantedge.backend.graphql;
+package com.quantedge.backend.resolver;
 
+import com.quantedge.backend.dto.response.ResearchNoteResponse;
 import com.quantedge.backend.entity.User;
+import com.quantedge.backend.mapper.ResearchNoteMapper;
 import com.quantedge.backend.repository.ResearchNoteRepository;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,36 +17,17 @@ import org.springframework.stereotype.Controller;
 public class ResearchNoteResolver {
 
     private final ResearchNoteRepository researchNoteRepository;
+    private final ResearchNoteMapper researchNoteMapper;
 
     @QueryMapping
     public List<ResearchNoteResponse> researchNotes(@AuthenticationPrincipal User user, @Argument String symbol) {
         if (symbol != null && !symbol.isBlank()) {
             return researchNoteRepository.findByUserAndCompanySymbolOrderByCreatedAtDesc(user, symbol).stream()
-                    .map(note -> new ResearchNoteResponse(
-                            note.getId().toString(),
-                            note.getCompany(),
-                            note.getTitle(),
-                            note.getContent(),
-                            note.getGeneratedBy(),
-                            note.getCreatedAt().toString()))
+                    .map(researchNoteMapper::toDto)
                     .collect(Collectors.toList());
         }
         return researchNoteRepository.findByUserOrderByCreatedAtDesc(user).stream()
-                .map(note -> new ResearchNoteResponse(
-                        note.getId().toString(),
-                        note.getCompany(),
-                        note.getTitle(),
-                        note.getContent(),
-                        note.getGeneratedBy(),
-                        note.getCreatedAt().toString()))
+                .map(researchNoteMapper::toDto)
                 .collect(Collectors.toList());
     }
-
-    public record ResearchNoteResponse(
-            String id,
-            com.quantedge.backend.entity.Company company,
-            String title,
-            String content,
-            String generatedBy,
-            String createdAt) {}
 }

@@ -33,7 +33,11 @@ public class ResearchAgentController {
     }
 
     @GetMapping(value = "/trace/{sessionId}", produces = "text/event-stream")
-    public SseEmitter connectTrace(@PathVariable String sessionId) {
+    public SseEmitter connectTrace(@AuthenticationPrincipal User user, @PathVariable String sessionId) {
+        if (!sseTraceService.isOwner(sessionId, user.getId())) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "Not authorized for this trace session");
+        }
         return sseTraceService.createEmitter(sessionId);
     }
 }

@@ -1,11 +1,6 @@
 package com.quantedge.backend.config;
 
 import com.quantedge.backend.dto.request.PlaceOrderRequest;
-import com.quantedge.backend.dto.response.DashboardResponse;
-import com.quantedge.backend.dto.response.OrderSummaryResponse;
-import com.quantedge.backend.dto.response.PlacedOrderResponse;
-import com.quantedge.backend.dto.response.StockDetailResponse;
-import com.quantedge.backend.dto.response.WatchlistItemResponse;
 import com.quantedge.backend.entity.User;
 import com.quantedge.backend.external.dto.FinnhubQuoteResponse;
 import com.quantedge.backend.service.DashboardService;
@@ -13,8 +8,9 @@ import com.quantedge.backend.service.OrderService;
 import com.quantedge.backend.service.QuoteService;
 import com.quantedge.backend.service.StockDetailService;
 import com.quantedge.backend.service.WatchlistService;
-import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +19,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 @Configuration
 public class ChatToolsConfig {
+
+    private final Map<UUID, PlaceOrderRequest> pendingOrders = new ConcurrentHashMap<>();
 
     private User getCurrentUser() {
         if (SecurityContextHolder.getContext().getAuthentication() != null
@@ -43,82 +41,151 @@ public class ChatToolsConfig {
 
     @Bean
     @Description("Get fundamentals, static profile, and historical chart data for a stock symbol")
-    public Function<SymbolRequest, StockDetailResponse> getCompanyInfo(StockDetailService stockDetailService) {
-        return request ->
-                stockDetailService.getStockDetail(request.symbol(), "1day", 14).orElse(null);
-    }
-
-    @Bean
-    @Description("Get the current real-time quote (price) for a stock symbol")
-    public Function<SymbolRequest, CustomQuoteResponse> getQuote(QuoteService quoteService) {
+    public Function<SymbolRequest, Object> getCompanyInfo(StockDetailService stockDetailService) {
         return request -> {
-            FinnhubQuoteResponse quote = quoteService.getQuote(request.symbol());
-            return new CustomQuoteResponse(
-                    quote.currentPrice(),
-                    quote.high(),
-                    quote.low(),
-                    quote.open(),
-                    quote.previousClose(),
-                    quote.timestamp());
-        };
-    }
-
-    @Bean
-    @Description("Get the user's dashboard, containing their portfolio performance and overall balance")
-    public Function<EmptyRequest, DashboardResponse> getDashboard(DashboardService dashboardService) {
-        return request -> dashboardService.getDashboard(getCurrentUser());
-    }
-
-    @Bean
-    @Description("Get the user's current watchlist of stocks")
-    public Function<EmptyRequest, List<WatchlistItemResponse>> getWatchlist(WatchlistService watchlistService) {
-        return request -> watchlistService.list(getCurrentUser());
-    }
-
-    @Bean
-    @Description("Add a stock symbol to the user's watchlist")
-    public Function<SymbolRequest, List<WatchlistItemResponse>> addToWatchlist(WatchlistService watchlistService) {
-        return request -> {
-            watchlistService.add(getCurrentUser(), request.symbol());
-            return watchlistService.list(getCurrentUser());
-        };
-    }
-
-    @Bean
-    @Description("Remove a stock symbol from the user's watchlist")
-    public Function<SymbolRequest, List<WatchlistItemResponse>> removeFromWatchlist(WatchlistService watchlistService) {
-        return request -> {
-            watchlistService.remove(getCurrentUser(), request.symbol());
-            return watchlistService.list(getCurrentUser());
-        };
-    }
-
-    @Bean
-    @Description("Get a list of all orders placed by the user")
-    public Function<EmptyRequest, List<OrderSummaryResponse>> getUserOrders(OrderService orderService) {
-        return request -> orderService.getOrderHistory(getCurrentUser());
-    }
-
-    @Bean
-    @Description(
-            "Place a new market or limit order for a stock. Type must be MARKET, LIMIT, STOP_LOSS, or STOP_LIMIT. Side must be BUY or SELL.")
-    public Function<PlaceOrderRequest, Object> placeOrder(OrderService orderService) {
-        return request -> {
-            if ("MARKET".equals(request.getType().name())) {
-                if ("BUY".equals(request.getSide().name())) {
-                    return orderService.buy(getCurrentUser(), request.getSymbol(), request.getQuantity());
-                } else {
-                    return orderService.sell(getCurrentUser(), request.getSymbol(), request.getQuantity());
-                }
-            } else {
-                return orderService.placeOrder(getCurrentUser(), request);
+            try {
+                return stockDetailService
+                        .getStockDetail(request.symbol(), "1day", 14)
+                        .orElse(null);
+            } catch (Exception e) {
+                return "Error executing getCompanyInfo: " + e.getMessage();
             }
         };
     }
 
     @Bean
-    @Description("Cancel an existing open order")
-    public Function<CancelOrderRequest, PlacedOrderResponse> cancelOrder(OrderService orderService) {
-        return request -> orderService.cancelOrder(getCurrentUser(), request.orderId());
+    @Description("Get the current real-time quote (price) for a stock symbol")
+    public Function<SymbolRequest, Object> getQuote(QuoteService quoteService) {
+        return request -> {
+            try {
+                FinnhubQuoteResponse quote = quoteService.getQuote(request.symbol());
+                return new CustomQuoteResponse(
+                        quote.currentPrice(),
+                        quote.high(),
+                        quote.low(),
+                        quote.open(),
+                        quote.previousClose(),
+                        quote.timestamp());
+            } catch (Exception e) {
+                return "Error executing getQuote: " + e.getMessage();
+            }
+        };
+    }
+
+    @Bean
+    @Description("Get the user's dashboard, containing their portfolio performance and overall balance")
+    public Function<EmptyRequest, Object> getDashboard(DashboardService dashboardService) {
+        return request -> {
+            try {
+                return dashboardService.getDashboard(getCurrentUser());
+            } catch (Exception e) {
+                return "Error executing getDashboard: " + e.getMessage();
+            }
+        };
+    }
+
+    @Bean
+    @Description("Get the user's current watchlist of stocks")
+    public Function<EmptyRequest, Object> getWatchlist(WatchlistService watchlistService) {
+        return request -> {
+            try {
+                return watchlistService.list(getCurrentUser());
+            } catch (Exception e) {
+                return "Error executing getWatchlist: " + e.getMessage();
+            }
+        };
+    }
+
+    @Bean
+    @Description("Add a stock symbol to the user's watchlist")
+    public Function<SymbolRequest, Object> addToWatchlist(WatchlistService watchlistService) {
+        return request -> {
+            try {
+                watchlistService.add(getCurrentUser(), request.symbol());
+                return watchlistService.list(getCurrentUser());
+            } catch (Exception e) {
+                return "Error executing addToWatchlist: " + e.getMessage();
+            }
+        };
+    }
+
+    @Bean
+    @Description("Remove a stock symbol from the user's watchlist")
+    public Function<SymbolRequest, Object> removeFromWatchlist(WatchlistService watchlistService) {
+        return request -> {
+            try {
+                watchlistService.remove(getCurrentUser(), request.symbol());
+                return watchlistService.list(getCurrentUser());
+            } catch (Exception e) {
+                return "Error executing removeFromWatchlist: " + e.getMessage();
+            }
+        };
+    }
+
+    @Bean
+    @Description("Get a list of all orders placed by the user")
+    public Function<EmptyRequest, Object> getUserOrders(OrderService orderService) {
+        return request -> {
+            try {
+                return orderService.getOrderHistory(getCurrentUser());
+            } catch (Exception e) {
+                return "Error executing getUserOrders: " + e.getMessage();
+            }
+        };
+    }
+
+    @Bean
+    @Description(
+            "Stage a new market or limit order for a stock. Type must be MARKET, LIMIT, STOP_LOSS, or STOP_LIMIT. Side must be BUY or SELL. This does not execute the order; it waits for user confirmation.")
+    public Function<PlaceOrderRequest, Object> placeOrder() {
+        return request -> {
+            try {
+                User user = getCurrentUser();
+                pendingOrders.put(user.getId(), request);
+                return "Order staged for " + request.getSide() + " " + request.getQuantity() + " of "
+                        + request.getSymbol()
+                        + ". Please ask the user to confirm by saying 'yes' to proceed, or 'no' to cancel.";
+            } catch (Exception e) {
+                return "Error staging order: " + e.getMessage();
+            }
+        };
+    }
+
+    @Bean
+    @Description("Execute the pending order after the user has explicitly confirmed 'yes'.")
+    public Function<EmptyRequest, Object> confirmPendingOrder(OrderService orderService) {
+        return request -> {
+            try {
+                User user = getCurrentUser();
+                PlaceOrderRequest pending = pendingOrders.remove(user.getId());
+                if (pending == null) {
+                    return "No pending order found to confirm.";
+                }
+
+                if ("MARKET".equals(pending.getType().name())) {
+                    if ("BUY".equals(pending.getSide().name())) {
+                        return orderService.buy(user, pending.getSymbol(), pending.getQuantity());
+                    } else {
+                        return orderService.sell(user, pending.getSymbol(), pending.getQuantity());
+                    }
+                } else {
+                    return orderService.placeOrder(user, pending);
+                }
+            } catch (Exception e) {
+                return "Error executing confirmed order: " + e.getMessage();
+            }
+        };
+    }
+
+    @Bean
+    @Description("Cancel an existing open order in the market (not a pending staging order).")
+    public Function<CancelOrderRequest, Object> cancelOrder(OrderService orderService) {
+        return request -> {
+            try {
+                return orderService.cancelOrder(getCurrentUser(), request.orderId());
+            } catch (Exception e) {
+                return "Error executing cancelOrder: " + e.getMessage();
+            }
+        };
     }
 }
