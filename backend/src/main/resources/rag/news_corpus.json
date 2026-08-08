@@ -1,0 +1,122 @@
+[
+  {
+    "id": "news-001",
+    "symbol": "AAPL",
+    "title": "Apple hit with EU antitrust fine over App Store steering rules",
+    "text": "The European Commission fined Apple Inc. 500 million euros in March 2024 for breaching the Digital Markets Act by preventing app developers from steering users to cheaper subscription offers outside the App Store. Regulators said Apple's anti-steering provisions harmed consumers and violated the bloc's new tech competition rules. Apple said it would appeal the decision, arguing the fine ignored the significant changes it had already made to comply with the DMA. The company has until early 2025 to fully remove the anti-steering restrictions across all EU markets or face daily penalties."
+  },
+  {
+    "id": "news-002",
+    "symbol": "MSFT",
+    "title": "Microsoft closes Activision Blizzard acquisition after UK approval",
+    "text": "Microsoft completed its 69 billion dollar acquisition of Activision Blizzard in October 2023 after the UK Competition and Markets Authority approved a restructured deal that excluded cloud streaming rights, which were sold separately to Ubisoft. The acquisition is the largest in gaming industry history and brings franchises including Call of Duty, World of Warcraft, and Candy Crush under Microsoft's Xbox division. CEO Satya Nadella called the closing a milestone for Microsoft's gaming and cloud strategy, while regulators in the US and EU had earlier cleared the deal with fewer conditions than the UK initially sought."
+  },
+  {
+    "id": "news-003",
+    "symbol": "GOOGL",
+    "title": "Alphabet ordered to face ad-tech breakup trial after DOJ antitrust ruling",
+    "text": "A federal judge ruled in April 2024 that Google illegally monopolized parts of the digital advertising technology market, siding with the Department of Justice in a case that could force Alphabet to divest its ad exchange business. The ruling found Google unlawfully tied its publisher ad server to its ad exchange, harming competition. Alphabet said it disagreed with the decision and would appeal. A separate remedies trial will determine whether Google must sell off AdX, the ad exchange at the center of the case, which analysts estimate could be worth tens of billions of dollars."
+  },
+  {
+    "id": "news-004",
+    "symbol": "AMZN",
+    "title": "Amazon FTC lawsuit alleges illegal monopoly maintenance",
+    "text": "The Federal Trade Commission and seventeen state attorneys general sued Amazon.com Inc. in September 2023, alleging the company illegally maintained monopoly power in online retail by punishing sellers who offered lower prices elsewhere and by burying non-Prime-eligible listings. The lawsuit seeks structural remedies that could include a breakup of Amazon's businesses. Amazon called the suit misguided, arguing its practices lower prices and expand selection for consumers. The case is expected to proceed to trial in 2026 and is considered one of the most significant antitrust actions against a tech company in decades."
+  },
+  {
+    "id": "news-005",
+    "symbol": "NVDA",
+    "title": "Nvidia reports record data center revenue on AI chip demand",
+    "text": "Nvidia Corporation reported quarterly data center revenue of 22.6 billion dollars in its fiscal third quarter of 2024, more than triple the prior year, driven by surging demand for its H100 and forthcoming H200 AI training chips. CEO Jensen Huang said demand for generative AI infrastructure was outstripping supply and that the company was ramping production as fast as possible. Nvidia's overall revenue for the quarter reached 18.12 billion dollars, beating analyst estimates, and the company guided next-quarter revenue to roughly 20 billion dollars, well above consensus."
+  },
+  {
+    "id": "news-006",
+    "symbol": "META",
+    "title": "Meta fined 1.2 billion euros for EU-US data transfer violations",
+    "text": "Ireland's Data Protection Commission fined Meta Platforms 1.2 billion euros in May 2023, the largest-ever GDPR penalty, for transferring European user data to the United States without adequate safeguards following the invalidation of the EU-US Privacy Shield framework. Regulators ordered Meta to suspend future data transfers and bring existing transfers into compliance within six months. Meta said it would appeal, arguing a conflict between EU privacy law and US surveillance law requirements left it with an unworkable legal choice, and that the ruling set a damaging precedent for thousands of companies operating across the Atlantic."
+  },
+  {
+    "id": "news-007",
+    "symbol": "TSLA",
+    "title": "Tesla recalls over two million vehicles for Autopilot safety issue",
+    "text": "Tesla recalled more than two million vehicles in the United States in December 2023 to install additional Autopilot safeguards after a two-year investigation by the National Highway Traffic Safety Administration found the driver-assistance system's controls insufficient to prevent misuse. The recall, delivered via an over-the-air software update, adds warnings and restricts where Autosteer can be used. NHTSA said it would continue monitoring whether the update adequately addresses the safety defect, and the agency's investigation into Tesla's Autopilot-related crashes remains open pending further review of real-world data."
+  },
+  {
+    "id": "news-008",
+    "symbol": "JPM",
+    "title": "JPMorgan Chase completes acquisition of First Republic Bank assets",
+    "text": "JPMorgan Chase acquired the substantial majority of First Republic Bank's assets and deposits in May 2023 in an FDIC-brokered deal after First Republic became the largest US bank failure since 2008. JPMorgan assumed approximately 92 billion dollars in deposits and 173 billion dollars in loans, and the FDIC agreed to share losses on residential and commercial loans. CEO Jamie Dimon said the acquisition was modestly beneficial for JPMorgan's shareholders and helped stabilize the regional banking system during a period of deposit flight following Silicon Valley Bank's collapse."
+  },
+  {
+    "id": "news-009",
+    "symbol": "V",
+    "title": "Visa and Mastercard reach 30 billion dollar swipe-fee settlement",
+    "text": "Visa Inc. and Mastercard agreed in March 2024 to a settlement worth roughly 30 billion dollars over five years with US merchants who alleged the card networks and banks conspired to fix interchange fees. Under the deal, Visa and Mastercard agreed to cap credit card swipe fees and allow merchants to charge different prices depending on which network's card a customer uses. Merchant groups were split on the settlement's adequacy, and a federal judge later rejected an earlier version of the deal as insufficient before the revised terms were approved."
+  },
+  {
+    "id": "news-010",
+    "symbol": "JNJ",
+    "title": "Johnson & Johnson to pay 6.5 billion dollars in talc litigation settlement",
+    "text": "Johnson & Johnson proposed a 6.5 billion dollar settlement in September 2023 to resolve tens of thousands of lawsuits alleging its talc-based products, including baby powder, caused ovarian cancer and mesothelioma. The proposal relied on a bankruptcy filing by a J&J subsidiary, a strategy known as the Texas two-step, which had already been rejected once by an appeals court. J&J said the settlement, structured to pay claimants over 25 years, would resolve the litigation more efficiently than continued case-by-case trials, though plaintiff attorneys remained divided on whether to accept the plan."
+  },
+  {
+    "id": "news-011",
+    "symbol": "UNH",
+    "title": "UnitedHealth discloses massive data breach after Change Healthcare cyberattack",
+    "text": "UnitedHealth Group confirmed in April 2024 that a ransomware attack on its Change Healthcare subsidiary in February had compromised the personal and health data of a substantial portion of the US population, one of the largest healthcare data breaches on record. The attack disrupted prescription processing and insurance claims nationwide for weeks. UnitedHealth said it paid a ransom to the attackers and estimated the incident would cost between 1.35 and 1.6 billion dollars in 2024, prompting congressional hearings into the healthcare system's exposure to a single point of failure in claims processing infrastructure."
+  },
+  {
+    "id": "news-012",
+    "symbol": "XOM",
+    "title": "Exxon Mobil closes 60 billion dollar Pioneer Natural Resources acquisition",
+    "text": "Exxon Mobil Corporation completed its all-stock acquisition of Pioneer Natural Resources in May 2024 after the Federal Trade Commission approved the deal on the condition that former Pioneer CEO Scott Sheffield be barred from an Exxon board seat over collusion concerns with OPEC. The roughly 60 billion dollar deal makes Exxon the largest producer in the Permian Basin, nearly doubling its footprint in the shale-rich region of West Texas and New Mexico. Exxon said the combined company would generate significant production and cost synergies over the following decade."
+  },
+  {
+    "id": "news-013",
+    "symbol": "WMT",
+    "title": "Walmart raises full-year guidance on strong e-commerce and grocery growth",
+    "text": "Walmart raised its full-year sales and profit guidance in November 2023 after reporting quarterly US comparable sales growth of 4.9 percent, driven by strength in grocery and a 24 percent jump in e-commerce sales. CEO Doug McMillon said higher-income households were increasingly shopping at Walmart for value, a trend the company said had persisted even as inflation cooled. Walmart also highlighted growth in its advertising business, which grew more than 20 percent, as a high-margin contributor increasingly material to overall profitability alongside its core retail and membership operations."
+  },
+  {
+    "id": "news-014",
+    "symbol": "PG",
+    "title": "Procter & Gamble raises prices again despite volume declines",
+    "text": "Procter & Gamble reported in its fiscal 2024 second-quarter results that organic sales rose 3 percent, driven almost entirely by pricing and product mix even as overall volumes declined 1 percent, reflecting continued consumer pushback against higher prices for household staples. CFO Andre Schulten said the company expected pricing contributions to moderate going forward as input cost inflation eased, shifting the growth algorithm back toward volume. P&G maintained its full-year organic sales growth guidance of 4 to 5 percent despite the volume softness in categories including fabric care and grooming."
+  },
+  {
+    "id": "news-015",
+    "symbol": "DIS",
+    "title": "Disney reaches proxy fight truce after Nelson Peltz board challenge",
+    "text": "The Walt Disney Company defeated activist investor Nelson Peltz's Trian Partners in an April 2024 proxy vote, with shareholders rejecting Peltz's bid for board seats after a months-long public campaign criticizing Disney's streaming losses and succession planning. Disney CEO Bob Iger had campaigned heavily against Trian, touting an improving outlook for Disney+ profitability and a succession plan finalized by early 2026. Peltz, whose firm held roughly 3 billion dollars of Disney stock, said he would continue monitoring the company's performance but declined to launch another campaign immediately."
+  },
+  {
+    "id": "news-016",
+    "symbol": "NFLX",
+    "title": "Netflix password-sharing crackdown drives record subscriber growth",
+    "text": "Netflix added 13.1 million subscribers in the fourth quarter of 2023, its largest quarterly gain ever, after rolling out paid password-sharing restrictions across most major markets throughout the year. The crackdown, combined with a lower-priced ad-supported tier launched in late 2022, pushed total global subscribers past 260 million. Co-CEO Greg Peters said the ad tier's membership grew 70 percent quarter over quarter, and the company said it would stop reporting quarterly subscriber numbers starting in 2025 as it shifts investor focus toward revenue and operating margin instead."
+  },
+  {
+    "id": "news-017",
+    "symbol": "KO",
+    "title": "Coca-Cola raises full-year outlook on resilient pricing power",
+    "text": "The Coca-Cola Company raised its full-year organic revenue growth guidance to 9 to 10 percent in its third-quarter 2023 results, citing resilient demand despite cumulative price increases of roughly 9 percent globally. CEO James Quincey said consumers had continued buying Coca-Cola products even as prices rose, particularly in emerging markets like India and Latin America. The company also pointed to strong performance from its Fairlife dairy brand and continued recovery in its away-from-home channel, including restaurants and entertainment venues, as post-pandemic mobility normalized further across most regions."
+  },
+  {
+    "id": "news-018",
+    "symbol": "BAC",
+    "title": "Bank of America discloses billions in unrealized bond portfolio losses",
+    "text": "Bank of America disclosed in its third-quarter 2023 filings that unrealized losses on its held-to-maturity securities portfolio had grown to roughly 131.6 billion dollars as rising interest rates depressed the value of bonds purchased when rates were near zero during the pandemic. Unlike Silicon Valley Bank, Bank of America maintained sufficient deposits and liquidity to avoid being forced to sell the underwater securities at a loss. CEO Brian Moynihan said the bank's deposit base remained stable and diversified, and that the paper losses would recede naturally as the bonds matured over the following several years."
+  },
+  {
+    "id": "news-019",
+    "symbol": "PFE",
+    "title": "Pfizer slashes 2023 guidance as Covid product demand collapses",
+    "text": "Pfizer cut its full-year 2023 revenue guidance by roughly 9 billion dollars in October 2023, citing a steeper-than-expected decline in demand for its Covid-19 vaccine Comirnaty and antiviral treatment Paxlovid as the pandemic receded further into an endemic phase. The company also announced a 3.5 billion dollar cost-cutting program, including layoffs, to offset the revenue decline. CEO Albert Bourla said Pfizer remained focused on its post-pandemic pipeline, including oncology assets gained through its 43 billion dollar acquisition of Seagen, to diversify revenue away from Covid products."
+  },
+  {
+    "id": "news-020",
+    "symbol": "AMD",
+    "title": "AMD unveils MI300X AI accelerator to challenge Nvidia's data center dominance",
+    "text": "Advanced Micro Devices launched its MI300X AI accelerator chip in December 2023, positioning it as a direct competitor to Nvidia's H100 for large language model training and inference workloads. AMD CEO Lisa Su said the MI300X offered 2.4 times the memory capacity of Nvidia's flagship chip, a potential advantage for running larger AI models. Microsoft, Meta, and Oracle said they planned to deploy MI300X chips in their data centers. AMD projected data center GPU revenue could reach 2 billion dollars in 2024, though analysts noted Nvidia's software ecosystem remained a significant competitive moat."
+  }
+]

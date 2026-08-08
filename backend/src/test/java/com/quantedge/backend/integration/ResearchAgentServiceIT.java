@@ -94,7 +94,7 @@ class ResearchAgentServiceIT {
         when(finnhubClient.getQuote(anyString()))
                 .thenReturn(new FinnhubQuoteResponse(100.0, 105.0, 95.0, 98.0, 99.0, System.currentTimeMillis()));
         when(twelveDataClient.getTimeSeries(anyString(), anyString(), any(Integer.class)))
-                .thenReturn(new TwelveDataTimeSeriesResponse(null, List.of()));
+                .thenReturn(new TwelveDataTimeSeriesResponse(null, List.of(), "ok", null));
 
         when(finnhubClient.getCompanyNews(anyString(), any(), any())).thenReturn(List.of());
         when(chatModel.call(any(Prompt.class)))

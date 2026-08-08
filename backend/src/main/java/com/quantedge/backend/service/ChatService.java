@@ -2,6 +2,7 @@ package com.quantedge.backend.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.quantedge.backend.config.ChatTools;
 import com.quantedge.backend.entity.ChatHistory;
 import com.quantedge.backend.entity.User;
 import com.quantedge.backend.repository.ChatHistoryRepository;
@@ -24,11 +25,14 @@ public class ChatService {
     private final ChatClient chatClient;
     private final ChatHistoryRepository chatHistoryRepository;
     private final ObjectMapper objectMapper;
+    private final ChatTools chatTools;
 
-    public ChatService(ChatClient chatClient, ChatHistoryRepository chatHistoryRepository, ObjectMapper objectMapper) {
+    public ChatService(
+            ChatClient chatClient, ChatHistoryRepository chatHistoryRepository, ObjectMapper objectMapper, ChatTools chatTools) {
         this.chatClient = chatClient;
         this.chatHistoryRepository = chatHistoryRepository;
         this.objectMapper = objectMapper;
+        this.chatTools = chatTools;
     }
 
     @Transactional
@@ -65,22 +69,12 @@ public class ChatService {
         ChatResponse aiResponse = chatClient
                 .prompt()
                 .messages(messages)
-                .functions(
-                        "getCompanyInfo",
-                        "getQuote",
-                        "getDashboard",
-                        "getWatchlist",
-                        "addToWatchlist",
-                        "removeFromWatchlist",
-                        "getUserOrders",
-                        "placeOrder",
-                        "confirmPendingOrder",
-                        "cancelOrder")
+                .tools(chatTools)
                 .call()
                 .chatResponse();
 
         Generation generation = aiResponse.getResult();
-        String assistantText = generation.getOutput().getContent();
+        String assistantText = generation.getOutput().getText();
 
         // Convert tool calls to JSON if any exist
         String toolCallsJson = null;

@@ -266,7 +266,9 @@ Response 200:
   "response": "The current real-time price of NVDA is 105.00."
 }
 `
-_Note: The Chat Agent uses 9 specific tool functions to fulfill user requests, including placing orders, getting quotes, adding to the watchlist, etc. The chat history is saved to the DB._
+_Note: The Chat Agent uses 11 tool functions to fulfill user requests, including placing orders,
+getting quotes, adding to the watchlist, and querying the RAG knowledge base. The chat history is
+saved to the DB._
 
 ### Research Agent (Phase 5, part 2)
 
@@ -279,4 +281,30 @@ Response 200:
 `
 
 **GET /api/v1/agent/trace/{sessionId}?token=<accessToken>** � Server-Sent Events stream for the reasoning trace of the triggered research agent.
-Events are of type race, and have JSON data containing step and message properties representing the agent's progress.
+Events are of type trace, and have JSON data containing step and message properties representing the agent's progress.
+
+### RAG Knowledge Base (Phase 5, part 3)
+
+Not a REST/GraphQL endpoint - a chat tool (`queryKnowledgeBase`, `ChatTools`) the Groq model can
+call mid-conversation, following the same REST-for-writes/GraphQL-for-reads/tool-calls convention
+as the other 10 chat tools.
+
+**Tool: `queryKnowledgeBase`**
+Input: `{ "query": "<natural-language question>" }`
+Output: top-5 `KnowledgeChunkResult` chunks - `{ docId, sourceType (NEWS | RESEARCH_NOTE), symbol,
+title, text, score }` - ranked by cosine similarity in the default Qdrant collection.
+
+- **Vector store**: Qdrant Cloud (`spring-ai-starter-vector-store-qdrant`), one point per chunk,
+  collection `quantedge_knowledge` (`quantedge.rag.qdrant.*` properties).
+- **Embeddings**: local ONNX `all-MiniLM-L6-v2` (384-dim, `spring-ai-starter-model-transformers`)
+  - Groq has no embeddings endpoint, so chat and embeddings intentionally use different models,
+  and retrieval has no external rate limit.
+- **Corpus**: a frozen fixture corpus (`backend/src/main/resources/rag/news_corpus.json`,
+  `research_notes_corpus.json`) rather than live Finnhub news or the live `research_notes` table,
+  so the retrieval eval harness's gold-set labels (`rag/gold_set.json`) stay valid across runs.
+  Ingested once on startup by `KnowledgeBaseStartupIngestor` (skipped if the collection already
+  has points).
+- **Chunking/retrieval technique** used by the production collection defaults to
+  `quantedge.rag.chunking.strategy=RECURSIVE` - see README's "Retrieval Evaluation" section for
+  the measured comparison against fixed-size/semantic chunking and dense/hybrid/rerank retrieval
+  that this default was chosen from.
