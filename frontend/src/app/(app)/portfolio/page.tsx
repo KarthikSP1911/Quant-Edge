@@ -3,6 +3,7 @@
 import { usePortfolio } from '@/hooks/usePortfolio'
 import PortfolioSummaryHeader from '@/components/portfolio/PortfolioSummaryHeader'
 import HoldingsTable from '@/components/portfolio/HoldingsTable'
+import ExportButtons from '@/components/shared/ExportButtons'
 import {
   PortfolioEmpty,
   PortfolioError,
@@ -15,11 +16,14 @@ export default function PortfolioPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-xl font-semibold text-[var(--color-text-primary)]">Portfolio</h1>
-        <p className="text-sm text-[var(--color-text-secondary)]">
-          Track your simulated holdings and performance.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-semibold text-[var(--color-text-primary)]">Portfolio</h1>
+          <p className="text-sm text-[var(--color-text-secondary)]">
+            Track your simulated holdings and performance.
+          </p>
+        </div>
+        <ExportButtons />
       </div>
 
       {isPending && (

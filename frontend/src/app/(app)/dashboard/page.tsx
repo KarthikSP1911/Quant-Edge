@@ -4,6 +4,7 @@ import { useDashboard } from '@/hooks/useDashboard'
 import { DashboardSkeleton, DashboardError } from '@/components/dashboard/DashboardStates'
 import AllocationChart from '@/components/dashboard/AllocationChart'
 import RecentActivity from '@/components/dashboard/RecentActivity'
+import ExportButtons from '@/components/shared/ExportButtons'
 import { formatPrice, formatChangePercent } from '@/lib/utils/format'
 
 export default function DashboardPage() {
@@ -11,11 +12,14 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-[var(--color-text-primary)]">Dashboard</h1>
-        <p className="text-sm text-[var(--color-text-secondary)]">
-          Your simulated account balance, allocation, and recent activity.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-[var(--color-text-primary)]">Dashboard</h1>
+          <p className="text-sm text-[var(--color-text-secondary)]">
+            Your simulated account balance, allocation, and recent activity.
+          </p>
+        </div>
+        <ExportButtons />
       </div>
 
       {isLoading && <DashboardSkeleton />}
