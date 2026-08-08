@@ -16,3 +16,24 @@ export interface TradeOrderResult {
   status: string
   executedAt: string
 }
+
+export type OrderStatus =
+  'PENDING' | 'OPEN' | 'FILLED' | 'PARTIALLY_FILLED' | 'CANCELLED' | 'REJECTED' | 'EXPIRED'
+
+export type OrderKind = 'MARKET' | 'LIMIT' | 'STOP_LOSS' | 'STOP_LIMIT'
+
+// Mirrors the backend's GraphQL Order type (openOrders/filledOrders/orderHistory).
+export interface Order {
+  id: string
+  symbol: string
+  side: OrderSide
+  type: OrderKind
+  status: OrderStatus
+  quantity: number
+  filledQuantity: number
+  limitPrice: number | null
+  stopPrice: number | null
+  createdAt: string
+  updatedAt: string
+  expiresAt: string | null
+}

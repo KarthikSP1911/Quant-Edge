@@ -8,3 +8,7 @@ export async function placeOrder(input: TradeOrderInput): Promise<TradeOrderResu
     body: JSON.stringify({ symbol: input.symbol, quantity: input.quantity }),
   })
 }
+
+export function cancelOrder(orderId: string): Promise<void> {
+  return apiRequest<void>(`/api/orders/${orderId}/cancel`, { method: 'POST' })
+}
