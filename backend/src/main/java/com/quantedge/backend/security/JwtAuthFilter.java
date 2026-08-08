@@ -37,12 +37,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         final String jwt;
         final String userEmail;
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            jwt = authHeader.substring(7);
+        } else if ("/api/orders/stream".equals(request.getRequestURI()) && request.getParameter("token") != null) {
+            // EventSource cannot set request headers, so the SSE stream accepts the access token as
+            // a query param instead - scoped to this one path so no other endpoint gains that surface.
+            jwt = request.getParameter("token");
+        } else {
             filterChain.doFilter(request, response);
             return;
         }
 
-        jwt = authHeader.substring(7);
         try {
             userEmail = jwtService.extractUsername(jwt);
 
