@@ -1,0 +1,85 @@
+# API Contract
+
+Per CLAUDE.md's API Design Rules: **REST** for writes, **GraphQL** for reads, **SSE** for push.
+Kafka is internal only — the frontend never touches it.
+
+Each Phase 4 feature documents its own endpoints in its own section below. Only edit the section
+for the feature you are building.
+
+## Stock Comparison
+
+### `stockComparison` — GraphQL query (read)
+
+Compares 2–3 stocks side by side: aligned fundamentals plus a shared-axis price history for the
+normalized overlay chart.
+
+```graphql
+stockComparison(
+  symbols: [String!]!
+  interval: String = "1day"
+  outputSize: Int = 90
+): StockComparison!
+```
+
+**Arguments**
+
+| Argument     | Type            | Required | Notes                                                                                   |
+| ------------ | --------------- | -------- | --------------------------------------------------------------------------------------- |
+| `symbols`    | `[String!]!`    | yes      | 2–3 symbols. Trimmed, upper-cased and de-duplicated server-side before the count check.   |
+| `interval`   | `String`        | no       | Twelve Data interval (`5min`, `1h`, `1day`, `1week`). Defaults to `1day`.                 |
+| `outputSize` | `Int`           | no       | Bars requested per symbol. Defaults to `90`.                                              |
+
+**Types**
+
+```graphql
+type StockComparison {
+  entries: [ComparisonEntry!]!
+}
+
+type ComparisonEntry {
+  company: Company!
+  quote: Quote!
+  fundamentals: Fundamentals!
+  candles: [Candle!]!
+}
+
+type Fundamentals {
+  marketCap: Float
+  peRatio: Float
+  fiftyTwoWeekHigh: Float
+  fiftyTwoWeekLow: Float
+}
+```
+
+`Company`, `Quote` and `Candle` are the existing Phase 2 types — unchanged.
+
+**Guarantees**
+
+- `entries` preserves the order the symbols were requested in — one entry per symbol.
+- Every entry's `candles` share an identical datetime axis: same length, same datetimes, sorted
+  oldest-first. The backend intersects the per-symbol series, so a bar one symbol is missing (a
+  halt, a later listing date, a provider gap) is dropped from all of them rather than silently
+  shifting one series against the others. If the stocks share no bars, every `candles` list is
+  empty.
+- All four `Fundamentals` fields are nullable. The comparison table renders the same rows for every
+  stock, so a metric the provider has no data for is `null` (rendered as an em dash), never `0`.
+
+**Errors**
+
+| Condition                                     | Error                                                  |
+| --------------------------------------------- | ------------------------------------------------------ |
+| Fewer than 2 or more than 3 distinct symbols  | `InvalidComparisonRequestException` (400)              |
+| A symbol is not in the `companies` table      | `CompanyNotFoundException` (404)                       |
+
+**Caching / rate limits**
+
+Cache-first, reusing the Phase 2 read paths. A warm cache serves a comparison with **zero** external
+calls. On a cold cache the cost is exactly one call per symbol per upstream:
+
+| Data                              | Cache              | TTL    | Source on miss              |
+| --------------------------------- | ------------------ | ------ | --------------------------- |
+| Quote                             | `PriceCache`       | 15 min | Finnhub `/quote`            |
+| Candles                           | `ChartCache`       | 60 min | Twelve Data `/time_series`  |
+| Market cap, P/E, 52w high/low     | `FundamentalsCache`| 24 h   | Finnhub `/stock/metric`     |
+
+Company reference data comes from Postgres and never hits an external API.
