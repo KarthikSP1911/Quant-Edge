@@ -192,3 +192,61 @@ Table: `companies` (see `V5__create_companies_table.sql`)
 Seeded with 20 real symbols across 7 sectors (`V6__seed_companies.sql`). No REST/GraphQL
 surface exists for this table yet — entity + repository only. The `companies` GraphQL query
 (filter by sector, search) lands in slice 5.
+
+## Portfolio Time Machine (Phase 4)
+
+Pure read, reconstructed from `order_executions` (there is no separate `transactions` table —
+see the Dashboard section's note). No new schema.
+
+```graphql
+type TimeMachineHolding {
+  company: Company!
+  quantity: Int!
+  averageCost: Float!
+  priceAtDate: Float!
+  marketValue: Float!
+  gainLoss: Float!
+  gainLossPercent: Float!
+}
+
+type TimeMachineDecision {
+  symbol: String!
+  quantity: Int!
+  buyPrice: Float!
+  sellPrice: Float!
+  executedAt: String!
+  realizedGainPercent: Float!
+}
+
+type TimeMachineResult {
+  asOfDate: String!
+  cashBalance: Float!
+  holdings: [TimeMachineHolding!]!
+  totalMarketValue: Float!
+  totalAccountValue: Float!
+  bestDecisions: [TimeMachineDecision!]!
+  worstDecisions: [TimeMachineDecision!]!
+}
+
+type Query {
+  portfolioTimeMachine(asOfDate: String!): TimeMachineResult!
+}
+```
+
+- `asOfDate` is an ISO date (`yyyy-MM-dd`); `400` (`InvalidTimeMachineRequestException`) if it
+  isn't parseable or is in the future.
+- `holdings` / `cashBalance` are computed by replaying every `OrderExecution` up to and including
+  `asOfDate` (`TransactionReplayer`), using the same weighted-average-cost math as the live
+  portfolio (`TradeExecutionService`) — no separate FIFO-lot bookkeeping. `cashBalance` starts
+  from the fixed `$10,000.00` new-user default (there is no deposit/withdrawal feature, so every
+  user's starting cash is that constant) and applies each historical buy/sell's cash delta.
+- `priceAtDate` is the closing price on `asOfDate` (or the most recent prior trading day),
+  resolved cache-first via `HistoricalPriceService` / Twelve Data `time_series` — separate Redis
+  cache slot (`chart:{symbol}:1day-history`, 24h TTL) from the short recent-window chart cache
+  `StockDetailService` uses, since this lookup needs much deeper history.
+- **Best/worst decision metric — realized gain % per closed lot**: for each SELL execution up to
+  `asOfDate`, `realizedGainPercent = (sellPrice − averageCostAtSale) / averageCostAtSale × 100`,
+  where `averageCostAtSale` is the position's running weighted-average cost immediately before
+  that sale. Only SELL executions produce a ranked entry — open (unsold) positions have no
+  realized outcome yet. `bestDecisions` / `worstDecisions` are each the top 5 by this metric,
+  descending / ascending.
