@@ -73,9 +73,24 @@ symbol is unknown.
 same shape as above with `status: "CANCELLED"`. `404` if the order doesn't exist or isn't the
 caller's; `400` if the order isn't currently `OPEN` (already filled/cancelled/expired).
 
-Not yet implemented in this part: execution/triggering (Part 2's Kafka matcher), balance/share
-reservation at placement time (funds aren't locked until the matcher fills the order), and the
-DAY-order expiry sweep.
+### Orders — matching, execution, expiry (Phase 3, part 2)
+
+`status` on a placed order is no longer static after the initial `OPEN` response - it now
+transitions asynchronously:
+
+- `OPEN` → `FILLED`: the Kafka matcher (consuming `stock-prices`) triggered the order per the
+  agreed rules and filled it. Fetch the order again (or via GraphQL reads) to see the terminal
+  state and the resulting `OrderExecution`.
+- `OPEN` → `REJECTED`: the order triggered, but the fill failed at execution time (insufficient
+  balance/shares - funds aren't reserved at placement, only checked at fill time).
+- `OPEN` → `EXPIRED`: a `DAY` order's `expires_at` passed before it triggered (sweep runs every
+  `order-expiry.fixed-rate-ms`, default 60s). `GTC` orders never expire this way.
+
+`PARTIALLY_FILLED` is defined on `OrderStatus` but intentionally unused - there is no order book,
+only a single reference price, so fills are always all-or-nothing.
+
+Balance/share reservation at placement time is still not implemented - funds are only checked when
+the matcher attempts the fill, per the above.
 
 ## GraphQL Schema
 
