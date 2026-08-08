@@ -192,3 +192,32 @@ Table: `companies` (see `V5__create_companies_table.sql`)
 Seeded with 20 real symbols across 7 sectors (`V6__seed_companies.sql`). No REST/GraphQL
 surface exists for this table yet — entity + repository only. The `companies` GraphQL query
 (filter by sector, search) lands in slice 5.
+
+## Export Reports (Phase 4)
+
+`ExportController` (`/api/exports`). Generation and download are one REST call — each endpoint
+renders the file and returns it directly in the response body (no separate polling/download
+step), per CLAUDE.md's rule that exports are a write, not a GraphQL read. Every generated file is
+also persisted to disk under `export.base-path`/`{userId}` (local filesystem only, no cloud
+storage — see `ExportFileStorage`).
+
+**`POST /api/exports/portfolio-pdf`** — current holdings + valuation, using the same data
+`DashboardService.getPortfolioSummary` serves to the portfolio page (so the PDF never disagrees
+with what's on screen). Returns `200` with `Content-Type: application/pdf` and
+`Content-Disposition: attachment; filename="portfolio-report.pdf"`.
+
+**`POST /api/exports/trade-history-csv`** — every fill (buy or sell) for the caller, oldest
+first. Columns: `Date, Symbol, Side, Quantity, Price, Total`. Returns `200` with
+`Content-Type: text/csv` and `Content-Disposition: attachment; filename="trade-history.csv"`.
+
+**`POST /api/exports/tax-pnl-pdf`** — realized gains/losses report (all-time). Lot-matching
+method is **average cost**, matching `Portfolio.averageCost` exactly: each SELL execution's
+realized gain is `(salePrice - averageCostAtTimeOfSale) * quantity`, where the average cost is
+replayed chronologically through every prior execution using the same weighted-average formula
+`TradeExecutionService.applyBuyToPortfolio` uses (scale 2, HALF_UP), and is left unchanged by
+sells (a full sell followed by a new buy starts a fresh average). See `PnlCalculationService`.
+Returns `200` with `Content-Type: application/pdf` and
+`Content-Disposition: attachment; filename="tax-pnl-report.pdf"`.
+
+All three require auth (`anyRequest().authenticated()`, no new `permitAll` added) and return
+`500` (`ReportGenerationException`) if PDF/CSV rendering or the disk write fails.
