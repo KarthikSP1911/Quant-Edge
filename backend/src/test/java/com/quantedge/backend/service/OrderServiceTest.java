@@ -58,13 +58,10 @@ class OrderServiceTest {
 
     @BeforeEach
     void setUp() {
+        TradeExecutionService tradeExecutionService = new TradeExecutionService(
+                userRepository, portfolioRepository, orderRepository, orderExecutionRepository);
         orderService = new OrderService(
-                userRepository,
-                companyRepository,
-                portfolioRepository,
-                orderRepository,
-                orderExecutionRepository,
-                quoteService);
+                companyRepository, orderRepository, orderExecutionRepository, quoteService, tradeExecutionService);
     }
 
     private User userWithBalance(BigDecimal balance) {
@@ -125,6 +122,7 @@ class OrderServiceTest {
     @Test
     void sellThrowsWhenNoHolding() {
         when(companyRepository.findBySymbol("AAPL")).thenReturn(Optional.of(apple));
+        when(quoteService.getQuote("AAPL")).thenReturn(new FinnhubQuoteResponse(100.0, 100.0, 100.0, 100.0, 100.0, 1L));
         User user = userWithBalance(BigDecimal.ZERO);
         when(portfolioRepository.findByUserAndCompany(user, apple)).thenReturn(Optional.empty());
 
@@ -134,6 +132,7 @@ class OrderServiceTest {
     @Test
     void sellThrowsWhenSellingMoreThanOwned() {
         when(companyRepository.findBySymbol("AAPL")).thenReturn(Optional.of(apple));
+        when(quoteService.getQuote("AAPL")).thenReturn(new FinnhubQuoteResponse(100.0, 100.0, 100.0, 100.0, 100.0, 1L));
         User user = userWithBalance(BigDecimal.ZERO);
         Portfolio portfolio = Portfolio.builder()
                 .user(user)
