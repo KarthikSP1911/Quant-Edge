@@ -109,6 +109,34 @@ type Dashboard {
     recentTransactions: [Transaction!]!
 }
 
+# --- Stock Comparison (Phase 4) ---
+
+"""
+Fundamentals for one comparison column. All nullable: the table renders the same rows for every
+stock, so a metric the provider has no data for is null (rendered as an em dash), not zero.
+"""
+type Fundamentals {
+    marketCap: Float
+    peRatio: Float
+    fiftyTwoWeekHigh: Float
+    fiftyTwoWeekLow: Float
+}
+
+"""
+One column of a comparison. `candles` shares an identical datetime axis with every other entry in
+the same StockComparison, so the overlay chart can plot them together without re-aligning.
+"""
+type ComparisonEntry {
+    company: Company!
+    quote: Quote!
+    fundamentals: Fundamentals!
+    candles: [Candle!]!
+}
+
+type StockComparison {
+    entries: [ComparisonEntry!]!
+}
+
 type Query {
     companies: [Company!]!
     company(symbol: String!): Company
@@ -119,4 +147,5 @@ type Query {
     openOrders: [Order!]!
     filledOrders: [Order!]!
     orderHistory: [Order!]!
+    stockComparison(symbols: [String!]!, interval: String = "1day", outputSize: Int = 90): StockComparison!
 }
