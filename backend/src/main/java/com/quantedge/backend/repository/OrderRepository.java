@@ -4,6 +4,7 @@ import com.quantedge.backend.entity.Company;
 import com.quantedge.backend.entity.Order;
 import com.quantedge.backend.enums.OrderStatus;
 import jakarta.persistence.LockModeType;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,6 +16,8 @@ import org.springframework.data.repository.query.Param;
 public interface OrderRepository extends JpaRepository<Order, UUID> {
 
     List<Order> findByCompanyAndStatus(Company company, OrderStatus status);
+
+    List<Order> findByStatusAndExpiresAtBefore(OrderStatus status, Instant instant);
 
     /** Row-level lock held for the duration of the matcher's fill transaction - the double-fill guard. */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
