@@ -43,28 +43,34 @@ cd backend
 ./mvnw -q compile -DskipTests
 ./mvnw -q dependency:build-classpath -Dmdep.outputFile=/tmp/cp.txt
 java -cp "target/classes;$(cat /tmp/cp.txt)" com.quantedge.backend.rag.eval.EvalRunner \
-    <FIXED|RECURSIVE|SEMANTIC> [chunkSize=800] [chunkOverlap=120]
+    <FIXED|RECURSIVE|SEMANTIC> <hybrid true|false> <rerank true|false> [chunkSize=800] [chunkOverlap=120]
 ```
 
-Requires `QDRANT_URL` / `QDRANT_API_KEY` env vars. Each run ingests the corpus into its own Qdrant
-collection (`quantedge_eval_<label>`), so combos never contaminate each other, and scores
-Recall@1/5/10 and MRR (`EvalMetrics`) against the gold set. This branch covers the dense-retrieval
-baseline across chunking strategies; phase-5/rag-technique-experiments adds hybrid (dense+BM25)
-and LLM-rerank rows on top.
+Requires `QDRANT_URL` / `QDRANT_API_KEY` env vars always, and `GROQ_API_KEY` / `GROQ_MODEL` only
+for `rerank=true` runs. Each run ingests the corpus into its own Qdrant collection
+(`quantedge_eval_<label>`), so combos never contaminate each other, and scores Recall@1/5/10 and
+MRR (`EvalMetrics`) against the gold set.
 
-| Config (chunking / rerank / retrieval mode / embedding model) | Recall@1 | Recall@5 | Recall@10 | MRR | Notes |
-| --- | --- | --- | --- | --- | --- |
-| FIXED / no-rerank / dense / all-MiniLM-L6-v2 (baseline) | 0.900 | 1.000 | 1.000 | 0.950 | |
-| RECURSIVE / no-rerank / dense / all-MiniLM-L6-v2 | 0.900 | 1.000 | 1.000 | 0.950 | Same as fixed-size at this corpus size — see Notes below the table. |
-| SEMANTIC / no-rerank / dense / all-MiniLM-L6-v2 | 0.900 | 1.000 | 1.000 | 0.950 | Produced 45 chunks vs 34 for fixed/recursive (finer-grained splits); no recall change at this corpus size. |
+| Config (chunking / rerank / retrieval mode / embedding model)  | Recall@1 | Recall@5 | Recall@10 | MRR   | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| -------------------------------------------------------------- | -------- | -------- | --------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| FIXED / no-rerank / dense / all-MiniLM-L6-v2 (baseline)        | 0.900    | 1.000    | 1.000     | 0.950 |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| RECURSIVE / no-rerank / dense / all-MiniLM-L6-v2               | 0.900    | 1.000    | 1.000     | 0.950 | Same as fixed-size at this corpus size — see Notes below the table.                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| SEMANTIC / no-rerank / dense / all-MiniLM-L6-v2                | 0.900    | 1.000    | 1.000     | 0.950 | Produced 45 chunks vs 34 for fixed/recursive (finer-grained splits); no recall change at this corpus size.                                                                                                                                                                                                                                                                                                                                                                           |
+| RECURSIVE / no-rerank / hybrid (dense+BM25) / all-MiniLM-L6-v2 | 0.900    | 1.000    | 1.000     | 0.950 | RRF fusion of dense + in-memory BM25; no change over dense-only here.                                                                                                                                                                                                                                                                                                                                                                                                                |
+| RECURSIVE / llm-rerank / dense / all-MiniLM-L6-v2              | —        | —        | —         | —     | Omitted: free-tier Groq rate limits (30 RPM) made this impractical for batch eval — the harness's LLM-rerank pass makes one Groq call per query, and 50 sequential calls stalled out on rate-limit backoff even after throttling to ~24/min. The code path (`LlmRerankService`, wired into `EvalRunner`/`KnowledgeBaseService`) is implemented and reachable via the reproduce command above with `rerank=true`; it just wasn't practical to run for the full gold set on this tier. |
 
-**Why every row is nearly identical**: the corpus is intentionally small (34–45 chunks across 34
-source documents) and the gold questions are each answerable from one clearly-distinguishable
-document, so dense retrieval alone already saturates Recall@5/@10 at 1.000 — there's no room left
-for chunking to improve on. The one consistent miss (Recall@1 = 0.900, 5/50 questions) is a
-technique-independent ceiling: those 5 questions each have a close semantic competitor among the
-other documents that occasionally out-scores the correct one for the #1 spot, not something
-chunking strategy fixes at this scale. This is an honest negative result, kept in the table rather
-than omitted, per this harness's rule against only reporting positive deltas. A larger, noisier
-corpus (e.g. full live news volume) is where chunking strategy would be expected to actually
-differentiate.
+**Why every dense/hybrid row is nearly identical**: the corpus is intentionally small (34–45
+chunks across 34 source documents) and the gold questions are each answerable from one
+clearly-distinguishable document, so dense retrieval alone already saturates Recall@5/@10 at
+1.000 — there's no room left for chunking or hybrid retrieval to improve on. The one consistent
+miss (Recall@1 = 0.900, 5/50 questions) is a technique-independent ceiling: those 5 questions each
+have a close semantic competitor among the other documents that occasionally out-scores the
+correct one for the #1 spot, not something any of these techniques fixes at this scale. This is an
+honest negative result, kept in the table rather than omitted, per this harness's rule against
+only reporting positive deltas. A larger, noisier corpus (e.g. full live news volume) is where
+these techniques would be expected to actually differentiate.
+
+**LLM rerank note**: `LlmRerankService` reranks candidates by asking the Groq chat model to order
+them by relevance in a single prompt (not a dedicated cross-encoder - none is available in this
+Java stack without a new heavyweight dependency), labeled "llm-rerank" rather than "cross-encoder"
+in the table above for that reason.
