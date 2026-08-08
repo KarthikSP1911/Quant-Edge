@@ -2,6 +2,7 @@ package com.quantedge.backend.service;
 
 import java.util.List;
 
+import com.quantedge.backend.aop.Auditable;
 import com.quantedge.backend.dto.response.WatchlistItemResponse;
 import com.quantedge.backend.entity.Company;
 import com.quantedge.backend.entity.User;
@@ -31,6 +32,7 @@ public class WatchlistService {
                 .toList();
     }
 
+    @Auditable(action = "WATCHLIST_ADD", entityType = "WATCHLIST", entityId = "#symbol")
     @Transactional
     public void add(User user, String symbol) {
         Company company = findCompany(symbol);
@@ -40,6 +42,7 @@ public class WatchlistService {
         }
     }
 
+    @Auditable(action = "WATCHLIST_REMOVE", entityType = "WATCHLIST", entityId = "#symbol")
     @Transactional
     public void remove(User user, String symbol) {
         Company company = findCompany(symbol);

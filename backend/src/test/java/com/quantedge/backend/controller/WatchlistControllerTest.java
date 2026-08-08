@@ -10,6 +10,7 @@ import com.quantedge.backend.entity.Company;
 import com.quantedge.backend.entity.User;
 import com.quantedge.backend.enums.AuthProvider;
 import com.quantedge.backend.enums.Role;
+import com.quantedge.backend.repository.AuditLogRepository;
 import com.quantedge.backend.repository.CompanyRepository;
 import com.quantedge.backend.repository.UserRepository;
 import com.quantedge.backend.repository.WatchlistRepository;
@@ -41,6 +42,9 @@ class WatchlistControllerTest {
     private WatchlistRepository watchlistRepository;
 
     @Autowired
+    private AuditLogRepository auditLogRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -57,6 +61,7 @@ class WatchlistControllerTest {
                 .build();
 
         watchlistRepository.deleteAll();
+        auditLogRepository.deleteAll();
         userRepository.deleteAll();
         companyRepository.deleteAll();
 
@@ -82,6 +87,7 @@ class WatchlistControllerTest {
     @AfterEach
     void tearDown() {
         watchlistRepository.deleteAll();
+        auditLogRepository.deleteAll();
         userRepository.deleteAll();
         companyRepository.deleteAll();
     }

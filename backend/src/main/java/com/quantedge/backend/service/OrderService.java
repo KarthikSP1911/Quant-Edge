@@ -8,6 +8,7 @@ import java.time.ZoneOffset;
 import java.util.List;
 import java.util.UUID;
 
+import com.quantedge.backend.aop.Auditable;
 import com.quantedge.backend.dto.request.PlaceOrderRequest;
 import com.quantedge.backend.dto.response.OrderResponse;
 import com.quantedge.backend.dto.response.OrderSummaryResponse;
@@ -50,6 +51,7 @@ public class OrderService {
     private final QuoteService quoteService;
     private final TradeExecutionService tradeExecutionService;
 
+    @Auditable(action = "BUY", entityType = "ORDER", entityId = "#result.id()")
     @Transactional
     public OrderResponse buy(User user, String symbol, int quantity) {
         Company company = findCompany(symbol);
@@ -58,6 +60,7 @@ public class OrderService {
         return execute(user, company, OrderSide.BUY, quantity, price);
     }
 
+    @Auditable(action = "SELL", entityType = "ORDER", entityId = "#result.id()")
     @Transactional
     public OrderResponse sell(User user, String symbol, int quantity) {
         Company company = findCompany(symbol);
@@ -70,6 +73,7 @@ public class OrderService {
      * Places a LIMIT/STOP_LOSS/STOP_LIMIT order as OPEN on the book. No execution happens here -
      * the Part 2 matcher consumes stock-price events and triggers/fills OPEN orders.
      */
+    @Auditable(action = "PLACE_ORDER", entityType = "ORDER", entityId = "#result.id()")
     @Transactional
     public PlacedOrderResponse placeOrder(User user, PlaceOrderRequest request) {
         if (request.getType() == OrderType.MARKET) {
@@ -97,6 +101,7 @@ public class OrderService {
         return toPlacedOrderResponse(order, company.getSymbol());
     }
 
+    @Auditable(action = "CANCEL_ORDER", entityType = "ORDER", entityId = "#orderId")
     @Transactional
     public PlacedOrderResponse cancelOrder(User user, UUID orderId) {
         Order order = orderRepository
