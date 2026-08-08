@@ -10,6 +10,7 @@ const navLinks = [
   { href: '/portfolio', label: 'Portfolio' },
   { href: '/orders', label: 'Orders' },
   { href: '/watchlist', label: 'Watchlist' },
+  { href: '/activity', label: 'Activity' },
 ]
 
 export default function AppTopbar() {
