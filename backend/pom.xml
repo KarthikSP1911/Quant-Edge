@@ -210,7 +210,9 @@
 							<version>2.50.0</version>
 						</palantirJavaFormat>
 						<removeUnusedImports/>
-						<importOrder/>
+						<importOrder>
+							<order>\#,java|javax,</order>
+						</importOrder>
 						<formatAnnotations/>
 					</java>
 				</configuration>

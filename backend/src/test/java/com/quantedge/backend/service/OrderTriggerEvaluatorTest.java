@@ -2,11 +2,12 @@ package com.quantedge.backend.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.math.BigDecimal;
+
 import com.quantedge.backend.entity.Order;
 import com.quantedge.backend.enums.OrderSide;
 import com.quantedge.backend.enums.OrderType;
 import com.quantedge.backend.service.OrderTriggerEvaluator.Trigger;
-import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
 
 class OrderTriggerEvaluatorTest {

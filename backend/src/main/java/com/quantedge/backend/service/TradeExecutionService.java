@@ -1,5 +1,8 @@
 package com.quantedge.backend.service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 import com.quantedge.backend.entity.Company;
 import com.quantedge.backend.entity.Order;
 import com.quantedge.backend.entity.OrderExecution;
@@ -13,8 +16,6 @@ import com.quantedge.backend.repository.OrderExecutionRepository;
 import com.quantedge.backend.repository.OrderRepository;
 import com.quantedge.backend.repository.PortfolioRepository;
 import com.quantedge.backend.repository.UserRepository;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

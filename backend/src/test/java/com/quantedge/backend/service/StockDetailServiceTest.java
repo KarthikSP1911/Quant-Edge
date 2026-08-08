@@ -4,6 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.util.List;
+import java.util.Optional;
+
 import com.quantedge.backend.cache.ChartCache;
 import com.quantedge.backend.dto.response.StockDetailResponse;
 import com.quantedge.backend.entity.Company;
@@ -12,8 +15,6 @@ import com.quantedge.backend.external.dto.FinnhubQuoteResponse;
 import com.quantedge.backend.external.dto.TwelveDataTimeSeriesResponse;
 import com.quantedge.backend.mapper.CompanyMapper;
 import com.quantedge.backend.repository.CompanyRepository;
-import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

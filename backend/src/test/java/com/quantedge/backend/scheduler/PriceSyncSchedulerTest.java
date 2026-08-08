@@ -4,6 +4,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import java.util.List;
+
 import com.quantedge.backend.cache.PriceCache;
 import com.quantedge.backend.entity.Company;
 import com.quantedge.backend.exception.ExternalApiException;
@@ -11,7 +13,6 @@ import com.quantedge.backend.external.FinnhubClient;
 import com.quantedge.backend.external.dto.FinnhubQuoteResponse;
 import com.quantedge.backend.kafka.producer.StockPriceProducer;
 import com.quantedge.backend.repository.CompanyRepository;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

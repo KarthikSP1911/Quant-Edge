@@ -1,9 +1,10 @@
 package com.quantedge.backend.kafka.producer;
 
+import java.time.Instant;
+
 import com.quantedge.backend.entity.Order;
 import com.quantedge.backend.entity.OrderExecution;
 import com.quantedge.backend.kafka.dto.TradeExecutedMessage;
-import java.time.Instant;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;

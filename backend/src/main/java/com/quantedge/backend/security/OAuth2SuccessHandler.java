@@ -1,5 +1,7 @@
 package com.quantedge.backend.security;
 
+import java.io.IOException;
+
 import com.quantedge.backend.entity.User;
 import com.quantedge.backend.enums.AuthProvider;
 import com.quantedge.backend.enums.Role;
@@ -7,7 +9,6 @@ import com.quantedge.backend.repository.UserRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;

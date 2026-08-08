@@ -1,11 +1,12 @@
 package com.quantedge.backend.security;
 
+import java.time.Instant;
+import java.util.UUID;
+
 import com.quantedge.backend.entity.OAuthCode;
 import com.quantedge.backend.entity.User;
 import com.quantedge.backend.repository.OAuthCodeRepository;
 import com.quantedge.backend.repository.UserRepository;
-import java.time.Instant;
-import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,9 +1,10 @@
 package com.quantedge.backend.resolver;
 
+import java.util.List;
+
 import com.quantedge.backend.dto.response.CompanyResponse;
 import com.quantedge.backend.mapper.CompanyMapper;
 import com.quantedge.backend.repository.CompanyRepository;
-import java.util.List;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;

@@ -1,5 +1,7 @@
 package com.quantedge.backend.dto.request;
 
+import java.math.BigDecimal;
+
 import com.quantedge.backend.enums.OrderSide;
 import com.quantedge.backend.enums.OrderType;
 import com.quantedge.backend.enums.TimeInForce;
@@ -7,7 +9,6 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import java.math.BigDecimal;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -4,6 +4,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.util.Optional;
+import java.util.UUID;
+
 import com.quantedge.backend.dto.auth.LoginRequest;
 import com.quantedge.backend.dto.auth.RegisterRequest;
 import com.quantedge.backend.dto.auth.TokenResponse;
@@ -15,8 +18,6 @@ import com.quantedge.backend.repository.UserRepository;
 import com.quantedge.backend.security.JwtService;
 import com.quantedge.backend.security.OneTimeCodeService;
 import com.quantedge.backend.security.RefreshTokenService;
-import java.util.Optional;
-import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

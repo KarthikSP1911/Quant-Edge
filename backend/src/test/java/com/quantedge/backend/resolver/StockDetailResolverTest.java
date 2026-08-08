@@ -2,14 +2,15 @@ package com.quantedge.backend.resolver;
 
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 import com.quantedge.backend.dto.response.CandleResponse;
 import com.quantedge.backend.dto.response.CompanyResponse;
 import com.quantedge.backend.dto.response.QuoteResponse;
 import com.quantedge.backend.dto.response.StockDetailResponse;
 import com.quantedge.backend.service.StockDetailService;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.graphql.test.autoconfigure.GraphQlTest;

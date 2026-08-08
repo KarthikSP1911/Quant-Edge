@@ -2,6 +2,7 @@ package com.quantedge.backend.cache;
 
 import java.time.Duration;
 import java.util.Optional;
+
 import org.springframework.stereotype.Component;
 
 /** Company news cache. TTL per CLAUDE.md's Data Strategy: news, 1 hour. */

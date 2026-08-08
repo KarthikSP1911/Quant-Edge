@@ -2,11 +2,12 @@ package com.quantedge.backend.resolver;
 
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+import java.util.Optional;
+
 import com.quantedge.backend.entity.Company;
 import com.quantedge.backend.mapper.CompanyMapper;
 import com.quantedge.backend.repository.CompanyRepository;
-import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.graphql.test.autoconfigure.GraphQlTest;

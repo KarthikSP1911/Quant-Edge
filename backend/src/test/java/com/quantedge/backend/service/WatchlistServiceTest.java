@@ -3,6 +3,9 @@ package com.quantedge.backend.service;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.List;
+import java.util.Optional;
+
 import com.quantedge.backend.entity.Company;
 import com.quantedge.backend.entity.User;
 import com.quantedge.backend.entity.Watchlist;
@@ -10,8 +13,6 @@ import com.quantedge.backend.exception.CompanyNotFoundException;
 import com.quantedge.backend.mapper.CompanyMapper;
 import com.quantedge.backend.repository.CompanyRepository;
 import com.quantedge.backend.repository.WatchlistRepository;
-import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

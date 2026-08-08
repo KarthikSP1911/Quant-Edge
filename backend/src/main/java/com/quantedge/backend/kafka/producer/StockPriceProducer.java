@@ -1,8 +1,9 @@
 package com.quantedge.backend.kafka.producer;
 
-import com.quantedge.backend.kafka.dto.PriceEventMessage;
 import java.math.BigDecimal;
 import java.time.Instant;
+
+import com.quantedge.backend.kafka.dto.PriceEventMessage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;

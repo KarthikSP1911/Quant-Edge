@@ -1,7 +1,8 @@
 package com.quantedge.backend.repository;
 
-import com.quantedge.backend.entity.OAuthCode;
 import java.util.Optional;
+
+import com.quantedge.backend.entity.OAuthCode;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
