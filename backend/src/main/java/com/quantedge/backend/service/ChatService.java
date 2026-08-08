@@ -62,7 +62,16 @@ public class ChatService {
         ChatResponse aiResponse = chatClient
                 .prompt()
                 .messages(messages)
-                // .functions(...) // will be added in chat-tools branch
+                .functions(
+                        "getCompanyInfo",
+                        "getQuote",
+                        "getDashboard",
+                        "getWatchlist",
+                        "addToWatchlist",
+                        "removeFromWatchlist",
+                        "getUserOrders",
+                        "placeOrder",
+                        "cancelOrder")
                 .call()
                 .chatResponse();
 
