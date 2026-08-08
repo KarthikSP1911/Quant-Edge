@@ -3,7 +3,7 @@ import { graphqlRequest } from './client'
 
 // Twelve Data's `interval` param (see backend TwelveDataClient) doesn't have a "range" concept —
 // the UI's range selector maps to an explicit (interval, outputSize) pair per range.
-const RANGE_TO_QUERY_ARGS: Record<ChartRange, { interval: string; outputSize: number }> = {
+export const RANGE_TO_QUERY_ARGS: Record<ChartRange, { interval: string; outputSize: number }> = {
   '1D': { interval: '5min', outputSize: 78 }, // ~6.5h session / 5-minute bars
   '1W': { interval: '1h', outputSize: 35 },
   '1M': { interval: '1day', outputSize: 22 },
