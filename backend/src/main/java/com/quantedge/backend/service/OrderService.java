@@ -2,6 +2,7 @@ package com.quantedge.backend.service;
 
 import com.quantedge.backend.dto.request.PlaceOrderRequest;
 import com.quantedge.backend.dto.response.OrderResponse;
+import com.quantedge.backend.dto.response.OrderSummaryResponse;
 import com.quantedge.backend.dto.response.PlacedOrderResponse;
 import com.quantedge.backend.entity.Company;
 import com.quantedge.backend.entity.Order;
@@ -23,6 +24,7 @@ import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -37,6 +39,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class OrderService {
+
+    private static final List<OrderStatus> OPEN_STATUSES = List.of(OrderStatus.PENDING, OrderStatus.OPEN);
+    private static final List<OrderStatus> FILLED_STATUSES = List.of(OrderStatus.FILLED, OrderStatus.PARTIALLY_FILLED);
 
     private final CompanyRepository companyRepository;
     private final OrderRepository orderRepository;
@@ -106,6 +111,41 @@ public class OrderService {
         orderRepository.save(order);
 
         return toPlacedOrderResponse(order, order.getCompany().getSymbol());
+    }
+
+    public List<OrderSummaryResponse> getOpenOrders(User user) {
+        return orderRepository.findByUserAndStatusInOrderByCreatedAtDesc(user, OPEN_STATUSES).stream()
+                .map(this::toOrderSummaryResponse)
+                .toList();
+    }
+
+    public List<OrderSummaryResponse> getFilledOrders(User user) {
+        return orderRepository.findByUserAndStatusInOrderByCreatedAtDesc(user, FILLED_STATUSES).stream()
+                .map(this::toOrderSummaryResponse)
+                .toList();
+    }
+
+    public List<OrderSummaryResponse> getOrderHistory(User user) {
+        return orderRepository.findByUserOrderByCreatedAtDesc(user).stream()
+                .map(this::toOrderSummaryResponse)
+                .toList();
+    }
+
+    private OrderSummaryResponse toOrderSummaryResponse(Order order) {
+        boolean filled = order.getStatus() == OrderStatus.FILLED;
+        return new OrderSummaryResponse(
+                order.getId(),
+                order.getCompany().getSymbol(),
+                order.getSide(),
+                order.getType(),
+                order.getStatus(),
+                order.getQuantity(),
+                filled ? order.getQuantity() : 0,
+                order.getLimitPrice(),
+                order.getStopPrice(),
+                order.getCreatedAt(),
+                order.getUpdatedAt(),
+                order.getExpiresAt());
     }
 
     private void validatePricesForType(PlaceOrderRequest request) {

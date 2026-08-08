@@ -43,6 +43,38 @@ enum OrderSide {
     SELL
 }
 
+enum OrderStatus {
+    PENDING
+    OPEN
+    FILLED
+    PARTIALLY_FILLED
+    CANCELLED
+    REJECTED
+    EXPIRED
+}
+
+enum OrderType {
+    MARKET
+    LIMIT
+    STOP_LOSS
+    STOP_LIMIT
+}
+
+type Order {
+    id: ID!
+    symbol: String!
+    side: OrderSide!
+    type: OrderType!
+    status: OrderStatus!
+    quantity: Int!
+    filledQuantity: Int!
+    limitPrice: Float
+    stopPrice: Float
+    createdAt: String!
+    updatedAt: String!
+    expiresAt: String
+}
+
 type PortfolioPosition {
     company: Company!
     quantity: Int!
@@ -84,4 +116,7 @@ type Query {
     watchlist: [WatchlistItem!]!
     dashboard: Dashboard!
     portfolio: PortfolioSummary!
+    openOrders: [Order!]!
+    filledOrders: [Order!]!
+    orderHistory: [Order!]!
 }

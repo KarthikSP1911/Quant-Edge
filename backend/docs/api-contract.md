@@ -92,12 +92,85 @@ only a single reference price, so fills are always all-or-nothing.
 Balance/share reservation at placement time is still not implemented - funds are only checked when
 the matcher attempts the fill, per the above.
 
+### Order fill stream (Phase 3, part 3)
+
+**`GET /api/orders/stream`** — Server-Sent Events stream of fill notifications for the
+authenticated user. `EventSource` cannot set an `Authorization` header, so this endpoint alone
+also accepts the access token as a query param: `GET /api/orders/stream?token=<accessToken>`
+(`JwtAuthFilter` only honors the query param on this exact path — every other endpoint still
+requires the `Authorization: Bearer` header). One connection is registered per tab/device; a user
+with several open tabs gets the event pushed to each.
+
+Event, name `order-fill`:
+
+```json
+{
+  "executionId": "c2a4...",
+  "orderId": "b3f1...",
+  "userId": "9e21...",
+  "symbol": "AAPL",
+  "side": "BUY",
+  "quantity": 10,
+  "price": "181.42",
+  "executedAt": "2026-08-08T09:05:12Z"
+}
+```
+
+Only fills produced by the Part 2 Kafka matcher (`OrderMatcherService` → `executed-trades` →
+`TradeExecutedConsumer`) are pushed here — synchronous market buy/sell already returns the fill
+in the REST response, so it does not also publish to this stream. The emitter is held in-memory
+per backend instance (`OrderSseRegistry`); it is not durable across a restart or shared across
+multiple backend instances, which is acceptable at the current single-instance scale.
+
 ## GraphQL Schema
 
 Schema file: `src/main/resources/graphql/schema.graphqls` (single central schema file).
 
-_(No GraphQL queries exist yet. The `companies` query and `Company` type are added in
-slice 5 — `phase-2/graphql-setup-and-company-queries`.)_
+### Orders (Phase 3, part 3)
+
+```graphql
+enum OrderStatus {
+  PENDING
+  OPEN
+  FILLED
+  PARTIALLY_FILLED
+  CANCELLED
+  REJECTED
+  EXPIRED
+}
+
+enum OrderType {
+  MARKET
+  LIMIT
+  STOP_LOSS
+  STOP_LIMIT
+}
+
+type Order {
+  id: ID!
+  symbol: String!
+  side: OrderSide!
+  type: OrderType!
+  status: OrderStatus!
+  quantity: Int!
+  filledQuantity: Int!
+  limitPrice: Float
+  stopPrice: Float
+  createdAt: String!
+  updatedAt: String!
+  expiresAt: String
+}
+
+type Query {
+  openOrders: [Order!]! # status in (PENDING, OPEN)
+  filledOrders: [Order!]! # status in (FILLED, PARTIALLY_FILLED)
+  orderHistory: [Order!]! # every order for the caller, newest first
+}
+```
+
+`filledQuantity` is `quantity` when `status == FILLED`, otherwise `0` — the current matcher and
+market-order paths always fill an order in full, so there is no partial-fill accounting yet
+despite `PARTIALLY_FILLED` existing as a status value reserved for future use.
 
 ## Data Model — Company (Phase 2, slice 1)
 
