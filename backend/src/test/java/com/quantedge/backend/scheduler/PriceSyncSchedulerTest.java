@@ -9,6 +9,7 @@ import com.quantedge.backend.entity.Company;
 import com.quantedge.backend.exception.ExternalApiException;
 import com.quantedge.backend.external.FinnhubClient;
 import com.quantedge.backend.external.dto.FinnhubQuoteResponse;
+import com.quantedge.backend.kafka.producer.StockPriceProducer;
 import com.quantedge.backend.repository.CompanyRepository;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,11 +30,14 @@ class PriceSyncSchedulerTest {
     @Mock
     private PriceCache priceCache;
 
+    @Mock
+    private StockPriceProducer stockPriceProducer;
+
     private PriceSyncScheduler scheduler;
 
     @BeforeEach
     void setUp() {
-        scheduler = new PriceSyncScheduler(companyRepository, finnhubClient, priceCache, 0L);
+        scheduler = new PriceSyncScheduler(companyRepository, finnhubClient, priceCache, stockPriceProducer, 0L);
     }
 
     private Company company(String symbol) {

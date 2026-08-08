@@ -5,7 +5,10 @@ import com.quantedge.backend.entity.Company;
 import com.quantedge.backend.exception.ExternalApiException;
 import com.quantedge.backend.external.FinnhubClient;
 import com.quantedge.backend.external.dto.FinnhubQuoteResponse;
+import com.quantedge.backend.kafka.producer.StockPriceProducer;
 import com.quantedge.backend.repository.CompanyRepository;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,16 +31,19 @@ public class PriceSyncScheduler {
     private final CompanyRepository companyRepository;
     private final FinnhubClient finnhubClient;
     private final PriceCache priceCache;
+    private final StockPriceProducer stockPriceProducer;
     private final long interCallDelayMs;
 
     public PriceSyncScheduler(
             CompanyRepository companyRepository,
             FinnhubClient finnhubClient,
             PriceCache priceCache,
+            StockPriceProducer stockPriceProducer,
             @Value("${price-sync.inter-call-delay-ms:1100}") long interCallDelayMs) {
         this.companyRepository = companyRepository;
         this.finnhubClient = finnhubClient;
         this.priceCache = priceCache;
+        this.stockPriceProducer = stockPriceProducer;
         this.interCallDelayMs = interCallDelayMs;
     }
 
@@ -61,6 +67,8 @@ public class PriceSyncScheduler {
         try {
             FinnhubQuoteResponse quote = finnhubClient.getQuote(symbol);
             priceCache.put(symbol, quote);
+            stockPriceProducer.publish(
+                    symbol, BigDecimal.valueOf(quote.currentPrice()).setScale(2, RoundingMode.HALF_UP));
             return true;
         } catch (ExternalApiException ex) {
             log.warn("Skipping price sync for symbol={} due to upstream failure", symbol, ex);
