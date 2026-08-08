@@ -109,6 +109,35 @@ type Dashboard {
     recentTransactions: [Transaction!]!
 }
 
+type TimeMachineHolding {
+    company: Company!
+    quantity: Int!
+    averageCost: Float!
+    priceAtDate: Float!
+    marketValue: Float!
+    gainLoss: Float!
+    gainLossPercent: Float!
+}
+
+type TimeMachineDecision {
+    symbol: String!
+    quantity: Int!
+    buyPrice: Float!
+    sellPrice: Float!
+    executedAt: String!
+    realizedGainPercent: Float!
+}
+
+type TimeMachineResult {
+    asOfDate: String!
+    cashBalance: Float!
+    holdings: [TimeMachineHolding!]!
+    totalMarketValue: Float!
+    totalAccountValue: Float!
+    bestDecisions: [TimeMachineDecision!]!
+    worstDecisions: [TimeMachineDecision!]!
+}
+
 type Query {
     companies: [Company!]!
     company(symbol: String!): Company
@@ -119,4 +148,5 @@ type Query {
     openOrders: [Order!]!
     filledOrders: [Order!]!
     orderHistory: [Order!]!
+    portfolioTimeMachine(asOfDate: String!): TimeMachineResult!
 }
