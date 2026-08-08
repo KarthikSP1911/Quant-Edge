@@ -20,6 +20,63 @@ See `AuthController` for Phase 1 auth endpoints (login, register, refresh, OAuth
 _(Phase 2 REST endpoints — buy/sell, watchlist writes — are added in later slices of this
 phase and documented here as they land.)_
 
+### Orders — place/cancel (Phase 3, part 1)
+
+`OrderController` (`/api/orders`). Market orders (`POST /api/orders/buy|sell`) execute
+synchronously and are unaffected — see Phase 2. `LIMIT`/`STOP_LOSS`/`STOP_LIMIT` orders rest on
+the book as `OPEN` until the Part 2 matcher triggers them against a synced price; this endpoint
+does not execute anything.
+
+**`POST /api/orders`** — place a limit/stop order.
+
+Request:
+
+```json
+{
+  "symbol": "AAPL",
+  "side": "BUY",
+  "type": "LIMIT",
+  "quantity": 10,
+  "limitPrice": "180.00",
+  "stopPrice": null,
+  "timeInForce": "GTC"
+}
+```
+
+- `type`: `LIMIT` | `STOP_LOSS` | `STOP_LIMIT` (not `MARKET` — use `/buy`/`/sell` for that).
+- `limitPrice` required for `LIMIT`/`STOP_LIMIT`; `stopPrice` required for `STOP_LOSS`/`STOP_LIMIT`.
+- `timeInForce`: `DAY` (expires at 23:59:59 UTC same day) | `GTC` (no expiry).
+
+Response `200`:
+
+```json
+{
+  "id": "b3f1...",
+  "symbol": "AAPL",
+  "side": "BUY",
+  "type": "LIMIT",
+  "quantity": 10,
+  "limitPrice": "180.00",
+  "stopPrice": null,
+  "timeInForce": "GTC",
+  "status": "OPEN",
+  "expiresAt": null,
+  "createdAt": "2026-08-08T09:00:00Z"
+}
+```
+
+Errors: `400` if `type` is `MARKET`, if the required price field for the type is missing, or if
+validation fails (`symbol`/`side`/`type`/`timeInForce` required, `quantity >= 1`). `404` if the
+symbol is unknown.
+
+**`POST /api/orders/{orderId}/cancel`** — cancels an `OPEN` order owned by the caller. Returns the
+same shape as above with `status: "CANCELLED"`. `404` if the order doesn't exist or isn't the
+caller's; `400` if the order isn't currently `OPEN` (already filled/cancelled/expired).
+
+Not yet implemented in this part: execution/triggering (Part 2's Kafka matcher), balance/share
+reservation at placement time (funds aren't locked until the matcher fills the order), and the
+DAY-order expiry sweep.
+
 ## GraphQL Schema
 
 Schema file: `src/main/resources/graphql/schema.graphqls` (single central schema file).
