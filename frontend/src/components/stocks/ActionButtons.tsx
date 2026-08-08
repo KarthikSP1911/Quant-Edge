@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import TradeModal from '@/components/trade/TradeModal'
+import OrderTicket from '@/components/trade/OrderTicket'
 import { useAddToWatchlist, useRemoveFromWatchlist, useWatchlist } from '@/hooks/useWatchlist'
 import type { OrderSide } from '@/types/order'
 
@@ -61,7 +61,7 @@ export default function ActionButtons({ symbol, price }: { symbol: string; price
       </button>
 
       {tradeSide && (
-        <TradeModal
+        <OrderTicket
           symbol={symbol}
           side={tradeSide}
           price={price}
