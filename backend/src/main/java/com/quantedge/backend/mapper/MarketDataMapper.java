@@ -1,5 +1,6 @@
 package com.quantedge.backend.mapper;
 
+import java.util.Comparator;
 import java.util.List;
 
 import com.quantedge.backend.dto.response.CandleResponse;
@@ -30,6 +31,7 @@ public class MarketDataMapper {
         if (timeSeries == null || timeSeries.values() == null) {
             return List.of();
         }
+        // Twelve Data returns candles newest-first; chart/indicator consumers require ascending order.
         return timeSeries.values().stream()
                 .map(candle -> new CandleResponse(
                         candle.datetime(),
@@ -38,6 +40,7 @@ public class MarketDataMapper {
                         Double.parseDouble(candle.low()),
                         Double.parseDouble(candle.close()),
                         Double.parseDouble(candle.volume())))
+                .sorted(Comparator.comparing(CandleResponse::datetime))
                 .toList();
     }
 }
