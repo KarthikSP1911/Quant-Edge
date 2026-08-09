@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useMemo } from 'react'
 import { useOpenOrders, useOrderHistory } from '@/hooks/useOrders'
 import OrdersTable from '@/components/orders/OrdersTable'
+import EmptyState from '@/components/ui/EmptyState'
 
 const PREVIEW_LIMIT = 5
 
@@ -42,15 +43,10 @@ export default function RecentOrdersPreview() {
       {!isPending &&
         !isError &&
         (orders.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-[var(--color-border)] py-10 text-center">
-            <p className="text-sm font-medium text-[var(--color-text-primary)]">No orders yet</p>
-            <Link
-              href="/companies"
-              className="text-sm font-medium text-[var(--color-accent-blue)] hover:underline"
-            >
-              Browse companies to place your first trade
-            </Link>
-          </div>
+          <EmptyState
+            title="No orders yet"
+            action={{ label: 'Browse companies to place your first trade', href: '/companies' }}
+          />
         ) : (
           <OrdersTable orders={orders} />
         ))}

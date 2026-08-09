@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import ResearchAgentBody from '@/components/research/ResearchAgentBody'
+import EmptyState from '@/components/ui/EmptyState'
 
 export default function ResearchAgentInline() {
   const [input, setInput] = useState('')
@@ -34,12 +35,10 @@ export default function ResearchAgentInline() {
       </form>
 
       {!activeSymbol && (
-        <div className="flex flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-[var(--color-border)] py-16 text-center">
-          <p className="text-sm font-medium text-[var(--color-text-primary)]">No research yet</p>
-          <p className="text-xs text-[var(--color-text-secondary)]">
-            Enter a ticker above to kick off an autonomous research run.
-          </p>
-        </div>
+        <EmptyState
+          title="No research yet"
+          message="Enter a ticker above to kick off an autonomous research run."
+        />
       )}
 
       {activeSymbol && (

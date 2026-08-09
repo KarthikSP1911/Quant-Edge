@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePortfolio } from '@/hooks/usePortfolio'
 import HoldingsTable from '@/components/portfolio/HoldingsTable'
+import EmptyState from '@/components/ui/EmptyState'
 
 const PREVIEW_LIMIT = 5
 
@@ -31,15 +32,10 @@ export default function HoldingsPreview() {
       {!isPending &&
         !isError &&
         (holdings.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-[var(--color-border)] py-10 text-center">
-            <p className="text-sm font-medium text-[var(--color-text-primary)]">No holdings yet</p>
-            <Link
-              href="/companies"
-              className="text-sm font-medium text-[var(--color-accent-blue)] hover:underline"
-            >
-              Browse companies to start trading
-            </Link>
-          </div>
+          <EmptyState
+            title="No holdings yet"
+            action={{ label: 'Browse companies to start trading', href: '/companies' }}
+          />
         ) : (
           <HoldingsTable holdings={holdings} limit={PREVIEW_LIMIT} />
         ))}
