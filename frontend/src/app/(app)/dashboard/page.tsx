@@ -5,6 +5,10 @@ import { DashboardSkeleton, DashboardError } from '@/components/dashboard/Dashbo
 import AllocationChart from '@/components/dashboard/AllocationChart'
 import RecentActivity from '@/components/dashboard/RecentActivity'
 import BalanceSummary from '@/components/dashboard/BalanceSummary'
+import HoldingsPreview from '@/components/dashboard/HoldingsPreview'
+import WatchlistPreview from '@/components/dashboard/WatchlistPreview'
+import RecentOrdersPreview from '@/components/dashboard/RecentOrdersPreview'
+import QuickActions from '@/components/dashboard/QuickActions'
 import ExportButtons from '@/components/shared/ExportButtons'
 
 export default function DashboardPage() {
@@ -33,6 +37,15 @@ export default function DashboardPage() {
             dayChangeValue={data.dayChangeValue}
             dayChangePercent={data.dayChangePercent}
           />
+
+          <QuickActions />
+
+          <HoldingsPreview />
+
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <WatchlistPreview />
+            <RecentOrdersPreview />
+          </div>
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <section className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] p-5">
