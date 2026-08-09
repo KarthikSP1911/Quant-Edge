@@ -41,7 +41,7 @@ public class ChatHistory {
     private String content;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "tool_calls", columnDefinition = "jsonb")
+    @Column(name = "tool_calls")
     private String toolCalls;
 
     @Column(name = "created_at", nullable = false, updatable = false)

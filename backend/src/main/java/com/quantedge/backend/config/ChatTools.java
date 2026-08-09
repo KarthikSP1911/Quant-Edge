@@ -18,6 +18,7 @@ import com.quantedge.backend.service.WatchlistService;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
@@ -47,7 +48,7 @@ public class ChatTools {
             WatchlistService watchlistService,
             OrderService orderService,
             KnowledgeBaseService knowledgeBaseService,
-            VectorStore knowledgeBaseVectorStore) {
+            @Lazy VectorStore knowledgeBaseVectorStore) {
         this.stockDetailService = stockDetailService;
         this.quoteService = quoteService;
         this.dashboardService = dashboardService;

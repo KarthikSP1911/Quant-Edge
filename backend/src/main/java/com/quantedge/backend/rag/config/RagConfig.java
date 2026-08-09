@@ -7,6 +7,7 @@ import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Primary;
 
 /**
@@ -49,6 +50,7 @@ public class RagConfig {
 
     @Bean
     @Primary
+    @Lazy
     public VectorStore knowledgeBaseVectorStore(QdrantVectorStoreFactory factory) {
         return factory.forCollection(defaultCollection, true);
     }

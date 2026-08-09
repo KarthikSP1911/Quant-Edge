@@ -3,6 +3,9 @@ name: backend-ci
 on:
   push:
     branches: [main]
+    paths:
+      - "backend/**"
+      - ".github/workflows/backend-ci.yml"
   pull_request:
     paths:
       - "backend/**"
@@ -23,6 +26,12 @@ jobs:
           java-version: "21"
           distribution: "temurin"
           cache: maven
+
+      - name: Cache ONNX embedding model
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/spring-ai-onnx-model
+          key: onnx-embedding-model-v1
 
       - name: Build and verify (tests + JaCoCo 80% gate)
         run: ./mvnw -B verify
