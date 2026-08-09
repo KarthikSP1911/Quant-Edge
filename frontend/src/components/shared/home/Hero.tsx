@@ -2,24 +2,59 @@
 
 import { motion, type Variants } from 'framer-motion'
 
-const CHART_POINTS = [
-  [0, 92],
-  [30, 84],
-  [60, 88],
-  [90, 70],
-  [120, 76],
-  [150, 58],
-  [180, 64],
-  [210, 46],
-  [240, 52],
-  [270, 34],
-  [300, 40],
-  [330, 22],
-  [360, 28],
-]
+// Seeded PRNG (mulberry32) so the candlestick series is deterministic across server and
+// client renders instead of using Math.random, which would cause a hydration mismatch.
+function mulberry32(seed: number) {
+  let a = seed
+  return () => {
+    a |= 0
+    a = (a + 0x6d2b79f5) | 0
+    let t = Math.imul(a ^ (a >>> 15), 1 | a)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
 
-const CHART_LINE = CHART_POINTS.map(([x, y]) => `${x},${y}`).join(' ')
-const CHART_AREA = `0,110 ${CHART_LINE} 360,110`
+const CANDLE_COUNT = 26
+const CANDLE_WIDTH = 6.5
+const CANDLE_GAP = 360 / CANDLE_COUNT
+const GRIDLINES = [18, 46, 74, 102]
+
+const CANDLES = (() => {
+  const random = mulberry32(42)
+  let price = 100
+  const candles: {
+    cx: number
+    open: number
+    close: number
+    high: number
+    low: number
+    bullish: boolean
+  }[] = []
+
+  for (let i = 0; i < CANDLE_COUNT; i++) {
+    const open = price
+    // Gentle overall uptrend (drift) with per-candle noise, matching the "+2.4%" badge.
+    const drift = -3.2
+    const noise = (random() - 0.5) * 9
+    const close = Math.max(6, Math.min(104, open + drift + noise))
+    const wickUp = random() * 5
+    const wickDown = random() * 5
+    price = close
+
+    candles.push({
+      cx: CANDLE_WIDTH / 2 + i * CANDLE_GAP,
+      open,
+      close,
+      high: Math.max(0, Math.min(open, close) - wickUp),
+      low: Math.min(110, Math.max(open, close) + wickDown),
+      // Smaller y = higher price, so a close above the open (smaller y) is bullish.
+      bullish: close <= open,
+    })
+  }
+
+  return candles
+})()
 
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 24 },
@@ -56,7 +91,7 @@ export default function Hero() {
               animate="show"
               custom={0.1}
               variants={fadeUp}
-              className="mt-6 text-5xl leading-[1.05] font-semibold tracking-tight text-[var(--color-text-primary)] sm:text-6xl"
+              className="mt-6 text-3xl leading-[1.1] font-semibold tracking-tight text-[var(--color-text-primary)] sm:text-4xl"
             >
               Make Better <br />
               Investment <br />
@@ -124,15 +159,44 @@ export default function Hero() {
                 preserveAspectRatio="none"
                 aria-hidden="true"
               >
-                <polygon points={CHART_AREA} fill="var(--color-accent-light)" opacity="0.6" />
-                <polyline
-                  points={CHART_LINE}
-                  fill="none"
-                  stroke="var(--color-accent-blue)"
-                  strokeWidth="2.5"
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                />
+                {GRIDLINES.map((y) => (
+                  <line
+                    key={y}
+                    x1="0"
+                    y1={y}
+                    x2="360"
+                    y2={y}
+                    stroke="var(--color-border)"
+                    strokeWidth="1"
+                    strokeDasharray="2 4"
+                  />
+                ))}
+
+                {CANDLES.map((candle, i) => {
+                  const color = candle.bullish ? 'var(--color-profit)' : 'var(--color-loss)'
+                  const bodyTop = Math.min(candle.open, candle.close)
+                  const bodyHeight = Math.max(1.4, Math.abs(candle.close - candle.open))
+                  return (
+                    <g key={i}>
+                      <line
+                        x1={candle.cx}
+                        y1={candle.high}
+                        x2={candle.cx}
+                        y2={candle.low}
+                        stroke={color}
+                        strokeWidth="1"
+                      />
+                      <rect
+                        x={candle.cx - CANDLE_WIDTH / 2}
+                        y={bodyTop}
+                        width={CANDLE_WIDTH}
+                        height={bodyHeight}
+                        rx="0.75"
+                        fill={color}
+                      />
+                    </g>
+                  )
+                })}
               </svg>
 
               <div className="mt-4 grid grid-cols-3 gap-4 border-t border-[var(--color-border)] pt-4 text-sm">
