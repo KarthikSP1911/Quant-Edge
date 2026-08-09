@@ -10,6 +10,7 @@ import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
@@ -46,7 +47,7 @@ public class KnowledgeBaseStartupIngestor implements ApplicationRunner {
             CorpusLoader corpusLoader,
             ChunkerFactory chunkerFactory,
             KnowledgeIngestionService ingestionService,
-            VectorStore knowledgeBaseVectorStore,
+            @Lazy VectorStore knowledgeBaseVectorStore,
             QdrantClient qdrantClient) {
         this.corpusLoader = corpusLoader;
         this.chunkerFactory = chunkerFactory;
@@ -60,6 +61,8 @@ public class KnowledgeBaseStartupIngestor implements ApplicationRunner {
         if (!autoIngest) {
             return;
         }
+        // Touching the lazy VectorStore bean forces collection creation before we count it.
+        knowledgeBaseVectorStore.getName();
         long existingCount = qdrantClient.countAsync(collectionName).get();
         if (existingCount > 0) {
             log.info(
