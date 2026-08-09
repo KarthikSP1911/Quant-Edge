@@ -65,7 +65,8 @@ public class SecurityConfig {
                                 "/oauth2/**",
                                 "/graphiql",
                                 "/swagger-ui/**",
-                                "/actuator/health")
+                                "/actuator/health",
+                                "/actuator/health/**")
                         .permitAll()
                         .anyRequest()
                         .authenticated())
