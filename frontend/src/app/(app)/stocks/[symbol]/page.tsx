@@ -11,6 +11,7 @@ import IndicatorPanel from '@/components/stocks/IndicatorPanel'
 import RangeToggle from '@/components/stocks/RangeToggle'
 import OverlayToggles, { type OverlayState } from '@/components/stocks/OverlayToggles'
 import ActionButtons from '@/components/stocks/ActionButtons'
+import StockNotesSection from '@/components/stocks/StockNotesSection'
 import {
   StockDetailError,
   StockDetailSkeleton,
@@ -81,6 +82,8 @@ export default function StockDetailPage() {
           <p className="text-sm text-[var(--color-text-secondary)]">{stock.description}</p>
         </section>
       )}
+
+      <StockNotesSection symbol={stock.symbol} />
     </div>
   )
 }
