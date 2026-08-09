@@ -1,0 +1,302 @@
+[
+  {
+    "id": "g-001",
+    "sourceType": "NEWS",
+    "docId": "news-001",
+    "question": "How much was Apple fined by EU regulators over App Store anti-steering rules?"
+  },
+  {
+    "id": "g-002",
+    "sourceType": "NEWS",
+    "docId": "news-001",
+    "question": "What law did Apple violate that led to its App Store fine in the EU?"
+  },
+  {
+    "id": "g-003",
+    "sourceType": "NEWS",
+    "docId": "news-002",
+    "question": "How much did Microsoft pay to acquire Activision Blizzard?"
+  },
+  {
+    "id": "g-004",
+    "sourceType": "NEWS",
+    "docId": "news-002",
+    "question": "Which regulator's approval let Microsoft close the Activision Blizzard deal?"
+  },
+  {
+    "id": "g-005",
+    "sourceType": "NEWS",
+    "docId": "news-003",
+    "question": "What did a federal judge rule about Google's ad-tech business?"
+  },
+  {
+    "id": "g-006",
+    "sourceType": "NEWS",
+    "docId": "news-003",
+    "question": "What part of Alphabet's ad business could be forced into divestiture after the DOJ ruling?"
+  },
+  {
+    "id": "g-007",
+    "sourceType": "NEWS",
+    "docId": "news-004",
+    "question": "What did the FTC allege in its lawsuit against Amazon?"
+  },
+  {
+    "id": "g-008",
+    "sourceType": "NEWS",
+    "docId": "news-004",
+    "question": "How many state attorneys general joined the FTC's Amazon antitrust lawsuit?"
+  },
+  {
+    "id": "g-009",
+    "sourceType": "NEWS",
+    "docId": "news-005",
+    "question": "How much data center revenue did Nvidia report in its fiscal Q3 2024?"
+  },
+  {
+    "id": "g-010",
+    "sourceType": "NEWS",
+    "docId": "news-005",
+    "question": "What is driving Nvidia's surging data center chip demand?"
+  },
+  {
+    "id": "g-011",
+    "sourceType": "NEWS",
+    "docId": "news-006",
+    "question": "How much was Meta fined for EU-US data transfer violations?"
+  },
+  {
+    "id": "g-012",
+    "sourceType": "NEWS",
+    "docId": "news-006",
+    "question": "Why did Ireland's Data Protection Commission fine Meta in 2023?"
+  },
+  {
+    "id": "g-013",
+    "sourceType": "NEWS",
+    "docId": "news-007",
+    "question": "How many Tesla vehicles were recalled over Autopilot safety issues?"
+  },
+  {
+    "id": "g-014",
+    "sourceType": "NEWS",
+    "docId": "news-007",
+    "question": "How did Tesla deliver the Autopilot recall fix to affected vehicles?"
+  },
+  {
+    "id": "g-015",
+    "sourceType": "NEWS",
+    "docId": "news-008",
+    "question": "What assets did JPMorgan Chase acquire from First Republic Bank?"
+  },
+  {
+    "id": "g-016",
+    "sourceType": "NEWS",
+    "docId": "news-008",
+    "question": "Why did First Republic Bank fail and get acquired by JPMorgan?"
+  },
+  {
+    "id": "g-017",
+    "sourceType": "NEWS",
+    "docId": "news-009",
+    "question": "How much is the Visa and Mastercard swipe-fee settlement worth?"
+  },
+  {
+    "id": "g-018",
+    "sourceType": "NEWS",
+    "docId": "news-010",
+    "question": "How much did Johnson & Johnson propose to pay to settle talc lawsuits?"
+  },
+  {
+    "id": "g-019",
+    "sourceType": "NEWS",
+    "docId": "news-010",
+    "question": "What legal strategy did J&J use to structure its talc settlement?"
+  },
+  {
+    "id": "g-020",
+    "sourceType": "NEWS",
+    "docId": "news-011",
+    "question": "What caused the massive UnitedHealth data breach in 2024?"
+  },
+  {
+    "id": "g-021",
+    "sourceType": "NEWS",
+    "docId": "news-012",
+    "question": "How much did Exxon Mobil pay to acquire Pioneer Natural Resources?"
+  },
+  {
+    "id": "g-022",
+    "sourceType": "NEWS",
+    "docId": "news-012",
+    "question": "What condition did the FTC place on Exxon's Pioneer acquisition?"
+  },
+  {
+    "id": "g-023",
+    "sourceType": "NEWS",
+    "docId": "news-013",
+    "question": "What drove Walmart to raise its full-year sales guidance in late 2023?"
+  },
+  {
+    "id": "g-024",
+    "sourceType": "NEWS",
+    "docId": "news-014",
+    "question": "What drove Procter & Gamble's organic sales growth despite falling volumes?"
+  },
+  {
+    "id": "g-025",
+    "sourceType": "NEWS",
+    "docId": "news-015",
+    "question": "Who challenged Disney's board in a 2024 proxy fight?"
+  },
+  {
+    "id": "g-026",
+    "sourceType": "NEWS",
+    "docId": "news-016",
+    "question": "How many subscribers did Netflix add in Q4 2023 after its password-sharing crackdown?"
+  },
+  {
+    "id": "g-027",
+    "sourceType": "NEWS",
+    "docId": "news-017",
+    "question": "What full-year revenue growth guidance did Coca-Cola raise to in Q3 2023?"
+  },
+  {
+    "id": "g-028",
+    "sourceType": "NEWS",
+    "docId": "news-018",
+    "question": "How large were Bank of America's unrealized bond portfolio losses in Q3 2023?"
+  },
+  {
+    "id": "g-029",
+    "sourceType": "NEWS",
+    "docId": "news-019",
+    "question": "Why did Pfizer cut its 2023 revenue guidance?"
+  },
+  {
+    "id": "g-030",
+    "sourceType": "NEWS",
+    "docId": "news-020",
+    "question": "What AI accelerator chip did AMD launch to compete with Nvidia's H100?"
+  },
+  {
+    "id": "g-031",
+    "sourceType": "NOTE",
+    "docId": "note-001",
+    "question": "What is AAPL's current RSI level and what does it signal?"
+  },
+  {
+    "id": "g-032",
+    "sourceType": "NOTE",
+    "docId": "note-001",
+    "question": "What RSI level should AAPL fall back below before adding new long positions?"
+  },
+  {
+    "id": "g-033",
+    "sourceType": "NOTE",
+    "docId": "note-002",
+    "question": "What Azure growth rate would justify MSFT's current valuation premium?"
+  },
+  {
+    "id": "g-034",
+    "sourceType": "NOTE",
+    "docId": "note-003",
+    "question": "What is the concern about Alphabet's AdX divestiture risk?"
+  },
+  {
+    "id": "g-035",
+    "sourceType": "NOTE",
+    "docId": "note-004",
+    "question": "What is the main supply constraint limiting Nvidia's chip shipments?"
+  },
+  {
+    "id": "g-036",
+    "sourceType": "NOTE",
+    "docId": "note-005",
+    "question": "How has Meta's operating margin changed since its efficiency initiative?"
+  },
+  {
+    "id": "g-037",
+    "sourceType": "NOTE",
+    "docId": "note-005",
+    "question": "What metric should be tracked for Meta's Reels monetization progress?"
+  },
+  {
+    "id": "g-038",
+    "sourceType": "NOTE",
+    "docId": "note-006",
+    "question": "How has Tesla's delivery growth rate changed from 2022 to 2023?"
+  },
+  {
+    "id": "g-039",
+    "sourceType": "NOTE",
+    "docId": "note-007",
+    "question": "What is the concern about JPM's net interest income going forward?"
+  },
+  {
+    "id": "g-040",
+    "sourceType": "NOTE",
+    "docId": "note-008",
+    "question": "What risk remains for J&J even after its proposed talc settlement?"
+  },
+  {
+    "id": "g-041",
+    "sourceType": "NOTE",
+    "docId": "note-009",
+    "question": "What cost synergies did Exxon guide to after the Pioneer acquisition?"
+  },
+  {
+    "id": "g-042",
+    "sourceType": "NOTE",
+    "docId": "note-010",
+    "question": "How do Walmart Connect's advertising margins compare to core grocery margins?"
+  },
+  {
+    "id": "g-043",
+    "sourceType": "NOTE",
+    "docId": "note-011",
+    "question": "What is the status of Disney's streaming profitability and succession plan?"
+  },
+  {
+    "id": "g-044",
+    "sourceType": "NOTE",
+    "docId": "note-012",
+    "question": "Why does the agent think Netflix's subscriber crackdown growth won't repeat?"
+  },
+  {
+    "id": "g-045",
+    "sourceType": "NOTE",
+    "docId": "note-012",
+    "question": "What metric should be watched for Netflix's ad tier instead of subscriber counts?"
+  },
+  {
+    "id": "g-046",
+    "sourceType": "NOTE",
+    "docId": "note-013",
+    "question": "Why might AMD's MI300X struggle to gain significant market share from Nvidia?"
+  },
+  {
+    "id": "g-047",
+    "sourceType": "NOTE",
+    "docId": "note-014",
+    "question": "Why isn't Bank of America's unrealized bond loss considered a solvency risk?"
+  },
+  {
+    "id": "g-048",
+    "sourceType": "NOTE",
+    "docId": "note-002",
+    "question": "What is MSFT's forward P/E compared to its five-year average?"
+  },
+  {
+    "id": "g-049",
+    "sourceType": "NOTE",
+    "docId": "note-004",
+    "question": "What kind of moving average crossover confirms NVDA's uptrend?"
+  },
+  {
+    "id": "g-050",
+    "sourceType": "NOTE",
+    "docId": "note-009",
+    "question": "What is Exxon's combined Permian Basin production after the Pioneer deal?"
+  }
+]

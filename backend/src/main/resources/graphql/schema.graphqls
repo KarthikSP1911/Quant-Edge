@@ -188,6 +188,23 @@ type TimeMachineResult {
     worstDecisions: [TimeMachineDecision!]!
 }
 
+type ChatHistory {
+    id: ID!
+    role: String!
+    content: String
+    toolCalls: String
+    createdAt: String!
+}
+
+type ResearchNote {
+    id: ID!
+    company: Company!
+    title: String!
+    content: String!
+    generatedBy: String!
+    createdAt: String!
+}
+
 type Query {
     companies: [Company!]!
     company(symbol: String!): Company
@@ -208,4 +225,6 @@ type Query {
     ): AuditLogPage!
     stockComparison(symbols: [String!]!, interval: String = "1day", outputSize: Int = 90): StockComparison!
     portfolioTimeMachine(asOfDate: String!): TimeMachineResult!
+    chatHistory: [ChatHistory!]!
+    researchNotes(symbol: String): [ResearchNote!]!
 }

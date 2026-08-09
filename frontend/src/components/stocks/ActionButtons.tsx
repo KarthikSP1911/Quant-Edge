@@ -4,9 +4,11 @@ import { useState } from 'react'
 import OrderTicket from '@/components/trade/OrderTicket'
 import { useAddToWatchlist, useRemoveFromWatchlist, useWatchlist } from '@/hooks/useWatchlist'
 import type { OrderSide } from '@/types/order'
+import ResearchAgentPanel from './ResearchAgentPanel'
 
 export default function ActionButtons({ symbol, price }: { symbol: string; price: number }) {
   const [tradeSide, setTradeSide] = useState<OrderSide | null>(null)
+  const [showResearch, setShowResearch] = useState(false)
 
   const { data: watchlist } = useWatchlist()
   const addMutation = useAddToWatchlist()
@@ -53,12 +55,15 @@ export default function ActionButtons({ symbol, price }: { symbol: string; price
       </button>
       <button
         type="button"
-        disabled
-        title="Research agent lands in Phase 6"
-        className="rounded-md border border-[var(--color-border)] px-4 py-2 text-sm font-medium text-[var(--color-text-primary)] opacity-50"
+        onClick={() => setShowResearch(true)}
+        className="rounded-md border border-[var(--color-border)] px-4 py-2 text-sm font-medium text-[var(--color-text-primary)] hover:bg-[var(--color-sidebar-hover)]"
       >
         Research this stock
       </button>
+
+      {showResearch && (
+        <ResearchAgentPanel symbol={symbol} onClose={() => setShowResearch(false)} />
+      )}
 
       {tradeSide && (
         <OrderTicket

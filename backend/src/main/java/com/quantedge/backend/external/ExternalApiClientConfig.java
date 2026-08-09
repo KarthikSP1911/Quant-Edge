@@ -29,6 +29,15 @@ public class ExternalApiClientConfig {
                 .build();
     }
 
+    @Bean
+    public RestClient alphaVantageRestClient(
+            @Value("${alphavantage.base-url}") String baseUrl, @Value("${alphavantage.timeout-ms}") long timeoutMs) {
+        return RestClient.builder()
+                .baseUrl(baseUrl)
+                .requestFactory(requestFactory(timeoutMs))
+                .build();
+    }
+
     private SimpleClientHttpRequestFactory requestFactory(long timeoutMs) {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(Duration.ofMillis(timeoutMs));
