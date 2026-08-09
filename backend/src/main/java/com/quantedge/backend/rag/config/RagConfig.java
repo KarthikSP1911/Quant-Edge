@@ -4,7 +4,6 @@ import io.qdrant.client.QdrantClient;
 import io.qdrant.client.QdrantGrpcClient;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.ai.vectorstore.qdrant.QdrantVectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,7 +33,8 @@ public class RagConfig {
 
     @Bean(destroyMethod = "close")
     public QdrantClient qdrantClient() {
-        String host = qdrantUrl.replaceFirst("^https?://", "").replaceAll("/$", "");
+        String host =
+                qdrantUrl.replaceFirst("^https?://", "").replaceAll("/$", "").replaceFirst(":\\d+$", "");
         boolean useTls = qdrantUrl.startsWith("https");
         QdrantGrpcClient grpcClient = QdrantGrpcClient.newBuilder(host, grpcPort, useTls)
                 .withApiKey(qdrantApiKey)
