@@ -15,14 +15,14 @@ function mulberry32(seed: number) {
   }
 }
 
-const CANDLE_COUNT = 26
-const CANDLE_WIDTH = 6.5
-const CANDLE_GAP = 360 / CANDLE_COUNT
-const GRIDLINES = [18, 46, 74, 102]
+const CANDLE_COUNT = 10
+const CANDLE_SLOT = 360 / CANDLE_COUNT
+const CANDLE_WIDTH = CANDLE_SLOT * 0.46
+const GRIDLINES = [22, 58, 94]
 
 const CANDLES = (() => {
-  const random = mulberry32(42)
-  let price = 100
+  const random = mulberry32(7)
+  let price = 96
   const candles: {
     cx: number
     open: number
@@ -35,15 +35,15 @@ const CANDLES = (() => {
   for (let i = 0; i < CANDLE_COUNT; i++) {
     const open = price
     // Gentle overall uptrend (drift) with per-candle noise, matching the "+2.4%" badge.
-    const drift = -3.2
-    const noise = (random() - 0.5) * 9
-    const close = Math.max(6, Math.min(104, open + drift + noise))
-    const wickUp = random() * 5
-    const wickDown = random() * 5
+    const drift = -6
+    const noise = (random() - 0.5) * 24
+    const close = Math.max(10, Math.min(108, open + drift + noise))
+    const wickUp = 4 + random() * 12
+    const wickDown = 4 + random() * 12
     price = close
 
     candles.push({
-      cx: CANDLE_WIDTH / 2 + i * CANDLE_GAP,
+      cx: CANDLE_SLOT / 2 + i * CANDLE_SLOT,
       open,
       close,
       high: Math.max(0, Math.min(open, close) - wickUp),
@@ -168,14 +168,13 @@ export default function Hero() {
                     y2={y}
                     stroke="var(--color-border)"
                     strokeWidth="1"
-                    strokeDasharray="2 4"
                   />
                 ))}
 
                 {CANDLES.map((candle, i) => {
                   const color = candle.bullish ? 'var(--color-profit)' : 'var(--color-loss)'
                   const bodyTop = Math.min(candle.open, candle.close)
-                  const bodyHeight = Math.max(1.4, Math.abs(candle.close - candle.open))
+                  const bodyHeight = Math.max(2, Math.abs(candle.close - candle.open))
                   return (
                     <g key={i}>
                       <line
@@ -184,14 +183,15 @@ export default function Hero() {
                         x2={candle.cx}
                         y2={candle.low}
                         stroke={color}
-                        strokeWidth="1"
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
                       />
                       <rect
                         x={candle.cx - CANDLE_WIDTH / 2}
                         y={bodyTop}
                         width={CANDLE_WIDTH}
                         height={bodyHeight}
-                        rx="0.75"
+                        rx="2"
                         fill={color}
                       />
                     </g>
