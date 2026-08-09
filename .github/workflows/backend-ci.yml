@@ -18,17 +18,22 @@ jobs:
       run:
         working-directory: backend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
+      # Tried bumping to JDK 25 (current LTS) here, but Spotless's palantir-java-format hooks
+      # into javac's internal APIs directly and doesn't support it yet (NoSuchMethodError on
+      # com.sun.tools.javac.util.Log$DeferredDiagnosticHandler). pom.xml's java.version (compile
+      # target) is 21 anyway, so there's no real benefit to chasing toolchain compatibility across
+      # every plugin (JaCoCo already needed a bump for this) ahead of the ecosystem - stay on 21.
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: "21"
           distribution: "temurin"
           cache: maven
 
       - name: Cache ONNX embedding model
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/spring-ai-onnx-model
           key: onnx-embedding-model-v1
@@ -38,7 +43,7 @@ jobs:
 
       - name: Upload JaCoCo coverage report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: jacoco-report
           path: backend/target/site/jacoco/
