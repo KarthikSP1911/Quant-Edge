@@ -9,12 +9,8 @@ import UserMenu from './UserMenu'
 const navLinks = [
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/companies', label: 'Companies' },
-  { href: '/compare', label: 'Compare' },
-  { href: '/portfolio', label: 'Portfolio' },
   { href: '/orders', label: 'Orders' },
-  { href: '/watchlist', label: 'Watchlist' },
-  { href: '/activity', label: 'Activity' },
-  { href: '/notes', label: 'Notes' },
+  { href: '/research', label: 'Research' },
 ]
 
 export default function AppTopbar() {
@@ -25,12 +21,12 @@ export default function AppTopbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-page-bg)]/80 backdrop-blur-md">
-      <nav className="mx-auto flex h-16 max-w-7xl items-center gap-8 px-6 sm:px-10">
+      <nav className="mx-auto flex h-16 max-w-7xl items-center gap-8 px-8 sm:px-12 lg:px-16">
         <Link href="/dashboard" aria-label="QuantEdge home" className="shrink-0">
           <Logo variant="full" size={22} />
         </Link>
 
-        <div className="hidden flex-1 items-center gap-1 overflow-x-auto lg:flex">
+        <div className="hidden flex-1 items-center gap-2 lg:flex">
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -82,7 +78,7 @@ export default function AppTopbar() {
           menuOpen ? 'max-h-96' : 'max-h-0 border-t-0'
         }`}
       >
-        <div className="flex flex-col gap-1 px-6 py-3 sm:px-10">
+        <div className="flex flex-col gap-1 px-8 py-3 sm:px-12">
           {navLinks.map((link) => (
             <Link
               key={link.href}
