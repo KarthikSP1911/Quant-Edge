@@ -28,7 +28,7 @@ export function GoogleIcon() {
 
 export function AuthDivider() {
   return (
-    <div className="my-4 flex items-center gap-3">
+    <div className="my-3 flex items-center gap-3">
       <div className="h-px flex-1 bg-[var(--color-border)]" />
       <span className="text-xs font-medium text-[var(--color-text-muted)]">OR</span>
       <div className="h-px flex-1 bg-[var(--color-border)]" />
@@ -97,34 +97,32 @@ export function AuthLayout({
 }: {
   eyebrow: string
   title: string
-  subtitle: string
+  subtitle?: string
   children: React.ReactNode
 }) {
   return (
-    <div className="relative flex h-dvh items-center justify-center overflow-y-auto bg-[var(--color-card-bg)] px-4 py-4">
+    <div className="relative flex h-dvh items-center justify-center overflow-y-auto bg-[var(--color-card-bg)] px-4 py-3">
       <div
         className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[420px] bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,var(--color-accent-light),transparent)]"
         aria-hidden="true"
       />
 
       <div className="w-full max-w-md">
-        <Link href="/" className="mb-4 flex items-center justify-center">
-          <Logo variant="full" size={24} />
+        <Link href="/" className="mb-3 flex items-center justify-center">
+          <Logo variant="full" size={32} />
         </Link>
 
-        <div className="rounded-2xl border border-[var(--color-border)] bg-white p-6 shadow-xl shadow-slate-900/5">
+        <div className="flex min-h-[490px] flex-col justify-center rounded-2xl border border-[var(--color-border)] bg-white p-7 shadow-xl shadow-slate-900/5">
           <p className="text-xs font-semibold tracking-wide text-[var(--color-accent-blue)] uppercase">
             {eyebrow}
           </p>
           <h1 className="mt-1 text-xl font-semibold text-[var(--color-text-primary)]">{title}</h1>
-          <p className="mt-1 text-sm text-[var(--color-text-secondary)]">{subtitle}</p>
+          {subtitle && (
+            <p className="mt-1 text-sm text-[var(--color-text-secondary)]">{subtitle}</p>
+          )}
 
-          <div className="mt-4">{children}</div>
+          <div className="mt-3">{children}</div>
         </div>
-
-        <p className="mt-4 text-center text-xs text-[var(--color-text-muted)]">
-          Simulated trading only. No real capital at risk.
-        </p>
       </div>
     </div>
   )

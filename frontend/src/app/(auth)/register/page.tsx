@@ -34,11 +34,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <AuthLayout
-      eyebrow="Get started"
-      title="Create your account"
-      subtitle="Free simulated trading with real market data — no card required."
-    >
+    <AuthLayout eyebrow="Get started" title="Create your account">
       {error && (
         <div className="mb-4 rounded-md border border-[var(--color-loss)]/30 bg-red-50 px-3 py-2 text-sm text-[var(--color-loss)]">
           {error}
@@ -84,7 +80,7 @@ export default function RegisterPage() {
         Continue with Google
       </button>
 
-      <p className="mt-5 text-center text-sm text-[var(--color-text-secondary)]">
+      <p className="mt-4 text-center text-sm text-[var(--color-text-secondary)]">
         Already have an account?{' '}
         <Link href="/login" className="font-medium text-[var(--color-accent-blue)] hover:underline">
           Sign in
