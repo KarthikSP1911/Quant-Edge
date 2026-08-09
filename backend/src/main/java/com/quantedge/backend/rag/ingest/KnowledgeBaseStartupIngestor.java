@@ -10,13 +10,18 @@ import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 /**
  * Ingests the frozen fixture corpus into the default {@code queryKnowledgeBase} collection on
  * startup, once - subsequent restarts see a non-zero point count and skip re-ingesting.
+ *
+ * <p>Requires the real Qdrant client, so it only registers when {@code quantedge.rag.qdrant.enabled}
+ * is true (the test profile sets it false since there is no live Qdrant in unit/CI runs).
  */
 @Component
+@ConditionalOnProperty(name = "quantedge.rag.qdrant.enabled", havingValue = "true", matchIfMissing = true)
 public class KnowledgeBaseStartupIngestor implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(KnowledgeBaseStartupIngestor.class);

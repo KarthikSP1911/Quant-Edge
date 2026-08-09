@@ -1,5 +1,6 @@
 package com.quantedge.backend.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,14 @@ public class GenAIConfig {
 
     @Value("${quantedge.ai.groq.max-tokens}")
     private Integer maxTokens;
+
+    // Boot 4 defaults to Jackson 3 and no longer autoconfigures a classic
+    // com.fasterxml.jackson.databind.ObjectMapper bean, so ChatService (which serializes tool-call
+    // history with it) needs one wired explicitly.
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper().findAndRegisterModules();
+    }
 
     @Bean
     public ChatClient chatClient(ChatClient.Builder builder) {
