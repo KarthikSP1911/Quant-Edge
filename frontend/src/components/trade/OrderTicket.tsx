@@ -116,7 +116,7 @@ export default function OrderTicket({
         <button
           type="button"
           onClick={onClose}
-          className="mt-4 w-full rounded-md bg-[var(--color-accent-blue)] px-4 py-2 text-sm font-medium text-white"
+          className="mt-4 w-full rounded-md bg-[var(--color-accent-blue)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
         >
           Done
         </button>
@@ -136,7 +136,7 @@ export default function OrderTicket({
         <button
           type="button"
           onClick={onClose}
-          className="mt-4 w-full rounded-md bg-[var(--color-accent-blue)] px-4 py-2 text-sm font-medium text-white"
+          className="mt-4 w-full rounded-md bg-[var(--color-accent-blue)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
         >
           Done
         </button>
@@ -159,7 +159,7 @@ export default function OrderTicket({
         </label>
         <select
           {...register('type')}
-          className="mt-1 w-full rounded-md border border-[var(--color-border)] px-3 py-2 text-sm text-[var(--color-text-primary)] focus:border-[var(--color-accent-blue)] focus:outline-none"
+          className="mt-1 w-full rounded-md border border-[var(--color-border)] px-3 py-2 text-sm text-[var(--color-text-primary)] focus:border-[var(--color-accent-blue)] focus:ring-1 focus:ring-[var(--color-accent-blue)] focus:outline-none"
         >
           {orderTypes.map((t) => (
             <option key={t.value} value={t.value}>
@@ -177,7 +177,7 @@ export default function OrderTicket({
           step={1}
           autoFocus
           {...register('quantity')}
-          className="mt-1 w-full rounded-md border border-[var(--color-border)] px-3 py-2 text-sm tabular-nums text-[var(--color-text-primary)] focus:border-[var(--color-accent-blue)] focus:outline-none"
+          className="mt-1 w-full rounded-md border border-[var(--color-border)] px-3 py-2 text-sm tabular-nums text-[var(--color-text-primary)] focus:border-[var(--color-accent-blue)] focus:ring-1 focus:ring-[var(--color-accent-blue)] focus:outline-none"
         />
         {errors.quantity && (
           <p className="mt-1 text-xs text-[var(--color-loss)]">{errors.quantity.message}</p>
@@ -193,7 +193,7 @@ export default function OrderTicket({
               min={0.01}
               step={0.01}
               {...register('limitPrice')}
-              className="mt-1 w-full rounded-md border border-[var(--color-border)] px-3 py-2 text-sm tabular-nums text-[var(--color-text-primary)] focus:border-[var(--color-accent-blue)] focus:outline-none"
+              className="mt-1 w-full rounded-md border border-[var(--color-border)] px-3 py-2 text-sm tabular-nums text-[var(--color-text-primary)] focus:border-[var(--color-accent-blue)] focus:ring-1 focus:ring-[var(--color-accent-blue)] focus:outline-none"
             />
             {errors.limitPrice && (
               <p className="mt-1 text-xs text-[var(--color-loss)]">{errors.limitPrice.message}</p>
@@ -211,7 +211,7 @@ export default function OrderTicket({
               min={0.01}
               step={0.01}
               {...register('stopPrice')}
-              className="mt-1 w-full rounded-md border border-[var(--color-border)] px-3 py-2 text-sm tabular-nums text-[var(--color-text-primary)] focus:border-[var(--color-accent-blue)] focus:outline-none"
+              className="mt-1 w-full rounded-md border border-[var(--color-border)] px-3 py-2 text-sm tabular-nums text-[var(--color-text-primary)] focus:border-[var(--color-accent-blue)] focus:ring-1 focus:ring-[var(--color-accent-blue)] focus:outline-none"
             />
             {errors.stopPrice && (
               <p className="mt-1 text-xs text-[var(--color-loss)]">{errors.stopPrice.message}</p>
@@ -226,7 +226,7 @@ export default function OrderTicket({
             </label>
             <select
               {...register('timeInForce')}
-              className="mt-1 w-full rounded-md border border-[var(--color-border)] px-3 py-2 text-sm text-[var(--color-text-primary)] focus:border-[var(--color-accent-blue)] focus:outline-none"
+              className="mt-1 w-full rounded-md border border-[var(--color-border)] px-3 py-2 text-sm text-[var(--color-text-primary)] focus:border-[var(--color-accent-blue)] focus:ring-1 focus:ring-[var(--color-accent-blue)] focus:outline-none"
             >
               <option value="GTC">Good till cancelled</option>
               <option value="DAY">Day only</option>
@@ -270,14 +270,14 @@ export default function OrderTicket({
           <button
             type="button"
             onClick={onClose}
-            className="flex-1 rounded-md border border-[var(--color-border)] px-4 py-2 text-sm font-medium text-[var(--color-text-primary)] hover:bg-[var(--color-sidebar-hover)]"
+            className="flex-1 rounded-md border border-[var(--color-border)] px-4 py-2 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-sidebar-hover)]"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={!canSubmit}
-            className={`flex-1 rounded-md px-4 py-2 text-sm font-medium text-white ${
+            className={`flex-1 rounded-md px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed ${
               isBuy ? 'bg-[var(--color-profit)]' : 'bg-[var(--color-loss)]'
             } disabled:opacity-50`}
           >
@@ -294,14 +294,14 @@ export default function OrderTicket({
 function ModalShell({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-sm rounded-lg bg-white p-6 shadow-lg"
+        className="w-full max-w-sm rounded-xl border border-[var(--color-border)] bg-white p-6 shadow-2xl"
       >
         {children}
       </div>

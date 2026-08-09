@@ -30,14 +30,14 @@ export default function ActionButtons({ symbol, price }: { symbol: string; price
       <button
         type="button"
         onClick={() => setTradeSide('BUY')}
-        className="rounded-md bg-[var(--color-profit)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+        className="rounded-md bg-[var(--color-profit)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 active:scale-[0.98]"
       >
         Buy
       </button>
       <button
         type="button"
         onClick={() => setTradeSide('SELL')}
-        className="rounded-md bg-[var(--color-loss)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+        className="rounded-md bg-[var(--color-loss)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 active:scale-[0.98]"
       >
         Sell
       </button>
@@ -56,7 +56,7 @@ export default function ActionButtons({ symbol, price }: { symbol: string; price
       <button
         type="button"
         onClick={() => setShowResearch(true)}
-        className="rounded-md border border-[var(--color-border)] px-4 py-2 text-sm font-medium text-[var(--color-text-primary)] hover:bg-[var(--color-sidebar-hover)]"
+        className="rounded-md border border-[var(--color-border)] px-4 py-2 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-sidebar-hover)]"
       >
         Research this stock
       </button>
