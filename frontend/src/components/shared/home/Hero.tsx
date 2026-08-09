@@ -2,59 +2,32 @@
 
 import { motion, type Variants } from 'framer-motion'
 
-// Seeded PRNG (mulberry32) so the candlestick series is deterministic across server and
-// client renders instead of using Math.random, which would cause a hydration mismatch.
-function mulberry32(seed: number) {
-  let a = seed
-  return () => {
-    a |= 0
-    a = (a + 0x6d2b79f5) | 0
-    let t = Math.imul(a ^ (a >>> 15), 1 | a)
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
-}
-
 const CANDLE_COUNT = 10
 const CANDLE_SLOT = 360 / CANDLE_COUNT
 const CANDLE_WIDTH = CANDLE_SLOT * 0.46
 const GRIDLINES = [22, 58, 94]
 
-const CANDLES = (() => {
-  const random = mulberry32(7)
-  let price = 96
-  const candles: {
-    cx: number
-    open: number
-    close: number
-    high: number
-    low: number
-    bullish: boolean
-  }[] = []
+// Fixed series (viewBox y: 0 = highest price, 110 = lowest) matching the reference
+// hero screenshot's exact candle-by-candle shape: green, red, red, green, green,
+// red, green, green, red, green, in a rising staircase.
+const CANDLE_SERIES: { open: number; close: number; high: number; low: number }[] = [
+  { open: 78.6, close: 61.1, high: 58.3, low: 92.9 },
+  { open: 61.9, close: 74.6, high: 39.6, low: 74.6 },
+  { open: 70.5, close: 93.7, high: 70.5, low: 110 },
+  { open: 93.7, close: 46.0, high: 46.0, low: 93.7 },
+  { open: 50.9, close: 35.5, high: 30.6, low: 50.9 },
+  { open: 38.7, close: 72.6, high: 24.4, low: 72.6 },
+  { open: 58.3, close: 20.4, high: 20.4, low: 58.3 },
+  { open: 26.5, close: 8.1, high: 6.1, low: 32.6 },
+  { open: 18.3, close: 38.7, high: 12.2, low: 46.0 },
+  { open: 27.7, close: 2.0, high: 0, low: 27.7 },
+]
 
-  for (let i = 0; i < CANDLE_COUNT; i++) {
-    const open = price
-    // Gentle overall uptrend (drift) with per-candle noise, matching the "+2.4%" badge.
-    const drift = -6
-    const noise = (random() - 0.5) * 24
-    const close = Math.max(10, Math.min(108, open + drift + noise))
-    const wickUp = 4 + random() * 12
-    const wickDown = 4 + random() * 12
-    price = close
-
-    candles.push({
-      cx: CANDLE_SLOT / 2 + i * CANDLE_SLOT,
-      open,
-      close,
-      high: Math.max(0, Math.min(open, close) - wickUp),
-      low: Math.min(110, Math.max(open, close) + wickDown),
-      // Smaller y = higher price, so a close above the open (smaller y) is bullish.
-      bullish: close <= open,
-    })
-  }
-
-  return candles
-})()
+const CANDLES = CANDLE_SERIES.map((c, i) => ({
+  cx: CANDLE_SLOT / 2 + i * CANDLE_SLOT,
+  ...c,
+  bullish: c.close <= c.open,
+}))
 
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 24 },
