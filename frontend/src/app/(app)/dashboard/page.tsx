@@ -43,19 +43,23 @@ export default function DashboardPage() {
           <HoldingsPreview />
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <WatchlistPreview />
-            <RecentOrdersPreview />
+            <div className="min-w-0">
+              <WatchlistPreview />
+            </div>
+            <div className="min-w-0">
+              <RecentOrdersPreview />
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <section className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] p-5">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <section className="min-w-0 rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] p-5">
               <h2 className="mb-4 text-sm font-semibold text-[var(--color-text-primary)]">
                 Allocation by sector
               </h2>
               <AllocationChart allocation={data.allocation} />
             </section>
 
-            <section className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] p-5">
+            <section className="min-w-0 rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] p-5">
               <h2 className="mb-2 text-sm font-semibold text-[var(--color-text-primary)]">
                 Recent activity
               </h2>

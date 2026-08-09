@@ -17,7 +17,7 @@ export default function ChatWidget() {
   return (
     <div ref={panelRef} className="fixed bottom-6 right-6 z-40">
       {open && (
-        <div className="mb-3 flex h-[560px] w-[380px] flex-col gap-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-card-bg)] p-4 shadow-2xl">
+        <div className="mb-3 flex h-[550px] max-h-[calc(100vh-6rem)] w-[400px] max-w-[calc(100vw-3rem)] flex-col gap-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-card-bg)] p-4 shadow-2xl">
           <div className="flex shrink-0 items-center justify-between">
             <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">
               QuantEdge Assistant
