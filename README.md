@@ -1,10 +1,64 @@
 <img src="./frontend/public/logo/logo-full.svg" alt="QuantEdge" height="40" />
 
-AI-powered stock research and simulated trading platform.
+AI-powered stock research and simulated trading platform, quantified.
+
+![Java 21](https://img.shields.io/badge/Java-21-orange)
+![Spring Boot 3.x](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen)
+![Next.js](https://img.shields.io/badge/Next.js-App%20Router-black)
+![TypeScript](https://img.shields.io/badge/TypeScript-blue)
+![PostgreSQL 15](https://img.shields.io/badge/PostgreSQL-15-336791)
+![Redis 7](https://img.shields.io/badge/Redis-7-DC382D)
+![Kafka](https://img.shields.io/badge/Kafka-KRaft-231F20)
+![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED)
 
 See [CLAUDE.md](./CLAUDE.md) for the full project spec, tech stack, and workflow rules.
 
-## Setup
+## Overview
+
+QuantEdge lets a user research a company (profile, price chart, news, technical indicators),
+hold a simulated portfolio, and place market/limit/stop orders against a real matching engine —
+with a GenAI research agent that can answer questions grounded in the platform's own data.
+
+- **Auth** — JWT access/refresh tokens (rotation + reuse detection), Google OAuth2
+- **Research** — company profiles, charts, news, indicators, cached in Redis on top of
+  Finnhub / Twelve Data / Alpha Vantage
+- **Trading** — simulated portfolios, market/limit/stop-loss/stop-limit orders, a Kafka-driven
+  matching engine, SSE fill notifications
+- **Standout features** — AOP audit log, company comparison, portfolio time machine, PDF/CSV
+  exports
+- **GenAI agent** — Spring AI over Groq, a 9-tool research agent with an SSE reasoning trace,
+  RAG over a Qdrant-backed knowledge base (news + research notes)
+
+## Architecture
+
+```
+┌─────────────┐        ┌──────────────────────────────┐        ┌─────────────┐
+│  Next.js    │  REST  │          Spring Boot          │        │ PostgreSQL  │
+│  frontend   │───────▶│  writes: auth, orders, export │───────▶│  (11 tables,│
+│             │ GraphQL│  reads: portfolio, dashboard  │        │   Flyway)   │
+│             │───────▶│  push: SSE (fills, agent      │        └─────────────┘
+│             │  SSE   │        reasoning trace)        │        ┌─────────────┐
+│             │◀───────│                                │───────▶│    Redis    │
+└─────────────┘        │  ┌──────────────────────────┐  │        │  (cache)    │
+                        │  │  Order matching engine   │◀─┼───────▶│    Kafka    │
+                        │  └──────────────────────────┘  │        │  (internal, │
+                        │  ┌──────────────────────────┐  │        │  KRaft)     │
+                        │  │  GenAI research agent     │  │        └─────────────┘
+                        │  │  (Spring AI + Groq +      │  │        ┌─────────────┐
+                        │  │   Qdrant RAG)              │─┼───────▶│   Qdrant    │
+                        │  └──────────────────────────┘  │        │ (vectors)   │
+                        └──────────────────────────────┘
+```
+
+Kafka never reaches the frontend — it is strictly internal to the backend (price events in,
+matching engine, executed-trade events out). See [CLAUDE.md § API Design Rules](./CLAUDE.md#api-design-rules)
+for which transport (REST/GraphQL/SSE) each kind of request uses.
+
+## Local Setup
+
+**Prerequisites:** Node.js 20+, Java 21, Maven (or use the bundled `./mvnw`), Docker + Docker
+Compose. Optional for hosted mode: a Neon Postgres URL, an Upstash Redis REST endpoint, and API
+keys for Finnhub / Twelve Data / Alpha Vantage / Groq / Qdrant Cloud.
 
 After cloning, run these once from the repo root:
 
@@ -25,11 +79,47 @@ approve lefthook's postinstall so hooks actually get installed:
 npm approve-scripts lefthook
 ```
 
-## Docker
+Copy `.env.example` to `.env` and fill in any keys you need (everything has a Docker-friendly
+local default — see [docs/docker.md](./docs/docker.md)):
 
-See [docs/docker.md](./docs/docker.md) for running the full local stack
-(`docker compose --profile local up --build`) or against hosted infra
-(`docker compose up backend frontend --build`).
+```bash
+cp .env.example .env
+```
+
+### Run everything with Docker
+
+```bash
+docker compose --profile local up --build
+```
+
+See [docs/docker.md](./docs/docker.md) for the full local-stack vs. hosted-infra modes
+(`docker compose --profile local up --build` vs. `docker compose up backend frontend --build`).
+
+### Run the backend directly
+
+```bash
+cd backend
+./mvnw spring-boot:run   # http://localhost:8080, health: /actuator/health
+./mvnw test               # fast unit tests (H2, no Testcontainers)
+./mvnw verify              # full build: tests + Spotless + Checkstyle + JaCoCo 80% coverage gate
+```
+
+Coverage report after `./mvnw verify`: `backend/target/site/jacoco/index.html`.
+
+### Run the frontend directly
+
+```bash
+cd frontend
+npm run dev      # http://localhost:3000
+npm run lint
+npm run typecheck
+```
+
+## API Overview
+
+REST for writes, GraphQL for reads, SSE for push — see
+[docs/api-contract.md](./docs/api-contract.md) for the full endpoint-by-endpoint contract, and
+[CLAUDE.md § API Design Rules](./CLAUDE.md#api-design-rules) for the rules behind that split.
 
 ## Retrieval Evaluation
 
