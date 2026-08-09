@@ -1,4 +1,4 @@
-<img src="./frontend/public/logo/logo-full.svg" alt="QuantEdge" height="40" />
+<img src="./frontend/public/logo/logo-full.svg" alt="QuantEdge" height="70" />
 
 AI-powered stock research and simulated trading platform, quantified.
 
@@ -31,28 +31,102 @@ with a GenAI research agent that can answer questions grounded in the platform's
 
 ## Architecture
 
-```
-┌─────────────┐        ┌──────────────────────────────┐        ┌─────────────┐
-│  Next.js    │  REST  │          Spring Boot          │        │ PostgreSQL  │
-│  frontend   │───────▶│  writes: auth, orders, export │───────▶│  (11 tables,│
-│             │ GraphQL│  reads: portfolio, dashboard  │        │   Flyway)   │
-│             │───────▶│  push: SSE (fills, agent      │        └─────────────┘
-│             │  SSE   │        reasoning trace)        │        ┌─────────────┐
-│             │◀───────│                                │───────▶│    Redis    │
-└─────────────┘        │  ┌──────────────────────────┐  │        │  (cache)    │
-                        │  │  Order matching engine   │◀─┼───────▶│    Kafka    │
-                        │  └──────────────────────────┘  │        │  (internal, │
-                        │  ┌──────────────────────────┐  │        │  KRaft)     │
-                        │  │  GenAI research agent     │  │        └─────────────┘
-                        │  │  (Spring AI + Groq +      │  │        ┌─────────────┐
-                        │  │   Qdrant RAG)              │─┼───────▶│   Qdrant    │
-                        │  └──────────────────────────┘  │        │ (vectors)   │
-                        └──────────────────────────────┘
+```mermaid
+flowchart LR
+    subgraph Client["🖥️ Frontend — Next.js App Router"]
+        direction TB
+        Pages["Pages: auth · dashboard · companies\nstocks · portfolio · orders · watchlist\ncompare · time-machine · notes · activity"]
+        Hooks["hooks/* (React Query)"]
+        APIClient["lib/api — REST client\n(auth, orders, export, research)"]
+        GQLClient["lib/graphql — GraphQL client\n(reads)"]
+        SSEClient["lib/sse — EventSource client\n(order fills, agent trace)"]
+        Pages --> Hooks --> APIClient & GQLClient & SSEClient
+    end
+
+    subgraph Backend["☕ Spring Boot Backend (Java 21)"]
+        direction TB
+
+        subgraph Edge["API Layer"]
+            direction LR
+            REST["REST Controllers\nAuth · Order · Export\nResearchAgent · Chat · Watchlist"]
+            GQL["GraphQL Resolvers\nDashboard · Portfolio · Company\nOrder · Watchlist · AuditLog\nComparison · TimeMachine · ChatHistory\nResearchNote"]
+            SSE["SSE Controllers\nOrderStreamController\n(fills + agent reasoning trace)"]
+        end
+
+        Security["Security\nJwtAuthFilter · JwtService\nRefreshTokenService · OneTimeCodeService\nLoginRateLimiter · Google OAuth2"]
+
+        subgraph Services["Service Layer"]
+            direction TB
+            Trading["OrderService · OrderMatcherService\nOrderTriggerEvaluator · TradeExecutionService"]
+            Research["QuoteService · StockDetailService\nHistoricalPriceService · StockComparisonService\nDashboardService · WatchlistService"]
+            Standout["AuditLogService (AOP) · TimeMachineService\nTransactionReplayer · export/* (PDF/CSV)"]
+            AgentSvc["ResearchAgentService · ChatService\nChatTools (10 @Tool methods)\nSseTraceService · ChatHistoryService"]
+        end
+
+        subgraph RAG["RAG Pipeline (rag/*)"]
+            direction TB
+            Ingest["ingest — CorpusLoader\nKnowledgeIngestionService"]
+            Chunk["chunking — Fixed / Recursive\nSemantic chunkers"]
+            Retrieve["retrieval — KnowledgeBaseService\nBM25 + dense hybrid, RRF fusion\nLlmRerankService"]
+            Ingest --> Chunk --> Retrieve
+        end
+
+        subgraph KafkaFlow["Kafka Pipeline (internal only)"]
+            direction LR
+            Producer1["StockPriceProducer"] --> TopicA[["stock-prices"]] --> Consumer1["OrderMatcherConsumer\n(manual-ack, post-commit)"]
+            Consumer1 --> Producer2["TradeExecutedProducer"] --> TopicB[["executed-trades"]] --> Consumer2["TradeExecutedConsumer"]
+        end
+
+        Scheduler["Schedulers\nPriceSyncScheduler (15min)\nOrderExpiryScheduler (60s)"]
+
+        External["External API Clients\nFinnhubClient · TwelveDataClient\nAlphaVantageClient"]
+
+        REST --> Security
+        REST --> Trading & Standout & AgentSvc
+        GQL --> Research & Standout & AgentSvc
+        SSE --> Trading
+        SSE --> AgentSvc
+        Trading <--> KafkaFlow
+        Trading --> TopicA
+        AgentSvc --> RAG
+        AgentSvc -->|"tool calls"| Trading & Research & Standout
+        Research --> External
+        Scheduler --> Research
+        Scheduler --> Trading
+    end
+
+    subgraph Data["Data & Infra"]
+        direction TB
+        PG[("PostgreSQL 15+\n11 tables · Flyway migrations")]
+        Redis[("Redis 7 / Upstash REST\nquotes 15m · charts 15-60m\nnews 1h · indicators 24h")]
+        Qdrant[("Qdrant Cloud\nvector store, 384-dim ONNX\nall-MiniLM-L6-v2 embeddings")]
+        Groq(["Groq API\nopenai/gpt-oss-120b\nvia Spring AI (OpenAI-compatible)"])
+        MarketAPIs(["Finnhub · Twelve Data\nAlpha Vantage"])
+    end
+
+    APIClient -- REST --> REST
+    GQLClient -- GraphQL --> GQL
+    SSEClient -- "SSE (push)" --> SSE
+
+    Services --> PG
+    Services --> Redis
+    RAG --> Qdrant
+    AgentSvc --> Groq
+    External --> MarketAPIs
+
+    classDef infra fill:#DBEAFE,stroke:#2563EB,color:#0F172A;
+    class PG,Redis,Qdrant,Groq,MarketAPIs infra;
 ```
 
-Kafka never reaches the frontend — it is strictly internal to the backend (price events in,
-matching engine, executed-trade events out). See [CLAUDE.md § API Design Rules](./CLAUDE.md#api-design-rules)
-for which transport (REST/GraphQL/SSE) each kind of request uses.
+- Kafka never reaches the frontend — it is strictly internal to the backend (price events in,
+  matching engine, executed-trade events out).
+- **REST** handles writes (auth, orders, exports, chat/agent triggers), **GraphQL** handles reads
+  (portfolio, dashboard, comparisons, timelines), **SSE** handles push (order fills, agent
+  reasoning trace) — see
+  [CLAUDE.md § API Design Rules](./CLAUDE.md#api-design-rules) for the rules behind that split.
+- The GenAI research agent (`ChatTools`) calls back into the same trading/research services as a
+  set of 10 `@Tool`-annotated methods, and separately grounds itself via the RAG pipeline over a
+  Qdrant-backed knowledge base of news + research notes.
 
 ## Local Setup
 
