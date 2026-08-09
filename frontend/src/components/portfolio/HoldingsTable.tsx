@@ -119,7 +119,8 @@ export default function HoldingsTable({
             </div>
             <div className="mt-2 flex justify-between text-xs text-[var(--color-text-secondary)]">
               <span>
-                {holding.quantity} sh @ {formatPrice(holding.averageCost)}
+                {holding.quantity} {holding.quantity === 1 ? 'share' : 'shares'} @{' '}
+                {formatPrice(holding.averageCost)}
               </span>
               <span>
                 Day:{' '}

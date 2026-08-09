@@ -8,8 +8,8 @@ function DecisionRow({ decision }: { decision: TimeMachineDecision }) {
       <div>
         <div className="font-medium text-[var(--color-text-primary)]">{decision.symbol}</div>
         <div className="text-xs text-[var(--color-text-secondary)]">
-          {decision.quantity} sh: {formatPrice(decision.buyPrice)} to{' '}
-          {formatPrice(decision.sellPrice)}
+          {decision.quantity} {decision.quantity === 1 ? 'share' : 'shares'}:{' '}
+          {formatPrice(decision.buyPrice)} to {formatPrice(decision.sellPrice)}
         </div>
       </div>
       <span

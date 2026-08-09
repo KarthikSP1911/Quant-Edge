@@ -53,7 +53,8 @@ export default function RecentActivity({ activity }: { activity: RecentActivityI
             </div>
             <div className="flex flex-col items-end tabular-nums">
               <span className="text-sm font-medium text-[var(--color-text-primary)]">
-                {item.quantity} sh @ {formatPrice(item.price)}
+                {item.quantity} {item.quantity === 1 ? 'share' : 'shares'} @{' '}
+                {formatPrice(item.price)}
               </span>
               <span className="text-xs text-[var(--color-text-secondary)]">
                 {formatPrice(item.quantity * item.price)}
