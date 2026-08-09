@@ -29,6 +29,7 @@ class FixedSizeChunkerTest {
 
     @Test
     void rejectsOverlapGreaterOrEqualToChunkSize() {
-        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class, () -> new FixedSizeChunker(10, 10));
+        org.junit.jupiter.api.Assertions.assertThrows(
+                IllegalArgumentException.class, () -> new FixedSizeChunker(10, 10));
     }
 }

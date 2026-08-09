@@ -50,7 +50,8 @@ public class SemanticChunker implements Chunker {
         int index = 0;
         for (int i = 0; i < sentences.size(); i++) {
             String sentence = sentences.get(i);
-            boolean isBreakpoint = i > 0 && (similarities[i - 1] < threshold || currentLength + sentence.length() > maxChunkSize);
+            boolean isBreakpoint =
+                    i > 0 && (similarities[i - 1] < threshold || currentLength + sentence.length() > maxChunkSize);
             if (isBreakpoint && !current.isEmpty()) {
                 chunks.add(new Chunk(String.join(" ", current), index++));
                 current = new ArrayList<>();

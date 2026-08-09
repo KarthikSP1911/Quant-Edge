@@ -81,7 +81,12 @@ public class ChatTools {
         try {
             FinnhubQuoteResponse quote = quoteService.getQuote(symbol);
             return new CustomQuoteResponse(
-                    quote.currentPrice(), quote.high(), quote.low(), quote.open(), quote.previousClose(), quote.timestamp());
+                    quote.currentPrice(),
+                    quote.high(),
+                    quote.low(),
+                    quote.open(),
+                    quote.previousClose(),
+                    quote.timestamp());
         } catch (Exception e) {
             return "Error executing getQuote: " + e.getMessage();
         }
@@ -135,8 +140,9 @@ public class ChatTools {
     }
 
     @Tool(
-            description = "Stage a new market or limit order for a stock. Type must be MARKET, LIMIT, STOP_LOSS, or "
-                    + "STOP_LIMIT. Side must be BUY or SELL. This does not execute the order; it waits for user confirmation.")
+            description =
+                    "Stage a new market or limit order for a stock. Type must be MARKET, LIMIT, STOP_LOSS, or "
+                            + "STOP_LIMIT. Side must be BUY or SELL. This does not execute the order; it waits for user confirmation.")
     public Object placeOrder(PlaceOrderRequest request) {
         try {
             User user = getCurrentUser();

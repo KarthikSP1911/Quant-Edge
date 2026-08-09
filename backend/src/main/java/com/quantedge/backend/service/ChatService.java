@@ -28,7 +28,10 @@ public class ChatService {
     private final ChatTools chatTools;
 
     public ChatService(
-            ChatClient chatClient, ChatHistoryRepository chatHistoryRepository, ObjectMapper objectMapper, ChatTools chatTools) {
+            ChatClient chatClient,
+            ChatHistoryRepository chatHistoryRepository,
+            ObjectMapper objectMapper,
+            ChatTools chatTools) {
         this.chatClient = chatClient;
         this.chatHistoryRepository = chatHistoryRepository;
         this.objectMapper = objectMapper;
@@ -66,12 +69,8 @@ public class ChatService {
         // Tool calling will be configured in the next branch (phase-5/chat-tools), but we can enable functions here if
         // they exist.
 
-        ChatResponse aiResponse = chatClient
-                .prompt()
-                .messages(messages)
-                .tools(chatTools)
-                .call()
-                .chatResponse();
+        ChatResponse aiResponse =
+                chatClient.prompt().messages(messages).tools(chatTools).call().chatResponse();
 
         Generation generation = aiResponse.getResult();
         String assistantText = generation.getOutput().getText();

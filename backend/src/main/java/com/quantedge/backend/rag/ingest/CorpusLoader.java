@@ -32,7 +32,8 @@ public class CorpusLoader {
 
     private List<KnowledgeDocument> load(String classpathLocation, SourceType sourceType) {
         try (InputStream in = new ClassPathResource(classpathLocation).getInputStream()) {
-            List<RawEntry> raw = objectMapper.readValue(in, objectMapper.getTypeFactory().constructCollectionType(List.class, RawEntry.class));
+            List<RawEntry> raw = objectMapper.readValue(
+                    in, objectMapper.getTypeFactory().constructCollectionType(List.class, RawEntry.class));
             return raw.stream()
                     .map(entry -> new KnowledgeDocument(entry.id, sourceType, entry.symbol, entry.title, entry.text))
                     .toList();

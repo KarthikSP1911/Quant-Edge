@@ -17,7 +17,8 @@ public class GoldSetLoader {
 
     public List<GoldExample> load() {
         try (InputStream in = new ClassPathResource(GOLD_SET_PATH).getInputStream()) {
-            return objectMapper.readValue(in, objectMapper.getTypeFactory().constructCollectionType(List.class, GoldExample.class));
+            return objectMapper.readValue(
+                    in, objectMapper.getTypeFactory().constructCollectionType(List.class, GoldExample.class));
         } catch (IOException e) {
             throw new IllegalStateException("Failed to load RAG gold set: " + GOLD_SET_PATH, e);
         }

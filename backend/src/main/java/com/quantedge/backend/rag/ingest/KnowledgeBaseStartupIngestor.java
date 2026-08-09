@@ -62,11 +62,18 @@ public class KnowledgeBaseStartupIngestor implements ApplicationRunner {
         }
         long existingCount = qdrantClient.countAsync(collectionName).get();
         if (existingCount > 0) {
-            log.info("Knowledge base collection '{}' already has {} points, skipping ingestion", collectionName, existingCount);
+            log.info(
+                    "Knowledge base collection '{}' already has {} points, skipping ingestion",
+                    collectionName,
+                    existingCount);
             return;
         }
         Chunker chunker = chunkerFactory.create(chunkingStrategy, chunkSize, chunkOverlap);
         int chunks = ingestionService.ingest(corpusLoader.loadAll(), chunker, knowledgeBaseVectorStore);
-        log.info("Ingested {} chunks into knowledge base collection '{}' using {}", chunks, collectionName, chunkingStrategy);
+        log.info(
+                "Ingested {} chunks into knowledge base collection '{}' using {}",
+                chunks,
+                collectionName,
+                chunkingStrategy);
     }
 }
