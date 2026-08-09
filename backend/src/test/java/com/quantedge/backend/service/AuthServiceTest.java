@@ -72,7 +72,7 @@ class AuthServiceTest {
     void register_Success() {
         RegisterRequest request = new RegisterRequest("Test User", "test@example.com", "password");
 
-        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
+        when(userRepository.findByEmailIgnoreCase("test@example.com")).thenReturn(Optional.empty());
         when(passwordEncoder.encode("password")).thenReturn("hashed");
         when(jwtService.generateAccessToken(any(User.class))).thenReturn("access");
         when(jwtService.generateRefreshToken(any(User.class))).thenReturn("refresh");
@@ -88,7 +88,7 @@ class AuthServiceTest {
     @Test
     void register_EmailTaken() {
         RegisterRequest request = new RegisterRequest("Test User", "test@example.com", "password");
-        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmailIgnoreCase("test@example.com")).thenReturn(Optional.of(testUser));
 
         assertThrows(EmailAlreadyInUseException.class, () -> authService.register(request));
     }
@@ -97,7 +97,7 @@ class AuthServiceTest {
     void login_Success() {
         LoginRequest request = new LoginRequest("test@example.com", "password");
 
-        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmailIgnoreCase("test@example.com")).thenReturn(Optional.of(testUser));
         when(jwtService.generateAccessToken(testUser)).thenReturn("access");
         when(jwtService.generateRefreshToken(testUser)).thenReturn("refresh");
 
