@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { getCurrentUser, logout } from '@/lib/auth/api'
 import { clearAccessToken, getAccessToken } from '@/lib/auth/tokens'
+import { useOutsideClick } from '@/hooks/useOutsideClick'
 
 function initials(name: string) {
   const parts = name.trim().split(/\s+/)
@@ -30,16 +31,7 @@ export default function UserMenu() {
     staleTime: 5 * 60 * 1000,
   })
 
-  useEffect(() => {
-    if (!open) return
-    const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [open])
+  useOutsideClick(menuRef, open, () => setOpen(false))
 
   const handleLogout = async () => {
     setIsLoggingOut(true)

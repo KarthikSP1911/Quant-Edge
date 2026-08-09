@@ -40,9 +40,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             jwt = authHeader.substring(7);
-        } else if ("/api/orders/stream".equals(request.getRequestURI()) && request.getParameter("token") != null) {
-            // EventSource cannot set request headers, so the SSE stream accepts the access token as
-            // a query param instead - scoped to this one path so no other endpoint gains that surface.
+        } else if (isSseQueryTokenPath(request.getRequestURI()) && request.getParameter("token") != null) {
+            // EventSource cannot set request headers, so SSE streams accept the access token as
+            // a query param instead - scoped to these paths so no other endpoint gains that surface.
             jwt = request.getParameter("token");
         } else {
             filterChain.doFilter(request, response);
@@ -69,5 +69,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private static boolean isSseQueryTokenPath(String requestUri) {
+        return "/api/orders/stream".equals(requestUri) || requestUri.startsWith("/api/v1/agent/trace/");
     }
 }

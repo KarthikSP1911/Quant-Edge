@@ -34,18 +34,14 @@ export default function RegisterPage() {
   }
 
   return (
-    <AuthLayout
-      eyebrow="Get started"
-      title="Create your account"
-      subtitle="Free simulated trading with real market data — no card required."
-    >
+    <AuthLayout eyebrow="Get started" title="Create your account">
       {error && (
-        <div className="mb-5 rounded-md border border-[var(--color-loss)]/30 bg-red-50 px-3 py-2.5 text-sm text-[var(--color-loss)]">
+        <div className="mb-4 rounded-md border border-[var(--color-loss)]/30 bg-red-50 px-3 py-2 text-sm text-[var(--color-loss)]">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleRegister} className="space-y-4">
+      <form onSubmit={handleRegister} className="space-y-3">
         <AuthInput
           label="Full name"
           type="text"
@@ -78,13 +74,13 @@ export default function RegisterPage() {
       <button
         type="button"
         onClick={handleGoogleLogin}
-        className="flex w-full items-center justify-center gap-2.5 rounded-md border border-[var(--color-border)] bg-white py-2.5 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-sidebar-hover)] active:scale-[0.99]"
+        className="flex w-full items-center justify-center gap-2.5 rounded-md border border-[var(--color-border)] bg-white py-2 text-sm font-medium text-[var(--color-text-primary)] transition-colors hover:bg-[var(--color-sidebar-hover)] active:scale-[0.99]"
       >
         <GoogleIcon />
         Continue with Google
       </button>
 
-      <p className="mt-8 text-center text-sm text-[var(--color-text-secondary)]">
+      <p className="mt-4 text-center text-sm text-[var(--color-text-secondary)]">
         Already have an account?{' '}
         <Link href="/login" className="font-medium text-[var(--color-accent-blue)] hover:underline">
           Sign in

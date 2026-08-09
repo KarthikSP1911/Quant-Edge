@@ -45,11 +45,15 @@ export default function WatchlistTable({
   companies,
   onRemove,
   removingSymbol,
+  limit,
 }: {
   companies: Company[]
   onRemove: (symbol: string) => void
   removingSymbol: string | null
+  limit?: number
 }) {
+  const visible = limit ? companies.slice(0, limit) : companies
+
   return (
     <>
       {/* Desktop / tablet table */}
@@ -64,7 +68,7 @@ export default function WatchlistTable({
             </tr>
           </thead>
           <tbody>
-            {companies.map((company) => (
+            {visible.map((company) => (
               <tr
                 key={company.id}
                 className="border-b border-[var(--color-border)] last:border-b-0"
@@ -93,7 +97,7 @@ export default function WatchlistTable({
 
       {/* Mobile card list */}
       <div className="flex flex-col gap-2 sm:hidden">
-        {companies.map((company) => (
+        {visible.map((company) => (
           <Link
             key={company.id}
             href={`/stocks/${company.symbol}`}

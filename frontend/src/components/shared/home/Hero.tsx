@@ -2,24 +2,32 @@
 
 import { motion, type Variants } from 'framer-motion'
 
-const CHART_POINTS = [
-  [0, 92],
-  [30, 84],
-  [60, 88],
-  [90, 70],
-  [120, 76],
-  [150, 58],
-  [180, 64],
-  [210, 46],
-  [240, 52],
-  [270, 34],
-  [300, 40],
-  [330, 22],
-  [360, 28],
+const CANDLE_COUNT = 10
+const CANDLE_SLOT = 360 / CANDLE_COUNT
+const CANDLE_WIDTH = CANDLE_SLOT * 0.46
+const GRIDLINES = [22, 58, 94]
+
+// Fixed series (viewBox y: 0 = highest price, 110 = lowest) matching the reference
+// hero screenshot's exact candle-by-candle shape: green, red, red, green, green,
+// red, green, green, red, green, in a rising staircase.
+const CANDLE_SERIES: { open: number; close: number; high: number; low: number }[] = [
+  { open: 78.6, close: 61.1, high: 58.3, low: 92.9 },
+  { open: 61.9, close: 74.6, high: 39.6, low: 74.6 },
+  { open: 70.5, close: 93.7, high: 70.5, low: 110 },
+  { open: 93.7, close: 46.0, high: 46.0, low: 93.7 },
+  { open: 50.9, close: 35.5, high: 30.6, low: 50.9 },
+  { open: 38.7, close: 72.6, high: 24.4, low: 72.6 },
+  { open: 58.3, close: 20.4, high: 20.4, low: 58.3 },
+  { open: 26.5, close: 8.1, high: 6.1, low: 32.6 },
+  { open: 18.3, close: 38.7, high: 12.2, low: 46.0 },
+  { open: 27.7, close: 2.0, high: 0, low: 27.7 },
 ]
 
-const CHART_LINE = CHART_POINTS.map(([x, y]) => `${x},${y}`).join(' ')
-const CHART_AREA = `0,110 ${CHART_LINE} 360,110`
+const CANDLES = CANDLE_SERIES.map((c, i) => ({
+  cx: CANDLE_SLOT / 2 + i * CANDLE_SLOT,
+  ...c,
+  bullish: c.close <= c.open,
+}))
 
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 24 },
@@ -56,7 +64,7 @@ export default function Hero() {
               animate="show"
               custom={0.1}
               variants={fadeUp}
-              className="mt-6 text-5xl leading-[1.05] font-semibold tracking-tight text-[var(--color-text-primary)] sm:text-6xl"
+              className="mt-6 text-3xl leading-[1.1] font-semibold tracking-tight text-[var(--color-text-primary)] sm:text-4xl"
             >
               Make Better <br />
               Investment <br />
@@ -124,15 +132,44 @@ export default function Hero() {
                 preserveAspectRatio="none"
                 aria-hidden="true"
               >
-                <polygon points={CHART_AREA} fill="var(--color-accent-light)" opacity="0.6" />
-                <polyline
-                  points={CHART_LINE}
-                  fill="none"
-                  stroke="var(--color-accent-blue)"
-                  strokeWidth="2.5"
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                />
+                {GRIDLINES.map((y) => (
+                  <line
+                    key={y}
+                    x1="0"
+                    y1={y}
+                    x2="360"
+                    y2={y}
+                    stroke="var(--color-border)"
+                    strokeWidth="1"
+                  />
+                ))}
+
+                {CANDLES.map((candle, i) => {
+                  const color = candle.bullish ? 'var(--color-profit)' : 'var(--color-loss)'
+                  const bodyTop = Math.min(candle.open, candle.close)
+                  const bodyHeight = Math.max(2, Math.abs(candle.close - candle.open))
+                  return (
+                    <g key={i}>
+                      <line
+                        x1={candle.cx}
+                        y1={candle.high}
+                        x2={candle.cx}
+                        y2={candle.low}
+                        stroke={color}
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                      />
+                      <rect
+                        x={candle.cx - CANDLE_WIDTH / 2}
+                        y={bodyTop}
+                        width={CANDLE_WIDTH}
+                        height={bodyHeight}
+                        rx="2"
+                        fill={color}
+                      />
+                    </g>
+                  )
+                })}
               </svg>
 
               <div className="mt-4 grid grid-cols-3 gap-4 border-t border-[var(--color-border)] pt-4 text-sm">

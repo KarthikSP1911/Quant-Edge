@@ -109,8 +109,8 @@ export default function OrderTicket({
       <ModalShell onClose={onClose}>
         <p className="text-sm font-semibold text-[var(--color-profit)]">Order filled</p>
         <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-          {isBuy ? 'Bought' : 'Sold'} {result.quantity} sh {symbol} @{' '}
-          {formatPrice(result.executionPrice)} &middot; total{' '}
+          {isBuy ? 'Bought' : 'Sold'} {result.quantity} {result.quantity === 1 ? 'share' : 'shares'}{' '}
+          of {symbol} @ {formatPrice(result.executionPrice)} &middot; total{' '}
           {formatPrice(result.quantity * result.executionPrice)}
         </p>
         <button
@@ -130,8 +130,8 @@ export default function OrderTicket({
       <ModalShell onClose={onClose}>
         <p className="text-sm font-semibold text-[var(--color-profit)]">Order placed</p>
         <p className="mt-2 text-sm text-[var(--color-text-secondary)]">
-          {isBuy ? 'Buy' : 'Sell'} {result.quantity} sh {symbol} resting as{' '}
-          {result.type.replace('_', ' ').toLowerCase()}, status {result.status}
+          {isBuy ? 'Buy' : 'Sell'} {result.quantity} {result.quantity === 1 ? 'share' : 'shares'} of{' '}
+          {symbol} resting as {result.type.replace('_', ' ').toLowerCase()}, status {result.status}
         </p>
         <button
           type="button"
@@ -245,7 +245,9 @@ export default function OrderTicket({
             <div className="mt-1 flex items-center justify-between text-xs text-[var(--color-text-muted)]">
               <span>{isBuy ? 'Cash available' : 'Shares owned'}</span>
               <span className="tabular-nums">
-                {isBuy ? formatPrice(cashBalance) : `${ownedQuantity} sh`}
+                {isBuy
+                  ? formatPrice(cashBalance)
+                  : `${ownedQuantity} ${ownedQuantity === 1 ? 'share' : 'shares'}`}
               </span>
             </div>
           </>
@@ -283,7 +285,7 @@ export default function OrderTicket({
           >
             {mutation.isPending
               ? 'Placing order…'
-              : `${isBuy ? 'Buy' : 'Sell'} ${quantity || 0} sh`}
+              : `${isBuy ? 'Buy' : 'Sell'} ${quantity || 0} ${quantity === 1 ? 'share' : 'shares'}`}
           </button>
         </div>
       </form>

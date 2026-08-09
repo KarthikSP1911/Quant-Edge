@@ -4,8 +4,12 @@ import { useDashboard } from '@/hooks/useDashboard'
 import { DashboardSkeleton, DashboardError } from '@/components/dashboard/DashboardStates'
 import AllocationChart from '@/components/dashboard/AllocationChart'
 import RecentActivity from '@/components/dashboard/RecentActivity'
+import BalanceSummary from '@/components/dashboard/BalanceSummary'
+import HoldingsPreview from '@/components/dashboard/HoldingsPreview'
+import WatchlistPreview from '@/components/dashboard/WatchlistPreview'
+import RecentOrdersPreview from '@/components/dashboard/RecentOrdersPreview'
+import QuickActions from '@/components/dashboard/QuickActions'
 import ExportButtons from '@/components/shared/ExportButtons'
-import { formatPrice, formatChangePercent } from '@/lib/utils/format'
 
 export default function DashboardPage() {
   const { data, isLoading, isError, refetch } = useDashboard()
@@ -34,15 +38,28 @@ export default function DashboardPage() {
             dayChangePercent={data.dayChangePercent}
           />
 
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <section className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] p-5">
+          <QuickActions />
+
+          <HoldingsPreview />
+
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="min-w-0">
+              <WatchlistPreview />
+            </div>
+            <div className="min-w-0">
+              <RecentOrdersPreview />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <section className="min-w-0 rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] p-5">
               <h2 className="mb-4 text-sm font-semibold text-[var(--color-text-primary)]">
                 Allocation by sector
               </h2>
               <AllocationChart allocation={data.allocation} />
             </section>
 
-            <section className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] p-5">
+            <section className="min-w-0 rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] p-5">
               <h2 className="mb-2 text-sm font-semibold text-[var(--color-text-primary)]">
                 Recent activity
               </h2>
@@ -51,47 +68,6 @@ export default function DashboardPage() {
           </div>
         </>
       )}
-    </div>
-  )
-}
-
-function BalanceSummary({
-  cashBalance,
-  netWorth,
-  dayChangeValue,
-  dayChangePercent,
-}: {
-  cashBalance: number
-  netWorth: number
-  dayChangeValue: number
-  dayChangePercent: number
-}) {
-  const isPositive = dayChangeValue >= 0
-  const changeColor = isPositive ? 'var(--color-profit)' : 'var(--color-loss)'
-  const sign = isPositive ? '+' : ''
-
-  return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-      <SummaryTile label="Cash balance" value={formatPrice(cashBalance)} />
-      <SummaryTile label="Total net worth" value={formatPrice(netWorth)} />
-      <div className="flex flex-col gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] p-5">
-        <span className="text-xs font-medium text-[var(--color-text-secondary)]">Day change</span>
-        <span className="text-xl font-semibold tabular-nums" style={{ color: changeColor }}>
-          {sign}
-          {formatPrice(dayChangeValue)} ({formatChangePercent(dayChangePercent)})
-        </span>
-      </div>
-    </div>
-  )
-}
-
-function SummaryTile({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex flex-col gap-1 rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] p-5">
-      <span className="text-xs font-medium text-[var(--color-text-secondary)]">{label}</span>
-      <span className="text-xl font-semibold tabular-nums text-[var(--color-text-primary)]">
-        {value}
-      </span>
     </div>
   )
 }

@@ -5,23 +5,6 @@ import Link from 'next/link'
 import { useState } from 'react'
 import Logo from '@/components/shared/Logo'
 
-const navLinks = [
-  { href: '#features', label: 'Features' },
-  { href: '#docs', label: 'Docs' },
-]
-
-function NavLink({ href, label }: { href: string; label: string }) {
-  return (
-    <a
-      href={href}
-      className="group relative text-sm font-medium text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-text-primary)]"
-    >
-      {label}
-      <span className="absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 bg-[var(--color-accent-blue)] transition-transform duration-200 ease-out group-hover:scale-x-100" />
-    </a>
-  )
-}
-
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -33,14 +16,8 @@ export default function Navbar() {
           aria-label="QuantEdge home"
           className="transition-transform duration-200 hover:scale-105 active:scale-95"
         >
-          <Logo variant="full" size={24} />
+          <Logo variant="full" size={30} />
         </Link>
-
-        <div className="hidden items-center gap-8 md:flex">
-          {navLinks.map((link) => (
-            <NavLink key={link.href} href={link.href} label={link.label} />
-          ))}
-        </div>
 
         <div className="hidden items-center gap-6 md:flex">
           <Link
@@ -92,17 +69,7 @@ export default function Navbar() {
         }`}
       >
         <div className="flex flex-col gap-1 px-8 py-4 sm:px-12">
-          {navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              onClick={() => setMenuOpen(false)}
-              className="rounded-md px-2 py-2 text-sm font-medium text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-sidebar-hover)] hover:text-[var(--color-text-primary)]"
-            >
-              {link.label}
-            </a>
-          ))}
-          <div className="mt-2 flex flex-col gap-2 border-t border-[var(--color-border)] pt-4">
+          <div className="flex flex-col gap-2">
             <Link
               href="/login"
               className="rounded-md px-2 py-2 text-sm font-medium text-[var(--color-text-secondary)] transition-colors hover:bg-[var(--color-sidebar-hover)] hover:text-[var(--color-text-primary)]"

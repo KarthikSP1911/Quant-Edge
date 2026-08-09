@@ -1,0 +1,42 @@
+<configuration>
+
+    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+
+    <!-- Compact, colorized console line: HH:mm:ss level [thread] logger - message.
+         Logger name is abbreviated to its last segment so lines don't wrap on a
+         normal terminal width. -->
+    <property name="CONSOLE_LOG_PATTERN"
+        value="%clr(%d{HH:mm:ss}){faint} %clr(%-5level) %clr([%15.15thread]){faint} %clr(%-30.30logger{0}){cyan} %clr(-){faint} %msg%n%wEx" />
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <root level="WARN">
+        <appender-ref ref="CONSOLE" />
+    </root>
+
+    <logger name="com.quantedge" level="INFO" />
+
+    <!-- Known-chatty frameworks: keep them at WARN even if root is loosened for
+         debugging, so a `logging.level.root=INFO` tweak doesn't flood the console
+         with connection-pool/SQL/security-filter noise. -->
+    <logger name="org.hibernate" level="WARN" />
+    <logger name="org.flywaydb" level="INFO" />
+    <logger name="com.zaxxer.hikari" level="WARN" />
+    <!-- NetworkClient logs a WARN on every broker reconnect attempt (constant background
+         noise against Aiven's Kafka when idle or on a flaky connection) - drop that specific
+         logger to ERROR; keep the rest of the Kafka client tree at WARN. -->
+    <logger name="org.apache.kafka.clients.NetworkClient" level="ERROR" />
+    <logger name="org.apache.kafka" level="WARN" />
+    <logger name="org.springframework.kafka" level="WARN" />
+    <logger name="org.springframework.security" level="WARN" />
+    <logger name="org.springframework.web" level="WARN" />
+    <logger name="io.qdrant" level="WARN" />
+    <logger name="io.grpc" level="WARN" />
+    <logger name="org.apache.tomcat" level="WARN" />
+    <logger name="org.apache.catalina" level="WARN" />
+
+</configuration>

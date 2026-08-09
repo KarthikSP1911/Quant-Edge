@@ -26,7 +26,15 @@ function HoldingIdentity({ holding }: { holding: Holding }) {
   )
 }
 
-export default function HoldingsTable({ holdings }: { holdings: Holding[] }) {
+export default function HoldingsTable({
+  holdings,
+  limit,
+}: {
+  holdings: Holding[]
+  limit?: number
+}) {
+  const visible = limit ? holdings.slice(0, limit) : holdings
+
   return (
     <>
       {/* Desktop / tablet table */}
@@ -44,7 +52,7 @@ export default function HoldingsTable({ holdings }: { holdings: Holding[] }) {
             </tr>
           </thead>
           <tbody>
-            {holdings.map((holding) => (
+            {visible.map((holding) => (
               <tr
                 key={holding.symbol}
                 className="border-b border-[var(--color-border)] last:border-b-0"
@@ -89,7 +97,7 @@ export default function HoldingsTable({ holdings }: { holdings: Holding[] }) {
 
       {/* Mobile card list */}
       <div className="flex flex-col gap-2 sm:hidden">
-        {holdings.map((holding) => (
+        {visible.map((holding) => (
           <Link
             key={holding.symbol}
             href={`/stocks/${holding.symbol}`}
@@ -111,7 +119,8 @@ export default function HoldingsTable({ holdings }: { holdings: Holding[] }) {
             </div>
             <div className="mt-2 flex justify-between text-xs text-[var(--color-text-secondary)]">
               <span>
-                {holding.quantity} sh @ {formatPrice(holding.averageCost)}
+                {holding.quantity} {holding.quantity === 1 ? 'share' : 'shares'} @{' '}
+                {formatPrice(holding.averageCost)}
               </span>
               <span>
                 Day:{' '}

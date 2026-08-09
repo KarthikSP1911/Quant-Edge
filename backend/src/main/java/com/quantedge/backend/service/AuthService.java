@@ -36,12 +36,13 @@ public class AuthService {
     private final LoginRateLimiter loginRateLimiter;
 
     public TokenResponse register(RegisterRequest request) {
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+        String email = request.getEmail().trim().toLowerCase();
+        if (userRepository.findByEmailIgnoreCase(email).isPresent()) {
             throw new EmailAlreadyInUseException("Email already in use");
         }
         var user = User.builder()
                 .name(request.getName())
-                .email(request.getEmail())
+                .email(email)
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .role(Role.USER)
                 .authProvider(AuthProvider.LOCAL)
@@ -61,7 +62,7 @@ public class AuthService {
             throw e;
         }
         var user = userRepository
-                .findByEmail(request.getEmail())
+                .findByEmailIgnoreCase(request.getEmail())
                 .orElseThrow(() -> new InvalidCredentialsException("Invalid email or password"));
 
         loginRateLimiter.recordSuccess(request.getEmail());
