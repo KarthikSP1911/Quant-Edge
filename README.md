@@ -25,6 +25,12 @@ approve lefthook's postinstall so hooks actually get installed:
 npm approve-scripts lefthook
 ```
 
+## Docker
+
+See [docs/docker.md](./docs/docker.md) for running the full local stack
+(`docker compose --profile local up --build`) or against hosted infra
+(`docker compose up backend frontend --build`).
+
 ## Retrieval Evaluation
 
 Phase 5's RAG layer (`backend/src/main/java/com/quantedge/backend/rag`) grounds the chat agent's

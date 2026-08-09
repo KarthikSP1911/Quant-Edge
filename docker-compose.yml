@@ -1,0 +1,119 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    profiles: ["local"]
+    environment:
+      POSTGRES_DB: quantedge
+      POSTGRES_USER: quantedge
+      POSTGRES_PASSWORD: quantedge
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quantedge -d quantedge"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    profiles: ["local"]
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Translates Upstash's REST protocol to the plain `redis` container above, since
+  # RedisCacheClient always speaks Upstash REST, never the native RESP wire protocol.
+  redis-http:
+    image: hiett/serverless-redis-http:latest
+    profiles: ["local"]
+    environment:
+      SRH_MODE: env
+      SRH_TOKEN: local-dev-token
+      SRH_CONNECTION_STRING: redis://redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    ports:
+      - "8079:80"
+
+  zookeeper:
+    image: bitnami/zookeeper:latest
+    profiles: ["local"]
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: bitnami/kafka:latest
+    profiles: ["local"]
+    environment:
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+
+  backend:
+    build:
+      context: ./backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: false
+      redis-http:
+        condition: service_started
+        required: false
+      kafka:
+        condition: service_started
+        required: false
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-jdbc:postgresql://postgres:5432/quantedge}
+      DATABASE_USERNAME: ${DATABASE_USERNAME:-quantedge}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-quantedge}
+      UPSTASH_REDIS_REST_URL: ${UPSTASH_REDIS_REST_URL:-http://redis-http:80}
+      UPSTASH_REDIS_REST_TOKEN: ${UPSTASH_REDIS_REST_TOKEN:-local-dev-token}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+      KAFKA_SECURITY_PROTOCOL: ${KAFKA_SECURITY_PROTOCOL:-PLAINTEXT}
+      KAFKA_SASL_USERNAME: ${KAFKA_SASL_USERNAME:-}
+      KAFKA_SASL_PASSWORD: ${KAFKA_SASL_PASSWORD:-}
+      KAFKA_SSL_BUNDLE: ${KAFKA_SSL_BUNDLE:-}
+      KAFKA_SSL_TRUSTSTORE_LOCATION: ${KAFKA_SSL_TRUSTSTORE_LOCATION:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      FINNHUB_API_KEY: ${FINNHUB_API_KEY:-}
+      TWELVE_DATA_API_KEY: ${TWELVE_DATA_API_KEY:-}
+      ALPHA_VANTAGE_API_KEY: ${ALPHA_VANTAGE_API_KEY:-}
+      QDRANT_URL: ${QDRANT_URL:-}
+      QDRANT_API_KEY: ${QDRANT_API_KEY:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://backend:8080}
+    depends_on:
+      - backend
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://backend:8080}
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres-data:
