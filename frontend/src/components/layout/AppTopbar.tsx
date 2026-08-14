@@ -11,6 +11,7 @@ const navLinks = [
   { href: '/companies', label: 'Companies' },
   { href: '/orders', label: 'Orders' },
   { href: '/research', label: 'Research' },
+  { href: '/wallet', label: 'Wallet' },
 ]
 
 export default function AppTopbar() {
