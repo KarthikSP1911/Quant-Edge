@@ -129,6 +129,16 @@ type AuditLogPage {
     size: Int!
 }
 
+# --- Wallet ---
+
+type WalletTransaction {
+    id: ID!
+    amountUsdCents: Int!
+    creditsAwarded: Float!
+    status: String!
+    createdAt: String!
+}
+
 # --- Stock Comparison (Phase 4) ---
 
 """
@@ -227,4 +237,5 @@ type Query {
     portfolioTimeMachine(asOfDate: String!): TimeMachineResult!
     chatHistory: [ChatHistory!]!
     researchNotes(symbol: String): [ResearchNote!]!
+    walletTransactions: [WalletTransaction!]!
 }
