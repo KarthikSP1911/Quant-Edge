@@ -42,11 +42,13 @@ docker-compose.yml at root
 - Cache-first: ~90% of page loads must hit Redis/Postgres only. External APIs are called on cache miss only.
 - External API rate limits are hard constraints: Finnhub 60/min, Twelve Data 800/day, Alpha Vantage 25/day, Groq 30/min
 
-## Database — 11 tables
+## Database — 12 tables
 
-users, companies, portfolios, transactions, orders, order_executions, watchlists, audit_logs, research_notes, alerts, chat_history
+users, companies, portfolios, transactions, orders, order_executions, watchlists, audit_logs, research_notes, alerts, chat_history, wallet_transactions
 
 All schema changes go through Flyway migrations. Never hand-edit a migration that has already been applied — write a new one.
+
+`wallet_transactions` backs the Stripe wallet top-up feature (real USD via Stripe Checkout → virtual `users.balance` credits, at a fixed $1 = 10 credits rate). It lives outside the 7-phase build plan below — it was added on its own `feature/stripe-wallet-topup` branch rather than a `phase-<n>/*` one, and commits use the `wallet` commitlint scope.
 
 ## Branding / Design Tokens
 
