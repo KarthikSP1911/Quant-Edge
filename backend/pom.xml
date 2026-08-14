@@ -188,6 +188,13 @@
 			<version>5.9</version>
 		</dependency>
 
+		<!-- Wallet top-up: Stripe Checkout (one-time payment) -->
+		<dependency>
+			<groupId>com.stripe</groupId>
+			<artifactId>stripe-java</artifactId>
+			<version>29.2.0</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
