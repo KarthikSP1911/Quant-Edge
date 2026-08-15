@@ -31,7 +31,7 @@ export default function RecentActivity({ activity }: { activity: RecentActivityI
             key={item.id}
             className="flex items-center justify-between gap-3 border-b border-[var(--color-border)] py-3 last:border-b-0"
           >
-            <div className="flex items-center gap-3">
+            <div className="flex min-w-0 items-center gap-3">
               <span
                 className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
                   isBuy
@@ -42,21 +42,21 @@ export default function RecentActivity({ activity }: { activity: RecentActivityI
               >
                 {isBuy ? 'B' : 'S'}
               </span>
-              <div className="flex flex-col">
-                <span className="text-sm font-medium text-[var(--color-text-primary)]">
+              <div className="flex min-w-0 flex-col">
+                <span className="truncate text-sm font-medium text-[var(--color-text-primary)]">
                   {isBuy ? 'Bought' : 'Sold'} {item.symbol}
                 </span>
-                <span className="text-xs text-[var(--color-text-secondary)]">
+                <span className="text-xs whitespace-nowrap text-[var(--color-text-secondary)]">
                   {formatTimestamp(item.timestamp)}
                 </span>
               </div>
             </div>
-            <div className="flex flex-col items-end tabular-nums">
-              <span className="text-sm font-medium text-[var(--color-text-primary)]">
+            <div className="flex shrink-0 flex-col items-end tabular-nums">
+              <span className="text-sm font-medium whitespace-nowrap text-[var(--color-text-primary)]">
                 {item.quantity} {item.quantity === 1 ? 'share' : 'shares'} @{' '}
                 {formatPrice(item.price)}
               </span>
-              <span className="text-xs text-[var(--color-text-secondary)]">
+              <span className="text-xs whitespace-nowrap text-[var(--color-text-secondary)]">
                 {formatPrice(item.quantity * item.price)}
               </span>
             </div>

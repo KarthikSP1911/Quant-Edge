@@ -1,15 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { useResearchNotes } from '@/hooks/useResearchNotes'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
 import Link from 'next/link'
+import { useResearchNotes } from '@/hooks/useResearchNotes'
+import ChatMarkdown from '@/components/chat/ChatMarkdown'
 
 function NotesSkeleton() {
   return (
-    <div className="flex flex-1 gap-6 overflow-hidden">
-      <div className="flex w-full max-w-xs shrink-0 flex-col gap-2 border-r border-[var(--color-border)] pr-4">
+    <div className="flex flex-col gap-6 sm:flex-row">
+      <div className="flex w-full shrink-0 flex-col gap-2 sm:max-w-xs">
         {Array.from({ length: 5 }).map((_, i) => (
           <div
             key={i}
@@ -32,7 +31,7 @@ function NotesSkeleton() {
 
 function NotesError({ onRetry }: { onRetry: () => void }) {
   return (
-    <div className="flex flex-1 flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-[var(--color-loss)]/40 bg-red-50/40 py-16 text-center">
+    <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-[var(--color-loss)]/40 bg-red-50/40 py-16 text-center">
       <p className="font-medium text-[var(--color-text-primary)]">Couldn&apos;t load notes</p>
       <p className="text-sm text-[var(--color-text-secondary)]">
         Something went wrong. Please try again.
@@ -48,29 +47,23 @@ function NotesError({ onRetry }: { onRetry: () => void }) {
   )
 }
 
-export default function NotesPage() {
+export default function ResearchNotesTab() {
   const { data: notes, isPending, isError, refetch } = useResearchNotes()
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(null)
 
-  const selectedNote = notes?.find((n) => n.id === selectedNoteId)
+  const visibleNotes = notes ?? []
+  const selectedNote = visibleNotes.find((n) => n.id === selectedNoteId)
 
   return (
-    <div className="flex h-[calc(100vh-9rem)] flex-col gap-6">
-      <div>
-        <h1 className="text-xl font-semibold text-[var(--color-text-primary)]">Research Notes</h1>
-        <p className="text-sm text-[var(--color-text-secondary)]">
-          AI-generated research notes saved from your stock research sessions.
-        </p>
-      </div>
-
+    <div className="flex flex-col gap-6">
       {isPending && <NotesSkeleton />}
       {isError && !isPending && <NotesError onRetry={() => void refetch()} />}
 
       {notes && !isPending && !isError && (
-        <div className="flex flex-1 gap-6 overflow-hidden">
+        <div className="flex flex-col gap-6 sm:flex-row">
           {/* Sidebar: note list */}
-          <div className="flex w-full max-w-xs shrink-0 flex-col overflow-y-auto border-r border-[var(--color-border)] pr-4">
-            {notes.length === 0 ? (
+          <div className="flex w-full shrink-0 flex-col gap-2 overflow-y-auto sm:max-w-xs sm:max-h-[65vh] sm:border-r sm:border-[var(--color-border)] sm:pr-4">
+            {visibleNotes.length === 0 ? (
               <div className="flex flex-col items-center gap-1 rounded-lg border border-dashed border-[var(--color-border)] py-12 text-center">
                 <p className="text-sm font-medium text-[var(--color-text-primary)]">
                   No notes saved yet
@@ -80,42 +73,40 @@ export default function NotesPage() {
                 </p>
               </div>
             ) : (
-              <div className="flex flex-col gap-2">
-                {notes.map((note) => (
-                  <button
-                    key={note.id}
-                    type="button"
-                    onClick={() => setSelectedNoteId(note.id)}
-                    className={`flex flex-col items-start rounded-lg border p-3 text-left transition-colors ${
-                      selectedNoteId === note.id
-                        ? 'border-[var(--color-accent-blue)] bg-[var(--color-accent-light)]'
-                        : 'border-[var(--color-border)] hover:bg-[var(--color-sidebar-hover)]'
-                    }`}
-                  >
-                    <div className="flex w-full items-center justify-between gap-2">
-                      <span className="font-medium text-[var(--color-text-primary)]">
-                        {note.company.symbol}
-                      </span>
-                      <span className="shrink-0 text-xs text-[var(--color-text-secondary)]">
-                        {new Date(note.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                    <h3 className="mt-1 line-clamp-1 text-sm text-[var(--color-text-secondary)]">
-                      {note.title}
-                    </h3>
-                    <span className="mt-2 rounded-full bg-[var(--color-sidebar-hover)] px-2 py-0.5 text-[10px] font-medium tracking-wide text-[var(--color-text-secondary)] uppercase">
-                      By {note.generatedBy}
+              visibleNotes.map((note) => (
+                <button
+                  key={note.id}
+                  type="button"
+                  onClick={() => setSelectedNoteId(note.id)}
+                  className={`flex flex-col items-start rounded-lg border p-3 text-left transition-colors ${
+                    selectedNoteId === note.id
+                      ? 'border-[var(--color-accent-blue)] bg-[var(--color-accent-light)]'
+                      : 'border-[var(--color-border)] hover:bg-[var(--color-sidebar-hover)]'
+                  }`}
+                >
+                  <div className="flex w-full items-center justify-between gap-2">
+                    <span className="font-medium text-[var(--color-text-primary)]">
+                      {note.company.symbol}
                     </span>
-                  </button>
-                ))}
-              </div>
+                    <span className="shrink-0 text-xs text-[var(--color-text-secondary)]">
+                      {new Date(note.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <h3 className="mt-1 line-clamp-1 text-sm text-[var(--color-text-secondary)]">
+                    {note.title}
+                  </h3>
+                  <span className="mt-2 rounded-full bg-[var(--color-sidebar-hover)] px-2 py-0.5 text-[10px] font-medium tracking-wide text-[var(--color-text-secondary)] uppercase">
+                    By {note.generatedBy}
+                  </span>
+                </button>
+              ))
             )}
           </div>
 
           {/* Main content: note reader */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto sm:max-h-[65vh]">
             {selectedNote ? (
-              <article className="prose max-w-none pb-12">
+              <article className="pb-4">
                 <div className="mb-6 border-b border-[var(--color-border)] pb-4">
                   <h2 className="mb-2 text-xl font-semibold text-[var(--color-text-primary)]">
                     {selectedNote.title}
@@ -132,12 +123,12 @@ export default function NotesPage() {
                   </div>
                 </div>
 
-                <div className="text-[var(--color-text-primary)]">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{selectedNote.content}</ReactMarkdown>
+                <div className="text-sm text-[var(--color-text-primary)]">
+                  <ChatMarkdown content={selectedNote.content} />
                 </div>
               </article>
             ) : (
-              <div className="flex h-full flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-[var(--color-border)] text-center">
+              <div className="flex h-full min-h-[240px] flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-[var(--color-border)] text-center">
                 <p className="text-sm font-medium text-[var(--color-text-primary)]">
                   Select a note to read
                 </p>

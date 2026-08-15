@@ -63,6 +63,7 @@ enum OrderType {
 type Order {
     id: ID!
     symbol: String!
+    company: Company!
     side: OrderSide!
     type: OrderType!
     status: OrderStatus!

@@ -11,6 +11,7 @@ import com.quantedge.backend.enums.OrderType;
 public record OrderSummaryResponse(
         UUID id,
         String symbol,
+        CompanyResponse company,
         OrderSide side,
         OrderType type,
         OrderStatus status,

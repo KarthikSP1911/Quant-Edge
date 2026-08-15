@@ -53,6 +53,10 @@ export type OrderKind = 'MARKET' | 'LIMIT' | 'STOP_LOSS' | 'STOP_LIMIT'
 export interface Order {
   id: string
   symbol: string
+  company: {
+    symbol: string
+    logoUrl: string | null
+  }
   side: OrderSide
   type: OrderKind
   status: OrderStatus

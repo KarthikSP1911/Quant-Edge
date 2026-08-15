@@ -4,6 +4,10 @@ import { graphqlRequest } from './client'
 const ORDER_FIELDS = `
   id
   symbol
+  company {
+    symbol
+    logoUrl
+  }
   side
   type
   status

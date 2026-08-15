@@ -3,11 +3,9 @@
 import { useDashboard } from '@/hooks/useDashboard'
 import { DashboardSkeleton, DashboardError } from '@/components/dashboard/DashboardStates'
 import AllocationChart from '@/components/dashboard/AllocationChart'
-import RecentActivity from '@/components/dashboard/RecentActivity'
 import BalanceSummary from '@/components/dashboard/BalanceSummary'
 import HoldingsPreview from '@/components/dashboard/HoldingsPreview'
 import WatchlistPreview from '@/components/dashboard/WatchlistPreview'
-import RecentOrdersPreview from '@/components/dashboard/RecentOrdersPreview'
 import QuickActions from '@/components/dashboard/QuickActions'
 import ExportButtons from '@/components/shared/ExportButtons'
 
@@ -20,7 +18,7 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-xl font-semibold text-[var(--color-text-primary)]">Dashboard</h1>
           <p className="text-sm text-[var(--color-text-secondary)]">
-            Your simulated account balance, allocation, and recent activity.
+            Your simulated account balance, holdings, and sector allocation.
           </p>
         </div>
         <ExportButtons />
@@ -42,30 +40,14 @@ export default function DashboardPage() {
 
           <HoldingsPreview />
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <div className="min-w-0">
-              <WatchlistPreview />
-            </div>
-            <div className="min-w-0">
-              <RecentOrdersPreview />
-            </div>
-          </div>
+          <WatchlistPreview />
 
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <section className="min-w-0 rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] p-5">
-              <h2 className="mb-4 text-sm font-semibold text-[var(--color-text-primary)]">
-                Allocation by sector
-              </h2>
-              <AllocationChart allocation={data.allocation} />
-            </section>
-
-            <section className="min-w-0 rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] p-5">
-              <h2 className="mb-2 text-sm font-semibold text-[var(--color-text-primary)]">
-                Recent activity
-              </h2>
-              <RecentActivity activity={data.recentActivity} />
-            </section>
-          </div>
+          <section className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] p-5">
+            <h2 className="mb-4 text-sm font-semibold text-[var(--color-text-primary)]">
+              Allocation by sector
+            </h2>
+            <AllocationChart allocation={data.allocation} />
+          </section>
         </>
       )}
     </div>

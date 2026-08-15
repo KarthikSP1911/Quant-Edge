@@ -25,6 +25,7 @@ import com.quantedge.backend.exception.CompanyNotFoundException;
 import com.quantedge.backend.exception.InvalidOrderRequestException;
 import com.quantedge.backend.exception.OrderNotFoundException;
 import com.quantedge.backend.external.dto.FinnhubQuoteResponse;
+import com.quantedge.backend.mapper.CompanyMapper;
 import com.quantedge.backend.repository.CompanyRepository;
 import com.quantedge.backend.repository.OrderExecutionRepository;
 import com.quantedge.backend.repository.OrderRepository;
@@ -46,6 +47,7 @@ public class OrderService {
     private static final List<OrderStatus> FILLED_STATUSES = List.of(OrderStatus.FILLED, OrderStatus.PARTIALLY_FILLED);
 
     private final CompanyRepository companyRepository;
+    private final CompanyMapper companyMapper;
     private final OrderRepository orderRepository;
     private final OrderExecutionRepository orderExecutionRepository;
     private final QuoteService quoteService;
@@ -142,6 +144,7 @@ public class OrderService {
         return new OrderSummaryResponse(
                 order.getId(),
                 order.getCompany().getSymbol(),
+                companyMapper.toResponse(order.getCompany()),
                 order.getSide(),
                 order.getType(),
                 order.getStatus(),

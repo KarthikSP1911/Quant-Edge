@@ -11,7 +11,7 @@ export default function StockNotesSection({ symbol }: { symbol: string }) {
       <div className="mb-3 flex items-center justify-between">
         <h2 className="text-sm font-semibold text-[var(--color-text-primary)]">Research notes</h2>
         <Link
-          href="/notes"
+          href="/research?tab=notes"
           className="text-sm font-medium text-[var(--color-accent-blue)] hover:underline"
         >
           View all notes
@@ -35,7 +35,7 @@ export default function StockNotesSection({ symbol }: { symbol: string }) {
             {notes.slice(0, 3).map((note) => (
               <li key={note.id}>
                 <Link
-                  href="/notes"
+                  href="/research?tab=notes"
                   className="block rounded-lg border border-[var(--color-border)] p-3 transition-colors hover:bg-[var(--color-sidebar-hover)]"
                 >
                   <div className="flex items-center justify-between gap-2">

@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { useComparison } from '@/hooks/useComparison'
 import { MIN_COMPARE_SYMBOLS } from '@/types/comparison'
 import type { ChartRange } from '@/types/stock'
@@ -15,13 +16,19 @@ import {
   NoOverlappingHistory,
 } from '@/components/comparison/ComparisonStates'
 import ResearchAgentInline from '@/components/research/ResearchAgentInline'
+import ResearchNotesTab from '@/components/research/ResearchNotesTab'
 
-type Tab = 'ai' | 'compare'
+type Tab = 'ai' | 'compare' | 'notes'
 
 const tabs: { id: Tab; label: string }[] = [
   { id: 'ai', label: 'AI Research' },
   { id: 'compare', label: 'Compare' },
+  { id: 'notes', label: 'Notes' },
 ]
+
+function isTab(value: string | null): value is Tab {
+  return value === 'ai' || value === 'compare' || value === 'notes'
+}
 
 function CompareTab() {
   const [symbols, setSymbols] = useState<string[]>([])
@@ -68,15 +75,18 @@ function CompareTab() {
   )
 }
 
-export default function ResearchPage() {
-  const [tab, setTab] = useState<Tab>('ai')
+function ResearchPageContent() {
+  const searchParams = useSearchParams()
+  const initialTab = searchParams.get('tab')
+  const [tab, setTab] = useState<Tab>(isTab(initialTab) ? initialTab : 'ai')
 
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-1">
         <h1 className="text-xl font-semibold text-[var(--color-text-primary)]">Research</h1>
         <p className="text-sm text-[var(--color-text-secondary)]">
-          Ask the AI research agent about a stock, or compare a few stocks side by side.
+          Ask the AI research agent about a stock, compare a few stocks side by side, or read saved
+          research notes.
         </p>
       </header>
 
@@ -99,6 +109,15 @@ export default function ResearchPage() {
 
       {tab === 'ai' && <ResearchAgentInline />}
       {tab === 'compare' && <CompareTab />}
+      {tab === 'notes' && <ResearchNotesTab />}
     </div>
+  )
+}
+
+export default function ResearchPage() {
+  return (
+    <Suspense fallback={null}>
+      <ResearchPageContent />
+    </Suspense>
   )
 }
