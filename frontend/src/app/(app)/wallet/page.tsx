@@ -36,7 +36,7 @@ export default function WalletPage() {
       <div>
         <h1 className="text-xl font-semibold text-[var(--color-text-primary)]">Wallet</h1>
         <p className="text-sm text-[var(--color-text-secondary)]">
-          Top up your virtual trading balance with real money via Stripe.
+          Top up your virtual trading balance via Razorpay (Test Mode).
         </p>
       </div>
 

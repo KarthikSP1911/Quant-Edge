@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { useCreateCheckoutSession } from '@/hooks/useCreateCheckoutSession'
+import { useTopUpWallet } from '@/hooks/useTopUpWallet'
 import { formatPrice } from '@/lib/utils/format'
 
 const PRESET_AMOUNTS = [10, 25, 50, 100]
@@ -26,7 +26,7 @@ export default function TopUpForm() {
     defaultValues: { amountUsd: 25 },
   })
 
-  const mutation = useCreateCheckoutSession()
+  const mutation = useTopUpWallet()
   const amountUsd = watch('amountUsd') || 0
 
   const onSubmit = (values: FormValues) => {
@@ -40,8 +40,8 @@ export default function TopUpForm() {
     >
       <h2 className="text-lg font-semibold text-[var(--color-text-primary)]">Top up wallet</h2>
       <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
-        Pay with a card via Stripe. Credits are added to your virtual trading balance at $1 = 10
-        credits.
+        Pay with a card via Razorpay (Test Mode). No real charge will be made. Credits are added to
+        your virtual trading balance at $1 = 10 credits.
       </p>
 
       <div className="mt-4 grid grid-cols-4 gap-2">
@@ -91,7 +91,7 @@ export default function TopUpForm() {
         disabled={amountUsd < 1 || mutation.isPending}
         className="mt-5 w-full rounded-md bg-[var(--color-accent-blue)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {mutation.isPending ? 'Redirecting to Stripe…' : `Pay ${formatPrice(amountUsd)}`}
+        {mutation.isPending ? 'Opening Razorpay…' : `Pay ${formatPrice(amountUsd)}`}
       </button>
     </form>
   )
