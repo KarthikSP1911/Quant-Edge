@@ -37,11 +37,11 @@ public class WalletTransaction {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "stripe_session_id", nullable = false, unique = true)
-    private String stripeSessionId;
+    @Column(name = "razorpay_order_id", nullable = false, unique = true)
+    private String razorpayOrderId;
 
-    @Column(name = "stripe_payment_intent_id")
-    private String stripePaymentIntentId;
+    @Column(name = "razorpay_payment_id")
+    private String razorpayPaymentId;
 
     @Column(name = "amount_usd_cents", nullable = false)
     private long amountUsdCents;

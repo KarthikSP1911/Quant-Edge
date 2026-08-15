@@ -14,22 +14,22 @@ import org.springframework.data.repository.query.Param;
 
 public interface WalletTransactionRepository extends JpaRepository<WalletTransaction, UUID> {
 
-    Optional<WalletTransaction> findByStripeSessionId(String stripeSessionId);
+    Optional<WalletTransaction> findByRazorpayOrderId(String razorpayOrderId);
 
     List<WalletTransaction> findByUserOrderByCreatedAtDesc(User user);
 
     /**
-     * Idempotency guard for the webhook: only transitions PENDING -> the given status, and only
-     * when the row is currently PENDING. Returns the number of rows updated (0 or 1) - the
-     * caller uses that to decide whether to actually credit {@code user.balance}, so a redelivered
-     * webhook event that finds the row already COMPLETED updates nothing and credits nothing.
+     * Idempotency guard: only transitions PENDING -> the given status, and only when the row is
+     * currently PENDING. Returns the number of rows updated (0 or 1) - the caller uses that to
+     * decide whether to actually credit {@code user.balance}, so a redelivered webhook event or a
+     * verify-payment call for an already-COMPLETED order updates nothing and credits nothing.
      */
     @Modifying
     @Query(
-            "update WalletTransaction w set w.status = :newStatus, w.stripePaymentIntentId = :paymentIntentId "
-                    + "where w.stripeSessionId = :stripeSessionId and w.status = com.quantedge.backend.enums.WalletTransactionStatus.PENDING")
+            "update WalletTransaction w set w.status = :newStatus, w.razorpayPaymentId = :paymentId "
+                    + "where w.razorpayOrderId = :razorpayOrderId and w.status = com.quantedge.backend.enums.WalletTransactionStatus.PENDING")
     int markCompletedIfPending(
-            @Param("stripeSessionId") String stripeSessionId,
-            @Param("paymentIntentId") String paymentIntentId,
+            @Param("razorpayOrderId") String razorpayOrderId,
+            @Param("paymentId") String paymentId,
             @Param("newStatus") WalletTransactionStatus newStatus);
 }

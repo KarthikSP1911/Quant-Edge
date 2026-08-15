@@ -63,7 +63,7 @@ public class SecurityConfig {
                                 "/api/auth/refresh",
                                 "/api/auth/logout",
                                 "/api/auth/oauth2/callback",
-                                "/api/webhooks/stripe",
+                                "/api/webhooks/razorpay",
                                 "/oauth2/**",
                                 "/graphiql",
                                 "/swagger-ui/**",

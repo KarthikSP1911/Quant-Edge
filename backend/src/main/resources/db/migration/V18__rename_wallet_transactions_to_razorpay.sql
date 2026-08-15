@@ -1,0 +1,2 @@
+ALTER TABLE wallet_transactions RENAME COLUMN stripe_session_id TO razorpay_order_id;
+ALTER TABLE wallet_transactions RENAME COLUMN stripe_payment_intent_id TO razorpay_payment_id;
