@@ -187,6 +187,17 @@ public class ChatTools {
         }
     }
 
+    @Tool(description = "Discard the pending staged order after the user declines to confirm it (e.g. says 'no').")
+    public Object cancelPendingOrder() {
+        pendingOrders.remove(getCurrentUser().getId());
+        return "Pending order discarded.";
+    }
+
+    /** Read-only lookup for the GraphQL {@code pendingOrder} query - not exposed as a tool. */
+    public PlaceOrderRequest peekPendingOrder(UUID userId) {
+        return pendingOrders.get(userId);
+    }
+
     @Tool(
             description = "Search the RAG knowledge base of ingested news articles and research notes for context "
                     + "relevant to a question, so answers can be grounded in retrieved sources instead of the model's "

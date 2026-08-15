@@ -75,6 +75,17 @@ type Order {
     expiresAt: String
 }
 
+# A chat-agent-staged order awaiting the user's explicit confirmation (see ChatTools#placeOrder).
+type PendingOrder {
+    symbol: String!
+    side: OrderSide!
+    type: OrderType!
+    quantity: Int!
+    limitPrice: Float
+    stopPrice: Float
+    estimatedCost: Float
+}
+
 type PortfolioPosition {
     company: Company!
     quantity: Int!
@@ -236,6 +247,7 @@ type Query {
     stockComparison(symbols: [String!]!, interval: String = "1day", outputSize: Int = 90): StockComparison!
     portfolioTimeMachine(asOfDate: String!): TimeMachineResult!
     chatHistory: [ChatHistory!]!
+    pendingOrder: PendingOrder
     researchNotes(symbol: String): [ResearchNote!]!
     walletTransactions: [WalletTransaction!]!
 }

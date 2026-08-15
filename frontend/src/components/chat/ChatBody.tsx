@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
-import { useChatHistory, useSendChatMessage } from '@/hooks/useChat'
+import ChatMarkdown from '@/components/chat/ChatMarkdown'
+import PendingOrderCard from '@/components/chat/PendingOrderCard'
+import { useChatHistory, usePendingOrder, useSendChatMessage } from '@/hooks/useChat'
 
 function ChatSkeleton() {
   return (
@@ -38,14 +38,18 @@ function ChatError({ onRetry }: { onRetry: () => void }) {
 }
 
 export default function ChatBody() {
-  const { data: messages, isPending, isError, refetch } = useChatHistory()
+  const { data: rawMessages, isPending, isError, refetch } = useChatHistory()
+  const messages = rawMessages
+    ? Array.from(new Map(rawMessages.map((m) => [m.id, m])).values())
+    : rawMessages
   const sendMessage = useSendChatMessage()
+  const { data: pendingOrder } = usePendingOrder()
   const [input, setInput] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
-  }, [messages, sendMessage.isPending])
+  }, [messages, sendMessage.isPending, pendingOrder])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -89,9 +93,7 @@ export default function ChatBody() {
                   {message.role === 'USER' ? (
                     <span className="whitespace-pre-wrap">{message.content}</span>
                   ) : (
-                    <div className="prose prose-sm max-w-none">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
-                    </div>
+                    <ChatMarkdown content={message.content} />
                   )}
                 </div>
               </div>
@@ -111,6 +113,15 @@ export default function ChatBody() {
                   />
                 </div>
               </div>
+            )}
+
+            {pendingOrder && !sendMessage.isPending && (
+              <PendingOrderCard
+                order={pendingOrder}
+                onAccept={() => sendMessage.mutate('yes')}
+                onReject={() => sendMessage.mutate('no')}
+                isSubmitting={sendMessage.isPending}
+              />
             )}
           </div>
 
