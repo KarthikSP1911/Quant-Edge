@@ -1,246 +1,275 @@
-<img src="./frontend/public/logo/logo-full.svg" alt="QuantEdge" height="70" />
+# Quant Edge
 
-AI-powered stock research and simulated trading platform, quantified.
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js" style="margin: 4px;" />
+  <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" style="margin: 4px;" />
+  <img src="https://img.shields.io/badge/Java_21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java 21" style="margin: 4px;" />
+  <img src="https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white" alt="Spring Boot" style="margin: 4px;" />
+  <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" style="margin: 4px;" />
+  <img src="https://img.shields.io/badge/Apache_Kafka-231F20?style=for-the-badge&logo=apache-kafka&logoColor=white" alt="Kafka" style="margin: 4px;" />
+  <img src="https://img.shields.io/badge/Qdrant-000000?style=for-the-badge&logo=qdrant&logoColor=white" alt="Qdrant" style="margin: 4px;" />
+  <img src="https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white" alt="OpenAI" style="margin: 4px;" />
+</p>
 
-![Java 21](https://img.shields.io/badge/Java-21-orange)
-![Spring Boot 3.x](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen)
-![Next.js](https://img.shields.io/badge/Next.js-App%20Router-black)
-![TypeScript](https://img.shields.io/badge/TypeScript-blue)
-![PostgreSQL 15](https://img.shields.io/badge/PostgreSQL-15-336791)
-![Redis 7](https://img.shields.io/badge/Redis-7-DC382D)
-![Kafka](https://img.shields.io/badge/Kafka-KRaft-231F20)
-![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED)
+## 🚀 Overview
 
-See [CLAUDE.md](./CLAUDE.md) for the full project spec, tech stack, and workflow rules.
+**Quant Edge** is an AI-powered financial and portfolio management platform. It leverages large language models (LLMs) and Retrieval-Augmented Generation (RAG) to provide intelligent insights, real-time market data integration, and comprehensive portfolio reporting. The platform features a highly scalable microservice-oriented architecture with event-driven data streaming.
 
-## Overview
+## ✨ Key Features
 
-QuantEdge lets a user research a company (profile, price chart, news, technical indicators),
-hold a simulated portfolio, and place market/limit/stop orders against a real matching engine —
-with a GenAI research agent that can answer questions grounded in the platform's own data.
+- **AI-Driven Insights**: Powered by Spring AI and OpenAI for intelligent chat, financial analysis, and personalized insights.
+- **Market Data Integration**: Connects with leading financial APIs (Finnhub, Twelve Data, Alpha Vantage) for real-time and historical market data.
+- **Event-Driven Architecture**: Utilizes Apache Kafka for robust asynchronous event processing and message brokering.
+- **Advanced Semantic Search**: Employs Qdrant as a vector database for embedding storage, supporting high-performance RAG workflows.
+- **Secure Authentication**: Implements Spring Security with OAuth2 (Google) and JWT for stateless authentication.
+- **Comprehensive Reporting**: Generates downloadable portfolio and tax reports via iText7 (PDF) and trade histories via OpenCSV.
 
-- **Auth** — JWT access/refresh tokens (rotation + reuse detection), Google OAuth2
-- **Research** — company profiles, charts, news, indicators, cached in Redis on top of
-  Finnhub / Twelve Data / Alpha Vantage
-- **Trading** — simulated portfolios, market/limit/stop-loss/stop-limit orders, a Kafka-driven
-  matching engine, SSE fill notifications
-- **Standout features** — AOP audit log, company comparison, portfolio time machine, PDF/CSV
-  exports
-- **GenAI agent** — Spring AI over Groq, a 9-tool research agent with an SSE reasoning trace,
-  RAG over a Qdrant-backed knowledge base (news + research notes)
+## 🛠️ Prerequisites
 
-## Architecture
+- **Java 21**
+- **Node.js 20+**
+- **Docker & Docker Compose** (for spinning up local database, cache, and messaging infrastructure)
+
+## 🚀 Getting Started
+
+### 1. Start Infrastructure Services
+
+Use Docker Compose to spin up the required local infrastructure (PostgreSQL, Redis via Serverless HTTP, Zookeeper, and Kafka):
+
+```bash
+docker-compose --profile local up -d
+```
+
+### 2. Environment Configuration
+
+Create a `.env` file in the root directory (use `.env.example` as a template). You'll need to configure key variables such as:
+
+- **Database:** `DATABASE_URL`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`
+- **Redis (Upstash/Local):** `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`
+- **External APIs:** `FINNHUB_API_KEY`, `TWELVE_DATA_API_KEY`, `ALPHA_VANTAGE_API_KEY`, `GROQ_API_KEY`
+- **Vector Store:** `QDRANT_URL`, `QDRANT_API_KEY`
+- **Auth:** `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `JWT_ACCESS_SECRET`
+
+### 3. Run the Application
+
+#### Windows (Quick Start)
+
+A convenient startup script is provided for Windows environments that will launch both the frontend and backend simultaneously:
+
+```bat
+start.bat
+```
+
+#### Manual Startup
+
+- **Backend**:
+
+  ```bash
+  cd backend
+  ./mvnw spring-boot:run
+  ```
+
+  _The backend API will be available at `http://localhost:8080`_
+
+- **Frontend**:
+  ```bash
+  cd frontend
+  npm install
+  npm run dev
+  ```
+  _The frontend UI will be available at `http://localhost:3000`_
+
+---
+
+## ✨ Component Interaction
+
+```mermaid
+flowchart TB
+
+    UI["Next.js UI<br/>(Frontend)"]
+    API["Spring Boot API<br/>(Logic Gateway)"]
+    Kafka["Kafka<br/>(Message Queue)"]
+    DB["PostgreSQL<br/>(Data JPA / Flyway)"]
+    Qdrant["Qdrant<br/>(Vector Store)"]
+    LLM["OpenAI<br/>(Spring AI)"]
+
+    UI <--> API
+    API <--> Kafka
+    API <--> DB
+    API <--> Qdrant
+    API <--> LLM
+
+    %% Styling
+    style UI fill:#D9EEF7,stroke:#000,stroke-width:2px,color:#000
+    style API fill:#DCEBC3,stroke:#000,stroke-width:2px,color:#000
+    style Kafka fill:#FF9900,stroke:#000,stroke-width:2px,color:#000
+    style DB fill:#316192,stroke:#000,stroke-width:2px,color:#FFF
+    style Qdrant fill:#F8E7A6,stroke:#000,stroke-width:2px,color:#000
+    style LLM fill:#DDB7ED,stroke:#000,stroke-width:2px,color:#000
+```
+
+## ✨ Architecture Design
 
 ```mermaid
 flowchart LR
-    subgraph Client["🖥️ Frontend — Next.js App Router"]
-        direction TB
-        Pages["Pages: auth · dashboard · companies\nstocks · portfolio · orders · watchlist\ncompare · time-machine · notes · activity"]
-        Hooks["hooks/* (React Query)"]
-        APIClient["lib/api — REST client\n(auth, orders, export, research)"]
-        GQLClient["lib/graphql — GraphQL client\n(reads)"]
-        SSEClient["lib/sse — EventSource client\n(order fills, agent trace)"]
-        Pages --> Hooks --> APIClient & GQLClient & SSEClient
+
+    U[User / Client]
+
+    subgraph F["Next.js Frontend App"]
+        UI[UI Components & Dashboards]
+        Charts[Lightweight Charts]
     end
 
-    subgraph Backend["☕ Spring Boot Backend (Java 21)"]
+    subgraph B["Spring Boot Backend"]
         direction TB
+        SM[OAuth2 & JWT Security]
+        API[GraphQL & REST APIs]
+        SAI[Spring AI Service]
+        EXP[PDF / CSV Exporter]
+        KFP[Kafka Producer]
+        KFC[Kafka Consumer]
 
-        subgraph Edge["API Layer"]
-            direction LR
-            REST["REST Controllers\nAuth · Order · Export\nResearchAgent · Chat · Watchlist"]
-            GQL["GraphQL Resolvers\nDashboard · Portfolio · Company\nOrder · Watchlist · AuditLog\nComparison · TimeMachine · ChatHistory\nResearchNote"]
-            SSE["SSE Controllers\nOrderStreamController\n(fills + agent reasoning trace)"]
-        end
-
-        Security["Security\nJwtAuthFilter · JwtService\nRefreshTokenService · OneTimeCodeService\nLoginRateLimiter · Google OAuth2"]
-
-        subgraph Services["Service Layer"]
-            direction TB
-            Trading["OrderService · OrderMatcherService\nOrderTriggerEvaluator · TradeExecutionService"]
-            Research["QuoteService · StockDetailService\nHistoricalPriceService · StockComparisonService\nDashboardService · WatchlistService"]
-            Standout["AuditLogService (AOP) · TimeMachineService\nTransactionReplayer · export/* (PDF/CSV)"]
-            AgentSvc["ResearchAgentService · ChatService\nChatTools (10 @Tool methods)\nSseTraceService · ChatHistoryService"]
-        end
-
-        subgraph RAG["RAG Pipeline (rag/*)"]
-            direction TB
-            Ingest["ingest — CorpusLoader\nKnowledgeIngestionService"]
-            Chunk["chunking — Fixed / Recursive\nSemantic chunkers"]
-            Retrieve["retrieval — KnowledgeBaseService\nBM25 + dense hybrid, RRF fusion\nLlmRerankService"]
-            Ingest --> Chunk --> Retrieve
-        end
-
-        subgraph KafkaFlow["Kafka Pipeline (internal only)"]
-            direction LR
-            Producer1["StockPriceProducer"] --> TopicA[["stock-prices"]] --> Consumer1["OrderMatcherConsumer\n(manual-ack, post-commit)"]
-            Consumer1 --> Producer2["TradeExecutedProducer"] --> TopicB[["executed-trades"]] --> Consumer2["TradeExecutedConsumer"]
-        end
-
-        Scheduler["Schedulers\nPriceSyncScheduler (15min)\nOrderExpiryScheduler (60s)"]
-
-        External["External API Clients\nFinnhubClient · TwelveDataClient\nAlphaVantageClient"]
-
-        REST --> Security
-        REST --> Trading & Standout & AgentSvc
-        GQL --> Research & Standout & AgentSvc
-        SSE --> Trading
-        SSE --> AgentSvc
-        Trading <--> KafkaFlow
-        Trading --> TopicA
-        AgentSvc --> RAG
-        AgentSvc -->|"tool calls"| Trading & Research & Standout
-        Research --> External
-        Scheduler --> Research
-        Scheduler --> Trading
+        SM --> API
+        API --> SAI
+        API --> EXP
+        API --> KFP
+        KFC --> SAI
     end
 
-    subgraph Data["Data & Infra"]
-        direction TB
-        PG[("PostgreSQL 15+\n11 tables · Flyway migrations")]
-        Redis[("Redis 7 / Upstash REST\nquotes 15m · charts 15-60m\nnews 1h · indicators 24h")]
-        Qdrant[("Qdrant Cloud\nvector store, 384-dim ONNX\nall-MiniLM-L6-v2 embeddings")]
-        Groq(["Groq API\nopenai/gpt-oss-120b\nvia Spring AI (OpenAI-compatible)"])
-        MarketAPIs(["Finnhub · Twelve Data\nAlpha Vantage"])
+    subgraph D["Data Layer"]
+        P[(PostgreSQL)]
+        Q[(Qdrant Vector Store)]
+        K[(Kafka Event Streaming)]
     end
 
-    APIClient -- REST --> REST
-    GQLClient -- GraphQL --> GQL
-    SSEClient -- "SSE (push)" --> SSE
+    subgraph External["External Services"]
+        OA[OpenAI API]
+    end
 
-    Services --> PG
-    Services --> Redis
-    RAG --> Qdrant
-    AgentSvc --> Groq
-    External --> MarketAPIs
+    U -->|HTTPS / WSS| F
+    F -->|GraphQL / REST| B
 
-    classDef infra fill:#DBEAFE,stroke:#2563EB,color:#0F172A;
-    class PG,Redis,Qdrant,Groq,MarketAPIs infra;
+    B -->|Read / Write| P
+    B -->|Semantic Search| Q
+    KFP -->|Publish Events| K
+    K -->|Consume Events| KFC
+
+    SAI -->|API Calls| OA
 ```
 
-- Kafka never reaches the frontend — it is strictly internal to the backend (price events in,
-  matching engine, executed-trade events out).
-- **REST** handles writes (auth, orders, exports, chat/agent triggers), **GraphQL** handles reads
-  (portfolio, dashboard, comparisons, timelines), **SSE** handles push (order fills, agent
-  reasoning trace) — see
-  [CLAUDE.md § API Design Rules](./CLAUDE.md#api-design-rules) for the rules behind that split.
-- The GenAI research agent (`ChatTools`) calls back into the same trading/research services as a
-  set of 10 `@Tool`-annotated methods, and separately grounds itself via the RAG pipeline over a
-  Qdrant-backed knowledge base of news + research notes.
+## ✨ Tech Stack
 
-## Local Setup
+<div align="center">
 
-**Prerequisites:** Node.js 20+, Java 21, Maven (or use the bundled `./mvnw`), Docker + Docker
-Compose. Optional for hosted mode: a Neon Postgres URL, an Upstash Redis REST endpoint, and API
-keys for Finnhub / Twelve Data / Alpha Vantage / Groq / Qdrant Cloud.
+<table>
+  <tr>
+    <th width="45%">Layer</th>
+    <th width="45%">Technology</th>
+    <th width="35%">Version / Details</th>
+  </tr>
 
-After cloning, run these once from the repo root:
+  <tr>
+    <td><b>Frontend Framework</b></td>
+    <td>Next.js (App Router / Turbopack)</td>
+    <td>16.3.x</td>
+  </tr>
 
-```bash
-npm install          # installs lefthook, commitlint, prettier at root
-                      # and auto-runs `lefthook install` via postinstall
-cd frontend && npm install
-cd ../backend && ./mvnw -q -DskipTests install
-```
+  <tr>
+    <td><b>Frontend Language</b></td>
+    <td>TypeScript</td>
+    <td>5.x</td>
+  </tr>
 
-This wires up the git hooks (pre-commit formatting, commit-msg linting,
-pre-push checks) documented in [CLAUDE.md § Tooling](./CLAUDE.md#tooling).
+  <tr>
+    <td><b>CSS</b></td>
+    <td>Tailwind CSS</td>
+    <td>4.x</td>
+  </tr>
 
-If `npm install` reports pending install scripts under `npm warn allow-scripts`,
-approve lefthook's postinstall so hooks actually get installed:
+  <tr>
+    <td><b>Charts</b></td>
+    <td>Lightweight Charts</td>
+    <td>5.2.x</td>
+  </tr>
 
-```bash
-npm approve-scripts lefthook
-```
+  <tr>
+    <td><b>State Management</b></td>
+    <td>React Query (TanStack)</td>
+    <td>5.101.x</td>
+  </tr>
 
-Copy `.env.example` to `.env` and fill in any keys you need (everything has a Docker-friendly
-local default — see [docs/docker.md](./docs/docker.md)):
+  <tr>
+    <td><b>Animations</b></td>
+    <td>Framer Motion</td>
+    <td>13.x</td>
+  </tr>
 
-```bash
-cp .env.example .env
-```
+  <tr>
+    <td><b>Backend Framework</b></td>
+    <td>Spring Boot</td>
+    <td>4.0.x</td>
+  </tr>
 
-### Run everything with Docker
+  <tr>
+    <td><b>Backend Language</b></td>
+    <td>Java</td>
+    <td>21</td>
+  </tr>
 
-```bash
-docker compose --profile local up --build
-```
+  <tr>
+    <td><b>API Layer</b></td>
+    <td>GraphQL + WebMVC</td>
+    <td>Latest</td>
+  </tr>
 
-See [docs/docker.md](./docs/docker.md) for the full local-stack vs. hosted-infra modes
-(`docker compose --profile local up --build` vs. `docker compose up backend frontend --build`).
+  <tr>
+    <td><b>AI Framework</b></td>
+    <td>Spring AI</td>
+    <td>2.0.x</td>
+  </tr>
 
-### Run the backend directly
+  <tr>
+    <td><b>Security / Auth</b></td>
+    <td>Spring Security, OAuth2, JJWT</td>
+    <td>Latest</td>
+  </tr>
 
-```bash
-cd backend
-./mvnw spring-boot:run   # http://localhost:8080, health: /actuator/health
-./mvnw test               # fast unit tests (H2, no Testcontainers)
-./mvnw verify              # full build: tests + Spotless + Checkstyle + JaCoCo 80% coverage gate
-```
+  <tr>
+    <td><b>Database</b></td>
+    <td>PostgreSQL (Data JPA + Flyway)</td>
+    <td>Latest</td>
+  </tr>
 
-Coverage report after `./mvnw verify`: `backend/target/site/jacoco/index.html`.
+  <tr>
+    <td><b>Vector Store</b></td>
+    <td>Qdrant</td>
+    <td>Latest</td>
+  </tr>
 
-### Run the frontend directly
+  <tr>
+    <td><b>Message Broker</b></td>
+    <td>Kafka</td>
+    <td>Latest</td>
+  </tr>
 
-```bash
-cd frontend
-npm run dev      # http://localhost:3000
-npm run lint
-npm run typecheck
-```
+  <tr>
+    <td><b>LLM Provider</b></td>
+    <td>OpenAI API</td>
+    <td>Latest</td>
+  </tr>
 
-## API Overview
+  <tr>
+    <td><b>File Exports</b></td>
+    <td>iText7 (PDF), OpenCSV (CSV)</td>
+    <td>Latest</td>
+  </tr>
 
-REST for writes, GraphQL for reads, SSE for push — see
-[docs/api-contract.md](./docs/api-contract.md) for the full endpoint-by-endpoint contract, and
-[CLAUDE.md § API Design Rules](./CLAUDE.md#api-design-rules) for the rules behind that split.
+  <tr>
+    <td><b>Testing</b></td>
+    <td>JUnit, Testcontainers, Jacoco</td>
+    <td>Latest</td>
+  </tr>
 
-## Retrieval Evaluation
+</table>
 
-Phase 5's RAG layer (`backend/src/main/java/com/quantedge/backend/rag`) grounds the chat agent's
-`queryKnowledgeBase` tool in a Qdrant Cloud vector store over a **frozen fixture corpus**: 20 news
-articles + 14 research notes (`backend/src/main/resources/rag/*.json`), chosen frozen rather than
-live so the gold-set labels below stay valid across runs. Embeddings are local ONNX
-`all-MiniLM-L6-v2` (384-dim) — Groq has no embeddings endpoint, so chat and embeddings
-intentionally use different models.
-
-**Gold set**: 50 hand-labeled question → source-document pairs
-(`backend/src/main/resources/rag/gold_set.json`), 30 from the news corpus and 20 from the
-research-notes corpus, one gold document per question. Reproduce any row with:
-
-```bash
-cd backend
-./mvnw -q compile -DskipTests
-./mvnw -q dependency:build-classpath -Dmdep.outputFile=/tmp/cp.txt
-java -cp "target/classes;$(cat /tmp/cp.txt)" com.quantedge.backend.rag.eval.EvalRunner \
-    <FIXED|RECURSIVE|SEMANTIC> <hybrid true|false> <rerank true|false> [chunkSize=800] [chunkOverlap=120]
-```
-
-Requires `QDRANT_URL` / `QDRANT_API_KEY` env vars always, and `GROQ_API_KEY` / `GROQ_MODEL` only
-for `rerank=true` runs. Each run ingests the corpus into its own Qdrant collection
-(`quantedge_eval_<label>`), so combos never contaminate each other, and scores Recall@1/5/10 and
-MRR (`EvalMetrics`) against the gold set.
-
-| Config (chunking / rerank / retrieval mode / embedding model)  | Recall@1 | Recall@5 | Recall@10 | MRR   | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| -------------------------------------------------------------- | -------- | -------- | --------- | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| FIXED / no-rerank / dense / all-MiniLM-L6-v2 (baseline)        | 0.900    | 1.000    | 1.000     | 0.950 |                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| RECURSIVE / no-rerank / dense / all-MiniLM-L6-v2               | 0.900    | 1.000    | 1.000     | 0.950 | Same as fixed-size at this corpus size — see Notes below the table.                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| SEMANTIC / no-rerank / dense / all-MiniLM-L6-v2                | 0.900    | 1.000    | 1.000     | 0.950 | Produced 45 chunks vs 34 for fixed/recursive (finer-grained splits); no recall change at this corpus size.                                                                                                                                                                                                                                                                                                                                                                           |
-| RECURSIVE / no-rerank / hybrid (dense+BM25) / all-MiniLM-L6-v2 | 0.900    | 1.000    | 1.000     | 0.950 | RRF fusion of dense + in-memory BM25; no change over dense-only here.                                                                                                                                                                                                                                                                                                                                                                                                                |
-| RECURSIVE / llm-rerank / dense / all-MiniLM-L6-v2              | —        | —        | —         | —     | Omitted: free-tier Groq rate limits (30 RPM) made this impractical for batch eval — the harness's LLM-rerank pass makes one Groq call per query, and 50 sequential calls stalled out on rate-limit backoff even after throttling to ~24/min. The code path (`LlmRerankService`, wired into `EvalRunner`/`KnowledgeBaseService`) is implemented and reachable via the reproduce command above with `rerank=true`; it just wasn't practical to run for the full gold set on this tier. |
-
-**Why every dense/hybrid row is nearly identical**: the corpus is intentionally small (34–45
-chunks across 34 source documents) and the gold questions are each answerable from one
-clearly-distinguishable document, so dense retrieval alone already saturates Recall@5/@10 at
-1.000 — there's no room left for chunking or hybrid retrieval to improve on. The one consistent
-miss (Recall@1 = 0.900, 5/50 questions) is a technique-independent ceiling: those 5 questions each
-have a close semantic competitor among the other documents that occasionally out-scores the
-correct one for the #1 spot, not something any of these techniques fixes at this scale. This is an
-honest negative result, kept in the table rather than omitted, per this harness's rule against
-only reporting positive deltas. A larger, noisier corpus (e.g. full live news volume) is where
-these techniques would be expected to actually differentiate.
-
-**LLM rerank note**: `LlmRerankService` reranks candidates by asking the Groq chat model to order
-them by relevance in a single prompt (not a dedicated cross-encoder - none is available in this
-Java stack without a new heavyweight dependency), labeled "llm-rerank" rather than "cross-encoder"
-in the table above for that reason.
+</div>
