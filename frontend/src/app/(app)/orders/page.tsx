@@ -84,10 +84,12 @@ export default function OrdersPage() {
           ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <RecentOrdersPreview />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+        <div className="lg:col-span-3">
+          <RecentOrdersPreview />
+        </div>
 
-        <section className="min-w-0 rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] p-5">
+        <section className="min-w-0 rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] p-5 lg:col-span-2">
           <h2 className="mb-4 text-sm font-semibold text-[var(--color-text-primary)]">
             Recent activity
           </h2>

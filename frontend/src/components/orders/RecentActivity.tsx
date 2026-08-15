@@ -1,5 +1,6 @@
 import type { RecentActivity as RecentActivityItem } from '@/lib/graphql/dashboard'
 import { formatPrice } from '@/lib/utils/format'
+import CompanyLogo from '@/components/companies/CompanyLogo'
 
 function formatTimestamp(iso: string): string {
   return new Date(iso).toLocaleString('en-US', {
@@ -32,16 +33,19 @@ export default function RecentActivity({ activity }: { activity: RecentActivityI
             className="flex items-center justify-between gap-3 border-b border-[var(--color-border)] py-3 last:border-b-0"
           >
             <div className="flex min-w-0 items-center gap-3">
-              <span
-                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
-                  isBuy
-                    ? 'bg-[var(--color-profit)]/10 text-[var(--color-profit)]'
-                    : 'bg-[var(--color-loss)]/10 text-[var(--color-loss)]'
-                }`}
-                aria-hidden
-              >
-                {isBuy ? 'B' : 'S'}
-              </span>
+              <div className="relative shrink-0">
+                <CompanyLogo symbol={item.symbol} logoUrl={item.logoUrl} />
+                <span
+                  className={`absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full border border-[var(--color-card-bg)] text-[9px] font-semibold ${
+                    isBuy
+                      ? 'bg-[var(--color-profit)]/10 text-[var(--color-profit)]'
+                      : 'bg-[var(--color-loss)]/10 text-[var(--color-loss)]'
+                  }`}
+                  aria-hidden
+                >
+                  {isBuy ? 'B' : 'S'}
+                </span>
+              </div>
               <div className="flex min-w-0 flex-col">
                 <span className="truncate text-sm font-medium text-[var(--color-text-primary)]">
                   {isBuy ? 'Bought' : 'Sold'} {item.symbol}

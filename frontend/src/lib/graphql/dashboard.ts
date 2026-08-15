@@ -10,6 +10,7 @@ export interface RecentActivity {
   id: string
   type: 'BUY' | 'SELL'
   symbol: string
+  logoUrl: string | null
   quantity: number
   price: number
   timestamp: string
@@ -45,6 +46,9 @@ const DASHBOARD_QUERY = /* GraphQL */ `
       recentTransactions {
         id
         symbol
+        company {
+          logoUrl
+        }
         side
         quantity
         price
@@ -65,6 +69,7 @@ interface RawPosition {
 interface RawTransaction {
   id: string
   symbol: string
+  company: { logoUrl: string | null }
   side: 'BUY' | 'SELL'
   quantity: number
   price: number
@@ -115,6 +120,7 @@ export async function fetchDashboardSummary(): Promise<DashboardSummary> {
     id: transaction.id,
     type: transaction.side,
     symbol: transaction.symbol,
+    logoUrl: transaction.company.logoUrl,
     quantity: transaction.quantity,
     price: transaction.price,
     timestamp: transaction.executedAt,

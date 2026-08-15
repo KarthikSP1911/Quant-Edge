@@ -7,6 +7,7 @@ export interface ResearchNote {
   company: {
     symbol: string
     name: string
+    logoUrl: string | null
   }
   title: string
   content: string

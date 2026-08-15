@@ -1,5 +1,6 @@
 import { API_BASE_URL } from '@/lib/config'
 import { getAccessToken } from '@/lib/auth/tokens'
+import { refreshTokenOnce } from '@/lib/auth/refresh'
 
 export class ApiError extends Error {
   status: number
@@ -34,9 +35,8 @@ async function parseErrorMessage(response: Response): Promise<string> {
   return 'Something went wrong. Please try again.'
 }
 
-export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
-  const token = getAccessToken()
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+async function send(path: string, init: RequestInit | undefined, token: string | null) {
+  return fetch(`${API_BASE_URL}${path}`, {
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
@@ -45,6 +45,17 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T
     },
     ...init,
   })
+}
+
+export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
+  let response = await send(path, init, getAccessToken())
+
+  if (response.status === 401) {
+    const refreshedToken = await refreshTokenOnce()
+    if (refreshedToken) {
+      response = await send(path, init, refreshedToken)
+    }
+  }
 
   if (!response.ok) {
     throw new ApiError(await parseErrorMessage(response), response.status)

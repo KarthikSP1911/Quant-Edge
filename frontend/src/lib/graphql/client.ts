@@ -1,5 +1,6 @@
 import { API_BASE_URL } from '@/lib/config'
 import { getAccessToken } from '@/lib/auth/tokens'
+import { refreshTokenOnce } from '@/lib/auth/refresh'
 
 export class GraphQLError extends Error {
   constructor(message: string) {
@@ -13,12 +14,12 @@ interface GraphQLResponse<T> {
   errors?: { message: string }[]
 }
 
-export async function graphqlRequest<T>(
+async function send(
   query: string,
-  variables?: Record<string, unknown>,
-): Promise<T> {
-  const token = getAccessToken()
-  const response = await fetch(`${API_BASE_URL}/graphql`, {
+  variables: Record<string, unknown> | undefined,
+  token: string | null,
+) {
+  return fetch(`${API_BASE_URL}/graphql`, {
     method: 'POST',
     credentials: 'include',
     headers: {
@@ -27,6 +28,20 @@ export async function graphqlRequest<T>(
     },
     body: JSON.stringify({ query, variables }),
   })
+}
+
+export async function graphqlRequest<T>(
+  query: string,
+  variables?: Record<string, unknown>,
+): Promise<T> {
+  let response = await send(query, variables, getAccessToken())
+
+  if (response.status === 401) {
+    const refreshedToken = await refreshTokenOnce()
+    if (refreshedToken) {
+      response = await send(query, variables, refreshedToken)
+    }
+  }
 
   if (!response.ok) {
     throw new GraphQLError(`GraphQL request failed with status ${response.status}`)

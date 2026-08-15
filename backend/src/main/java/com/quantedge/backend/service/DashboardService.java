@@ -101,6 +101,7 @@ public class DashboardService {
         return new TransactionResponse(
                 execution.getId(),
                 execution.getOrder().getCompany().getSymbol(),
+                companyMapper.toResponse(execution.getOrder().getCompany()),
                 execution.getOrder().getSide(),
                 execution.getExecutedQuantity(),
                 execution.getExecutionPrice(),

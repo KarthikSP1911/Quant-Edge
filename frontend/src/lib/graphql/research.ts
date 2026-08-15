@@ -5,6 +5,7 @@ export const GET_RESEARCH_NOTES = `
       company {
         symbol
         name
+        logoUrl
       }
       title
       content

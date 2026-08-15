@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { useCompanies } from '@/hooks/useCompanies'
 import { useDebouncedValue } from '@/hooks/useDebouncedValue'
 import { MAX_COMPARE_SYMBOLS } from '@/types/comparison'
+import CompanyLogo from '@/components/companies/CompanyLogo'
 
 export default function SymbolPicker({
   selected,
@@ -58,7 +59,7 @@ export default function SymbolPicker({
         ))}
       </div>
 
-      <div className="relative max-w-md">
+      <div className="relative">
         <input
           type="text"
           value={search}
@@ -70,7 +71,7 @@ export default function SymbolPicker({
               : 'Add a stock by symbol or name…'
           }
           aria-label="Search stocks to compare"
-          className="w-full rounded-md border border-[var(--color-border)] bg-[var(--color-card-bg)] px-3 py-2 text-sm text-[var(--color-text-primary)] transition-colors outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-accent-blue)] disabled:bg-[var(--color-sidebar-hover)] disabled:text-[var(--color-text-muted)]"
+          className="w-full rounded-md border border-[var(--color-border)] bg-white px-4 py-2.5 text-sm text-[var(--color-text-primary)] transition-colors outline-none placeholder:text-[var(--color-text-muted)] focus:border-[var(--color-accent-blue)] disabled:bg-[var(--color-sidebar-hover)] disabled:text-[var(--color-text-muted)]"
         />
 
         {matches.length > 0 && (
@@ -80,13 +81,16 @@ export default function SymbolPicker({
                 <button
                   type="button"
                   onClick={() => add(company.symbol)}
-                  className="flex w-full items-baseline gap-2 px-3 py-2 text-left text-sm transition-colors hover:bg-[var(--color-sidebar-hover)]"
+                  className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors hover:bg-[var(--color-sidebar-hover)]"
                 >
-                  <span className="font-medium text-[var(--color-text-primary)]">
-                    {company.symbol}
-                  </span>
-                  <span className="truncate text-xs text-[var(--color-text-secondary)]">
-                    {company.name}
+                  <CompanyLogo symbol={company.symbol} logoUrl={company.logoUrl} />
+                  <span className="flex min-w-0 items-baseline gap-2">
+                    <span className="font-medium text-[var(--color-text-primary)]">
+                      {company.symbol}
+                    </span>
+                    <span className="truncate text-xs text-[var(--color-text-secondary)]">
+                      {company.name}
+                    </span>
                   </span>
                 </button>
               </li>

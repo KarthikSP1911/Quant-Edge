@@ -109,6 +109,7 @@ type PortfolioSummary {
 type Transaction {
     id: ID!
     symbol: String!
+    company: Company!
     side: OrderSide!
     quantity: Int!
     price: Float!

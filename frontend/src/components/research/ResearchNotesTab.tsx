@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useResearchNotes } from '@/hooks/useResearchNotes'
 import ChatMarkdown from '@/components/chat/ChatMarkdown'
+import CompanyLogo from '@/components/companies/CompanyLogo'
 
 function NotesSkeleton() {
   return (
@@ -78,26 +79,29 @@ export default function ResearchNotesTab() {
                   key={note.id}
                   type="button"
                   onClick={() => setSelectedNoteId(note.id)}
-                  className={`flex flex-col items-start rounded-lg border p-3 text-left transition-colors ${
+                  className={`flex items-start gap-3 rounded-lg border p-3 text-left transition-colors ${
                     selectedNoteId === note.id
                       ? 'border-[var(--color-accent-blue)] bg-[var(--color-accent-light)]'
                       : 'border-[var(--color-border)] hover:bg-[var(--color-sidebar-hover)]'
                   }`}
                 >
-                  <div className="flex w-full items-center justify-between gap-2">
-                    <span className="font-medium text-[var(--color-text-primary)]">
-                      {note.company.symbol}
-                    </span>
-                    <span className="shrink-0 text-xs text-[var(--color-text-secondary)]">
-                      {new Date(note.createdAt).toLocaleDateString()}
+                  <CompanyLogo symbol={note.company.symbol} logoUrl={note.company.logoUrl} />
+                  <div className="flex min-w-0 flex-1 flex-col items-start">
+                    <div className="flex w-full items-center justify-between gap-2">
+                      <span className="font-medium text-[var(--color-text-primary)]">
+                        {note.company.symbol}
+                      </span>
+                      <span className="shrink-0 text-xs text-[var(--color-text-secondary)]">
+                        {new Date(note.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <h3 className="mt-1 line-clamp-1 text-sm text-[var(--color-text-secondary)]">
+                      {note.title}
+                    </h3>
+                    <span className="mt-2 rounded-full bg-[var(--color-sidebar-hover)] px-2 py-0.5 text-[10px] font-medium tracking-wide text-[var(--color-text-secondary)] uppercase">
+                      By {note.generatedBy}
                     </span>
                   </div>
-                  <h3 className="mt-1 line-clamp-1 text-sm text-[var(--color-text-secondary)]">
-                    {note.title}
-                  </h3>
-                  <span className="mt-2 rounded-full bg-[var(--color-sidebar-hover)] px-2 py-0.5 text-[10px] font-medium tracking-wide text-[var(--color-text-secondary)] uppercase">
-                    By {note.generatedBy}
-                  </span>
                 </button>
               ))
             )}
@@ -107,19 +111,25 @@ export default function ResearchNotesTab() {
           <div className="flex-1 overflow-y-auto sm:max-h-[65vh]">
             {selectedNote ? (
               <article className="pb-4">
-                <div className="mb-6 border-b border-[var(--color-border)] pb-4">
-                  <h2 className="mb-2 text-xl font-semibold text-[var(--color-text-primary)]">
-                    {selectedNote.title}
-                  </h2>
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-[var(--color-text-secondary)]">
-                    <Link
-                      href={`/stocks/${selectedNote.company.symbol}`}
-                      className="font-medium text-[var(--color-accent-blue)] hover:underline"
-                    >
-                      {selectedNote.company.symbol} · {selectedNote.company.name}
-                    </Link>
-                    <span aria-hidden>•</span>
-                    <span>{new Date(selectedNote.createdAt).toLocaleString()}</span>
+                <div className="mb-6 flex items-start gap-3 border-b border-[var(--color-border)] pb-4">
+                  <CompanyLogo
+                    symbol={selectedNote.company.symbol}
+                    logoUrl={selectedNote.company.logoUrl}
+                  />
+                  <div className="min-w-0">
+                    <h2 className="mb-2 text-xl font-semibold text-[var(--color-text-primary)]">
+                      {selectedNote.title}
+                    </h2>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-[var(--color-text-secondary)]">
+                      <Link
+                        href={`/stocks/${selectedNote.company.symbol}`}
+                        className="font-medium text-[var(--color-accent-blue)] hover:underline"
+                      >
+                        {selectedNote.company.symbol} · {selectedNote.company.name}
+                      </Link>
+                      <span aria-hidden>•</span>
+                      <span>{new Date(selectedNote.createdAt).toLocaleString()}</span>
+                    </div>
                   </div>
                 </div>
 

@@ -17,6 +17,7 @@ import {
 } from '@/components/comparison/ComparisonStates'
 import ResearchAgentInline from '@/components/research/ResearchAgentInline'
 import ResearchNotesTab from '@/components/research/ResearchNotesTab'
+import ResearchWorkspaceRail from '@/components/research/ResearchWorkspaceRail'
 
 type Tab = 'ai' | 'compare' | 'notes'
 
@@ -42,7 +43,12 @@ function CompareTab() {
 
   return (
     <div className="flex flex-col gap-6">
-      <SymbolPicker selected={symbols} onChange={setSymbols} />
+      <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] p-5">
+        <h2 className="mb-3 text-sm font-semibold text-[var(--color-text-primary)]">
+          Pick stocks to compare
+        </h2>
+        <SymbolPicker selected={symbols} onChange={setSymbols} />
+      </div>
 
       {!enoughStocks && <NeedsMoreStocks selectedCount={symbols.length} />}
 
@@ -80,16 +86,10 @@ function ResearchPageContent() {
   const initialTab = searchParams.get('tab')
   const [tab, setTab] = useState<Tab>(isTab(initialTab) ? initialTab : 'ai')
 
+  const showRail = tab !== 'notes'
+
   return (
     <div className="flex flex-col gap-6">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-xl font-semibold text-[var(--color-text-primary)]">Research</h1>
-        <p className="text-sm text-[var(--color-text-secondary)]">
-          Ask the AI research agent about a stock, compare a few stocks side by side, or read saved
-          research notes.
-        </p>
-      </header>
-
       <div className="flex gap-1 border-b border-[var(--color-border)]">
         {tabs.map((t) => (
           <button
@@ -107,9 +107,19 @@ function ResearchPageContent() {
         ))}
       </div>
 
-      {tab === 'ai' && <ResearchAgentInline />}
-      {tab === 'compare' && <CompareTab />}
-      {tab === 'notes' && <ResearchNotesTab />}
+      <div className={showRail ? 'grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1fr)_300px]' : ''}>
+        <div className="min-w-0">
+          {tab === 'ai' && <ResearchAgentInline />}
+          {tab === 'compare' && <CompareTab />}
+          {tab === 'notes' && <ResearchNotesTab />}
+        </div>
+
+        {showRail && (
+          <div className="hidden xl:block">
+            <ResearchWorkspaceRail onOpenNotes={() => setTab('notes')} />
+          </div>
+        )}
+      </div>
     </div>
   )
 }
