@@ -48,7 +48,7 @@ users, companies, portfolios, transactions, orders, order_executions, watchlists
 
 All schema changes go through Flyway migrations. Never hand-edit a migration that has already been applied — write a new one.
 
-`wallet_transactions` backs the Stripe wallet top-up feature (real USD via Stripe Checkout → virtual `users.balance` credits, at a fixed $1 = 10 credits rate). It lives outside the 7-phase build plan below — it was added on its own `feature/stripe-wallet-topup` branch rather than a `phase-<n>/*` one, and commits use the `wallet` commitlint scope.
+`wallet_transactions` backs the Razorpay (Test Mode) wallet top-up feature (USD via Razorpay Checkout.js → virtual `users.balance` credits, at a fixed $1 = 10 credits rate; no real money is ever charged). The backend creates a Razorpay Order server-side, the frontend opens the Checkout.js modal client-side, and a JWT-authenticated verify-payment endpoint checks the HMAC-SHA256 payment signature before crediting — a `payment.captured` webhook (`X-Razorpay-Signature`-verified) backs that up idempotently in case the browser closes first. It lives outside the 7-phase build plan below — it was added on its own `feature/stripe-wallet-topup` branch rather than a `phase-<n>/*` one, and commits use the `wallet` commitlint scope.
 
 ## Branding / Design Tokens
 
