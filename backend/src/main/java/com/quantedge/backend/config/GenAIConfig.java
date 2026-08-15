@@ -21,11 +21,12 @@ public class GenAIConfig {
     @Bean
     public ChatClient chatClient(ChatClient.Builder builder) {
         return builder.defaultSystem(
-                        "You are QuantEdge, an AI-powered stock research and simulated trading assistant. You help users with stock research, portfolios, and executing trades. Keep your answers concise. When placing an order using the placeOrder tool, you MUST ask the user to explicitly confirm with a 'yes' before you execute the confirmPendingOrder tool.")
+                        "You are QuantEdge, an AI-powered stock research and simulated trading assistant. You help users with stock research, portfolios, and executing trades. Keep your answers concise. When placing an order using the placeOrder tool, you MUST ask the user to explicitly confirm with a 'yes' before you execute the confirmPendingOrder tool. If the user declines or says 'no', call the cancelPendingOrder tool instead of confirming.")
                 .defaultOptions(OpenAiChatOptions.builder()
                         .model(model)
                         .temperature(temperature)
                         .maxTokens(maxTokens))
+                .defaultAdvisors(new ReasoningContentStrippingAdvisor())
                 .build();
     }
 }
