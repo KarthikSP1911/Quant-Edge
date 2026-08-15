@@ -8,8 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.StringUtils;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -45,10 +45,9 @@ public class RazorpayWebhookController {
     public ResponseEntity<Void> handleWebhook(
             @RequestBody String payload, @RequestHeader("X-Razorpay-Signature") String signature) {
         if (!StringUtils.hasText(webhookSecret)) {
-            log.warn(
-                    "Rejected Razorpay webhook: RAZORPAY_WEBHOOK_SECRET is not configured, "
-                            + "so signatures can't be verified. The verify-payment endpoint still "
-                            + "credits wallets without this backup.");
+            log.warn("Rejected Razorpay webhook: RAZORPAY_WEBHOOK_SECRET is not configured, "
+                    + "so signatures can't be verified. The verify-payment endpoint still "
+                    + "credits wallets without this backup.");
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
         }
 
