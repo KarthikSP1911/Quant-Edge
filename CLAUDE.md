@@ -92,7 +92,8 @@ Logo: "Quant" in #0F172A + "Edge" in #2563EB. No tagline under the logo.
   Example: `feat(auth): add refresh token rotation`
 - Never bundle unrelated changes into one commit.
 - Run the build and tests before every commit. Do not commit broken code.
-- When a feature is done and verified, merge to `main` and delete the branch.
+- When a feature is done and verified, merge to `main` and delete the branch — ask permission
+  before the delete step (see Working Agreement).
 - Tell me the branch name before you start work on it.
 
 ## Tooling
@@ -180,6 +181,8 @@ Example: `feat(orders): add stop-limit order validation`
 ## Working Agreement
 
 - Ask before installing a new dependency that isn't in the planned stack.
+- Ask before deleting anything — branches (local or remote), files, database rows/tables,
+  migrations, or force-pushing. This applies even after a merge is verified green.
 - Never commit secrets. All keys go in `.env`, which is gitignored. Keep `.env.example` updated.
 - Prefer editing existing files over creating new ones.
 - When something in this file becomes stale, update CLAUDE.md as part of the same commit.
