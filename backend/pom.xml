@@ -188,6 +188,13 @@
 			<version>5.9</version>
 		</dependency>
 
+		<!-- Wallet top-up: Razorpay Checkout (Test Mode, one-time payment) -->
+		<dependency>
+			<groupId>com.razorpay</groupId>
+			<artifactId>razorpay-java</artifactId>
+			<version>1.4.9</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>

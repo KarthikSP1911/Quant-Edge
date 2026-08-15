@@ -21,6 +21,7 @@ module.exports = {
         'db',
         'docker',
         'tooling',
+        'wallet',
       ],
     ],
     'header-max-length': [2, 'always', 72],

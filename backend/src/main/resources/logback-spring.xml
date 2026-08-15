@@ -2,11 +2,16 @@
 
     <include resource="org/springframework/boot/logging/logback/defaults.xml" />
 
+    <!-- Spring Boot's built-in %clr(%level) highlight only colors ERROR/WARN/INFO and leaves
+         DEBUG/TRACE uncolored; %levelClr (LevelHighlightConverter) also dims DEBUG/TRACE. -->
+    <conversionRule conversionWord="levelClr"
+        class="com.quantedge.backend.config.logging.LevelHighlightConverter" />
+
     <!-- Compact, colorized console line: HH:mm:ss level [thread] logger - message.
          Logger name is abbreviated to its last segment so lines don't wrap on a
          normal terminal width. -->
     <property name="CONSOLE_LOG_PATTERN"
-        value="%clr(%d{HH:mm:ss}){faint} %clr(%-5level) %clr([%15.15thread]){faint} %clr(%-30.30logger{0}){cyan} %clr(-){faint} %msg%n%wEx" />
+        value="%clr(%d{HH:mm:ss}){faint} %levelClr(%-5level) %clr([%.15thread]){faint} %clr(%-30.30logger{0}){cyan} %clr(-){faint} %msg%n%wEx" />
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
