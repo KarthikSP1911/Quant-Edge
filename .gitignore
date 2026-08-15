@@ -1,7 +1,8 @@
 # Root-level Node tooling (lefthook, commitlint, prettier)
 node_modules/
 npm-debug.log*
-
+notes_hr/
+notes/
 # OS
 .DS_Store
 Thumbs.db
