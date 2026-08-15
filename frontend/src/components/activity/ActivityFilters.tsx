@@ -15,7 +15,7 @@ const ENTITY_TYPES = [
 ]
 
 const selectClasses =
-  'rounded-md border border-[var(--color-border)] bg-[var(--color-page-bg)] px-3 py-2 text-sm text-[var(--color-text-primary)] focus:border-[var(--color-accent-blue)] focus:outline-none'
+  'rounded-md border border-[var(--color-border)] bg-[var(--color-card-bg)] px-3 py-2 text-sm text-[var(--color-text-primary)] focus:border-[var(--color-accent-blue)] focus:outline-none'
 
 export interface ActivityFiltersValue {
   action: string

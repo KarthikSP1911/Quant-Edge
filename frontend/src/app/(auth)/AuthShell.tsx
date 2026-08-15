@@ -101,7 +101,7 @@ export function AuthLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="relative flex h-dvh items-center justify-center overflow-y-auto bg-[var(--color-card-bg)] px-4 py-3">
+    <div className="relative flex h-dvh items-center justify-center overflow-y-auto bg-[var(--color-page-bg)] px-4 py-3">
       <div
         className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[420px] bg-[radial-gradient(ellipse_60%_50%_at_50%_0%,var(--color-accent-light),transparent)]"
         aria-hidden="true"

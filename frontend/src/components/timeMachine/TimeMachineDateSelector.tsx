@@ -37,7 +37,7 @@ export default function TimeMachineDateSelector({
           min={minDate}
           max={today}
           onChange={(e) => onChange(e.target.value)}
-          className="rounded-md border border-[var(--color-border)] bg-[var(--color-page-bg)] px-2 py-1 text-sm text-[var(--color-text-primary)] focus:border-[var(--color-accent-blue)] focus:ring-1 focus:ring-[var(--color-accent-blue)] focus:outline-none"
+          className="rounded-md border border-[var(--color-border)] bg-[var(--color-card-bg)] px-2 py-1 text-sm text-[var(--color-text-primary)] focus:border-[var(--color-accent-blue)] focus:ring-1 focus:ring-[var(--color-accent-blue)] focus:outline-none"
         />
       </label>
       <input

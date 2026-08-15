@@ -32,8 +32,8 @@ function OAuth2Callback() {
   const code = searchParams.get('code')
   if (!code) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="p-8 bg-white rounded shadow text-center text-red-600">
+      <div className="flex min-h-screen items-center justify-center bg-[var(--color-page-bg)]">
+        <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] p-8 text-center text-[var(--color-loss)] shadow-sm">
           No authorization code provided
         </div>
       </div>
@@ -42,15 +42,19 @@ function OAuth2Callback() {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="p-8 bg-white rounded shadow text-center text-red-600">{error}</div>
+      <div className="flex min-h-screen items-center justify-center bg-[var(--color-page-bg)]">
+        <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] p-8 text-center text-[var(--color-loss)] shadow-sm">
+          {error}
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="p-8 bg-white rounded shadow text-center">Authenticating...</div>
+    <div className="flex min-h-screen items-center justify-center bg-[var(--color-page-bg)]">
+      <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] p-8 text-center text-[var(--color-text-primary)] shadow-sm">
+        Authenticating...
+      </div>
     </div>
   )
 }

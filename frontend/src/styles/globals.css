@@ -1,8 +1,8 @@
 @import 'tailwindcss';
 
 :root {
-  --color-page-bg: #ffffff;
-  --color-card-bg: #f8fafc;
+  --color-page-bg: #f8fafc;
+  --color-card-bg: #f6ecece8;
   --color-sidebar-hover: #f1f5f9;
   --color-border: #e2e8f0;
   --color-text-primary: #0f172a;

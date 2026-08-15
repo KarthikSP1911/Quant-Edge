@@ -100,7 +100,7 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-[var(--color-card-bg)]">
+        <div className="flex min-h-screen items-center justify-center bg-[var(--color-page-bg)]">
           <Logo variant="mark" size={28} />
         </div>
       }

@@ -54,8 +54,8 @@ All schema changes go through Flyway migrations. Never hand-edit a migration tha
 
 ```
 Font: Inter (400, 500, 600) | Theme: light
-Page bg        #FFFFFF
-Card bg        #F8FAFC
+Page bg        #F8FAFC
+Card bg        #FFFFFF
 Sidebar/hover  #F1F5F9
 Border         #E2E8F0
 Text primary   #0F172A
