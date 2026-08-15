@@ -199,9 +199,11 @@ public class ChatTools {
     }
 
     @Tool(
-            description = "Search the RAG knowledge base of ingested news articles and research notes for context "
-                    + "relevant to a question, so answers can be grounded in retrieved sources instead of the model's "
-                    + "own memory. Returns the top matching chunks with their source title and symbol.")
+            description = "Search the RAG knowledge base of ingested news articles (refreshed daily from Finnhub) and "
+                    + "research notes for context relevant to a question, so answers can be grounded in retrieved "
+                    + "sources instead of the model's own memory. Returns the top matching chunks, ranked to favor "
+                    + "recent news, each with its source title, symbol, source/url, and publishedAt timestamp when "
+                    + "known.")
     public Object queryKnowledgeBase(@ToolParam(description = "Natural-language question to search for") String query) {
         try {
             List<KnowledgeChunkResult> results = knowledgeBaseService.denseSearch(knowledgeBaseVectorStore, query, 5);

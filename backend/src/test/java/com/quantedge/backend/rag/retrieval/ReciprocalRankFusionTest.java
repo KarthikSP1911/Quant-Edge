@@ -10,7 +10,8 @@ import org.junit.jupiter.api.Test;
 class ReciprocalRankFusionTest {
 
     private static KnowledgeChunkResult chunk(String docId, double score) {
-        return new KnowledgeChunkResult(docId, SourceType.NEWS, "AAPL", "title-" + docId, "text-" + docId, score);
+        return new KnowledgeChunkResult(
+                docId, SourceType.NEWS, "AAPL", "title-" + docId, "text-" + docId, score, null, null, null);
     }
 
     @Test

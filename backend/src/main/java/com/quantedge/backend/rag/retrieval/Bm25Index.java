@@ -93,7 +93,10 @@ public class Bm25Index {
                 (String) metadata.get(KnowledgeIngestionService.META_SYMBOL),
                 (String) metadata.get(KnowledgeIngestionService.META_TITLE),
                 doc.getText(),
-                scoredIndex.score);
+                scoredIndex.score,
+                (String) metadata.get(KnowledgeIngestionService.META_SOURCE),
+                (String) metadata.get(KnowledgeIngestionService.META_URL),
+                KnowledgeIngestionService.readPublishedAt(metadata));
     }
 
     private static List<String> tokenize(String text) {

@@ -1,6 +1,7 @@
 package com.quantedge.backend.rag.retrieval;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.quantedge.backend.rag.ingest.KnowledgeIngestionService;
@@ -20,6 +21,10 @@ public class KnowledgeBaseService {
 
     private static final int HYBRID_FETCH_MULTIPLIER = 4;
 
+    // Overfetch before applying the recency boost so a fresher-but-slightly-less-similar news
+    // chunk outside the raw top-K can still surface once boosted, then trim back to topK.
+    private static final int RECENCY_FETCH_MULTIPLIER = 3;
+
     private final LlmRerankService llmRerankService;
 
     public KnowledgeBaseService(LlmRerankService llmRerankService) {
@@ -27,9 +32,13 @@ public class KnowledgeBaseService {
     }
 
     public List<KnowledgeChunkResult> denseSearch(VectorStore vectorStore, String query, int topK) {
-        List<Document> results = vectorStore.similaritySearch(
-                SearchRequest.builder().query(query).topK(topK).build());
-        return results.stream().map(this::toResult).toList();
+        List<Document> results = vectorStore.similaritySearch(SearchRequest.builder()
+                .query(query)
+                .topK(topK * RECENCY_FETCH_MULTIPLIER)
+                .build());
+        List<KnowledgeChunkResult> boosted =
+                RecencyRanking.boost(results.stream().map(this::toResult).toList());
+        return boosted.size() > topK ? boosted.subList(0, topK) : boosted;
     }
 
     public List<KnowledgeChunkResult> hybridSearch(
@@ -52,13 +61,17 @@ public class KnowledgeBaseService {
     }
 
     private KnowledgeChunkResult toResult(Document document) {
+        Map<String, Object> metadata = document.getMetadata();
         return new KnowledgeChunkResult(
-                (String) document.getMetadata().get(KnowledgeIngestionService.META_DOC_ID),
-                SourceType.valueOf((String) document.getMetadata().get(KnowledgeIngestionService.META_SOURCE_TYPE)),
-                (String) document.getMetadata().get(KnowledgeIngestionService.META_SYMBOL),
-                (String) document.getMetadata().get(KnowledgeIngestionService.META_TITLE),
+                (String) metadata.get(KnowledgeIngestionService.META_DOC_ID),
+                SourceType.valueOf((String) metadata.get(KnowledgeIngestionService.META_SOURCE_TYPE)),
+                (String) metadata.get(KnowledgeIngestionService.META_SYMBOL),
+                (String) metadata.get(KnowledgeIngestionService.META_TITLE),
                 document.getText(),
-                document.getScore() == null ? 0.0 : document.getScore());
+                document.getScore() == null ? 0.0 : document.getScore(),
+                (String) metadata.get(KnowledgeIngestionService.META_SOURCE),
+                (String) metadata.get(KnowledgeIngestionService.META_URL),
+                KnowledgeIngestionService.readPublishedAt(metadata));
     }
 
     /**

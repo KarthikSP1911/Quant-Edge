@@ -37,7 +37,10 @@ public final class ReciprocalRankFusion {
                     chunk.symbol(),
                     chunk.title(),
                     chunk.text(),
-                    fusedScores.get(key(chunk))));
+                    fusedScores.get(key(chunk)),
+                    chunk.source(),
+                    chunk.url(),
+                    chunk.publishedAt()));
         }
         return rescored;
     }
