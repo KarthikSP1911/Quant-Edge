@@ -163,111 +163,93 @@ flowchart LR
 
 <table>
   <tr>
-    <th width="45%">Layer</th>
+    <th width="55%">Layer</th>
     <th width="45%">Technology</th>
-    <th width="35%">Version / Details</th>
   </tr>
 
   <tr>
     <td><b>Frontend Framework</b></td>
     <td>Next.js (App Router / Turbopack)</td>
-    <td>16.3.x</td>
   </tr>
 
   <tr>
     <td><b>Frontend Language</b></td>
     <td>TypeScript</td>
-    <td>5.x</td>
   </tr>
 
   <tr>
     <td><b>CSS</b></td>
     <td>Tailwind CSS</td>
-    <td>4.x</td>
   </tr>
 
   <tr>
     <td><b>Charts</b></td>
     <td>Lightweight Charts</td>
-    <td>5.2.x</td>
   </tr>
 
   <tr>
     <td><b>State Management</b></td>
     <td>React Query (TanStack)</td>
-    <td>5.101.x</td>
   </tr>
 
   <tr>
     <td><b>Animations</b></td>
     <td>Framer Motion</td>
-    <td>13.x</td>
   </tr>
 
   <tr>
     <td><b>Backend Framework</b></td>
     <td>Spring Boot</td>
-    <td>4.0.x</td>
   </tr>
 
   <tr>
     <td><b>Backend Language</b></td>
     <td>Java</td>
-    <td>21</td>
   </tr>
 
   <tr>
     <td><b>API Layer</b></td>
     <td>GraphQL + WebMVC</td>
-    <td>Latest</td>
   </tr>
 
   <tr>
     <td><b>AI Framework</b></td>
     <td>Spring AI</td>
-    <td>2.0.x</td>
   </tr>
 
   <tr>
     <td><b>Security / Auth</b></td>
     <td>Spring Security, OAuth2, JJWT</td>
-    <td>Latest</td>
   </tr>
 
   <tr>
     <td><b>Database</b></td>
     <td>PostgreSQL (Data JPA + Flyway)</td>
-    <td>Latest</td>
   </tr>
 
   <tr>
     <td><b>Vector Store</b></td>
     <td>Qdrant</td>
-    <td>Latest</td>
   </tr>
 
   <tr>
     <td><b>Message Broker</b></td>
     <td>Kafka</td>
-    <td>Latest</td>
   </tr>
 
   <tr>
     <td><b>LLM Provider</b></td>
     <td>OpenAI API</td>
-    <td>Latest</td>
   </tr>
 
   <tr>
     <td><b>File Exports</b></td>
     <td>iText7 (PDF), OpenCSV (CSV)</td>
-    <td>Latest</td>
   </tr>
 
   <tr>
     <td><b>Testing</b></td>
     <td>JUnit, Testcontainers, Jacoco</td>
-    <td>Latest</td>
   </tr>
 
 </table>
