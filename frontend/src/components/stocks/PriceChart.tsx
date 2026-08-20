@@ -49,7 +49,9 @@ export default function PriceChart({
         horzLines: { color: '#E2E8F0' },
       },
       rightPriceScale: { borderColor: '#E2E8F0' },
-      timeScale: { borderColor: '#E2E8F0' },
+      // timeVisible lets the axis show HH:MM for intraday (1D) candles instead of
+      // collapsing every bar in the day down to the same date label.
+      timeScale: { borderColor: '#E2E8F0', timeVisible: true, secondsVisible: false },
     })
 
     const candleSeries = chart.addSeries(CandlestickSeries, {

@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { ApiError, exchangeOAuthCode } from '@/lib/auth/api'
 import { setAccessToken } from '@/lib/auth/tokens'
+import { clearChatHistory } from '@/lib/api/chat'
 
 function OAuth2Callback() {
   const router = useRouter()
@@ -20,6 +21,8 @@ function OAuth2Callback() {
       try {
         const data = await exchangeOAuthCode(code)
         setAccessToken(data.accessToken)
+        // Best-effort - a fresh login starts a clean chat conversation, but shouldn't block on it.
+        void clearChatHistory().catch(() => {})
         router.push('/dashboard')
       } catch (err) {
         setError(err instanceof ApiError ? err.message : 'Authentication failed. Please try again.')

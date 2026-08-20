@@ -12,4 +12,6 @@ public interface ChatHistoryRepository extends JpaRepository<ChatHistory, UUID> 
     List<ChatHistory> findByUserIdOrderByCreatedAtAsc(UUID userId);
 
     List<ChatHistory> findTop50ByUserIdOrderByCreatedAtDesc(UUID userId);
+
+    void deleteByUserId(UUID userId);
 }

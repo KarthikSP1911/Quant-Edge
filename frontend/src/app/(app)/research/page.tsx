@@ -18,17 +18,19 @@ import {
 import ResearchAgentInline from '@/components/research/ResearchAgentInline'
 import ResearchNotesTab from '@/components/research/ResearchNotesTab'
 import ResearchWorkspaceRail from '@/components/research/ResearchWorkspaceRail'
+import TimeMachineTabContent from '@/components/timeMachine/TimeMachineTabContent'
 
-type Tab = 'ai' | 'compare' | 'notes'
+type Tab = 'ai' | 'compare' | 'timemachine' | 'notes'
 
 const tabs: { id: Tab; label: string }[] = [
   { id: 'ai', label: 'AI Research' },
   { id: 'compare', label: 'Compare' },
+  { id: 'timemachine', label: 'Time Machine' },
   { id: 'notes', label: 'Notes' },
 ]
 
 function isTab(value: string | null): value is Tab {
-  return value === 'ai' || value === 'compare' || value === 'notes'
+  return value === 'ai' || value === 'compare' || value === 'timemachine' || value === 'notes'
 }
 
 function CompareTab() {
@@ -111,6 +113,7 @@ function ResearchPageContent() {
         <div className="min-w-0">
           {tab === 'ai' && <ResearchAgentInline />}
           {tab === 'compare' && <CompareTab />}
+          {tab === 'timemachine' && <TimeMachineTabContent />}
           {tab === 'notes' && <ResearchNotesTab />}
         </div>
 

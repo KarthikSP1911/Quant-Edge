@@ -36,6 +36,7 @@ type StockDetail {
 type WatchlistItem {
     company: Company!
     addedAt: String!
+    quote: Quote!
 }
 
 enum OrderSide {

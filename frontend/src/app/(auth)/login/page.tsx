@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ApiError, googleLoginUrl, login } from '@/lib/auth/api'
 import { setAccessToken } from '@/lib/auth/tokens'
+import { clearChatHistory } from '@/lib/api/chat'
 import Logo from '@/components/shared/Logo'
 import { GoogleIcon, AuthLayout, AuthInput, AuthSubmitButton, AuthDivider } from '../AuthShell'
 
@@ -33,6 +34,8 @@ function LoginForm() {
     try {
       const data = await login({ email, password })
       setAccessToken(data.accessToken)
+      // Best-effort - a fresh login starts a clean chat conversation, but shouldn't block on it.
+      void clearChatHistory().catch(() => {})
       router.push('/dashboard')
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Invalid email or password')

@@ -40,14 +40,20 @@ export default function DashboardPage() {
 
           <HoldingsPreview />
 
-          <WatchlistPreview />
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <section>
+              <div className="mb-4 flex w-48 justify-center pl-5">
+                <h2 className="text-lg font-semibold whitespace-nowrap text-[var(--color-text-primary)]">
+                  Allocation by sector
+                </h2>
+              </div>
+              <div className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] p-5">
+                <AllocationChart allocation={data.allocation} />
+              </div>
+            </section>
 
-          <section className="rounded-lg border border-[var(--color-border)] bg-[var(--color-card-bg)] p-5">
-            <h2 className="mb-4 text-sm font-semibold text-[var(--color-text-primary)]">
-              Allocation by sector
-            </h2>
-            <AllocationChart allocation={data.allocation} />
-          </section>
+            <WatchlistPreview />
+          </div>
         </>
       )}
     </div>

@@ -79,7 +79,8 @@ class StockDetailServiceTest {
     void onCacheHitUsesCachedCandlesWithoutCallingTwelveData() {
         when(companyRepository.findBySymbol("AAPL")).thenReturn(Optional.of(apple));
         when(quoteService.getQuote("AAPL")).thenReturn(quote);
-        when(chartCache.get("AAPL", "1day", TwelveDataTimeSeriesResponse.class)).thenReturn(Optional.of(timeSeries));
+        when(chartCache.get("AAPL", "1day", 30, TwelveDataTimeSeriesResponse.class))
+                .thenReturn(Optional.of(timeSeries));
 
         Optional<StockDetailResponse> result = service.getStockDetail("AAPL", "1day", 30);
 
@@ -93,12 +94,13 @@ class StockDetailServiceTest {
     void onCacheMissFetchesFromTwelveDataAndPopulatesCache() {
         when(companyRepository.findBySymbol("AAPL")).thenReturn(Optional.of(apple));
         when(quoteService.getQuote("AAPL")).thenReturn(quote);
-        when(chartCache.get("AAPL", "1day", TwelveDataTimeSeriesResponse.class)).thenReturn(Optional.empty());
+        when(chartCache.get("AAPL", "1day", 30, TwelveDataTimeSeriesResponse.class))
+                .thenReturn(Optional.empty());
         when(twelveDataClient.getTimeSeries("AAPL", "1day", 30)).thenReturn(timeSeries);
 
         Optional<StockDetailResponse> result = service.getStockDetail("AAPL", "1day", 30);
 
         assertThat(result).isPresent();
-        verify(chartCache).put(eq("AAPL"), eq("1day"), eq(timeSeries), any());
+        verify(chartCache).put(eq("AAPL"), eq("1day"), eq(30), eq(timeSeries), any());
     }
 }

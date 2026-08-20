@@ -110,10 +110,10 @@ public class StockComparisonService {
 
     private TwelveDataTimeSeriesResponse resolveTimeSeries(String symbol, String interval, int outputSize) {
         return chartCache
-                .get(symbol, interval, TwelveDataTimeSeriesResponse.class)
+                .get(symbol, interval, outputSize, TwelveDataTimeSeriesResponse.class)
                 .orElseGet(() -> {
                     TwelveDataTimeSeriesResponse fetched = twelveDataClient.getTimeSeries(symbol, interval, outputSize);
-                    chartCache.put(symbol, interval, fetched, CHART_TTL);
+                    chartCache.put(symbol, interval, outputSize, fetched, CHART_TTL);
                     return fetched;
                 });
     }

@@ -21,19 +21,22 @@ public class ChartCache {
         this.redisCacheClient = redisCacheClient;
     }
 
-    public <T> Optional<T> get(String symbol, String interval, Class<T> type) {
-        return redisCacheClient.get(key(symbol, interval), type);
+    public <T> Optional<T> get(String symbol, String interval, int outputSize, Class<T> type) {
+        return redisCacheClient.get(key(symbol, interval, outputSize), type);
     }
 
-    public void put(String symbol, String interval, Object value, Duration ttl) {
-        redisCacheClient.set(key(symbol, interval), value, ttl);
+    public void put(String symbol, String interval, int outputSize, Object value, Duration ttl) {
+        redisCacheClient.set(key(symbol, interval, outputSize), value, ttl);
     }
 
-    public void evict(String symbol, String interval) {
-        redisCacheClient.delete(key(symbol, interval));
+    public void evict(String symbol, String interval, int outputSize) {
+        redisCacheClient.delete(key(symbol, interval, outputSize));
     }
 
-    private String key(String symbol, String interval) {
-        return PREFIX + symbol + ":" + interval;
+    // outputSize is part of the key — different callers (chart ranges, comparisons, history
+    // lookups) share the same symbol+interval but need different windows of candles, and would
+    // otherwise silently overwrite each other's cached response.
+    private String key(String symbol, String interval, int outputSize) {
+        return PREFIX + symbol + ":" + interval + ":" + outputSize;
     }
 }

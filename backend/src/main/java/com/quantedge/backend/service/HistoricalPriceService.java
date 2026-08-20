@@ -31,9 +31,10 @@ public class HistoricalPriceService {
     private final TwelveDataClient twelveDataClient;
 
     public Optional<BigDecimal> getClosePriceAsOf(String symbol, LocalDate date) {
+        int outputSize = resolveOutputSize(date);
         TwelveDataTimeSeriesResponse timeSeries = chartCache
-                .get(symbol, HISTORY_INTERVAL, TwelveDataTimeSeriesResponse.class)
-                .orElseGet(() -> fetchAndCache(symbol, date));
+                .get(symbol, HISTORY_INTERVAL, outputSize, TwelveDataTimeSeriesResponse.class)
+                .orElseGet(() -> fetchAndCache(symbol, outputSize));
 
         if (timeSeries == null || timeSeries.values() == null) {
             return Optional.empty();
@@ -46,14 +47,16 @@ public class HistoricalPriceService {
                 .map(candle -> new BigDecimal(candle.close()));
     }
 
-    private TwelveDataTimeSeriesResponse fetchAndCache(String symbol, LocalDate date) {
+    private int resolveOutputSize(LocalDate date) {
         long daysSinceDate = Duration.between(
                         date.atStartOfDay(), LocalDate.now().atStartOfDay())
                 .toDays();
-        int outputSize = (int) Math.min(MAX_OUTPUT_SIZE, Math.max(30, daysSinceDate + 30));
+        return (int) Math.min(MAX_OUTPUT_SIZE, Math.max(30, daysSinceDate + 30));
+    }
 
+    private TwelveDataTimeSeriesResponse fetchAndCache(String symbol, int outputSize) {
         TwelveDataTimeSeriesResponse fetched = twelveDataClient.getTimeSeries(symbol, "1day", outputSize);
-        chartCache.put(symbol, HISTORY_INTERVAL, fetched, HISTORY_TTL);
+        chartCache.put(symbol, HISTORY_INTERVAL, outputSize, fetched, HISTORY_TTL);
         return fetched;
     }
 }

@@ -6,7 +6,6 @@ import { downloadExport, type ExportKind } from '@/lib/api/exports'
 const EXPORTS: { kind: ExportKind; label: string }[] = [
   { kind: 'portfolio-pdf', label: 'Portfolio PDF' },
   { kind: 'trade-history-csv', label: 'Trade History CSV' },
-  { kind: 'tax-pnl-pdf', label: 'Tax P&L PDF' },
 ]
 
 export default function ExportButtons() {

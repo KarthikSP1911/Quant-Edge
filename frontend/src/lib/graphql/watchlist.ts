@@ -16,17 +16,24 @@ const WATCHLIST_QUERY = /* GraphQL */ `
         exchange
       }
       addedAt
+      quote {
+        currentPrice
+      }
     }
   }
 `
 
-interface WatchlistQueryResponse {
-  watchlist: { company: Company; addedAt: string }[]
+export interface WatchlistCompany extends Company {
+  currentPrice: number
 }
 
-export async function fetchWatchlist(): Promise<Company[]> {
+interface WatchlistQueryResponse {
+  watchlist: { company: Company; addedAt: string; quote: { currentPrice: number } }[]
+}
+
+export async function fetchWatchlist(): Promise<WatchlistCompany[]> {
   const data = await graphqlRequest<WatchlistQueryResponse>(WATCHLIST_QUERY)
-  return data.watchlist.map((item) => item.company)
+  return data.watchlist.map((item) => ({ ...item.company, currentPrice: item.quote.currentPrice }))
 }
 
 export function addToWatchlist(symbol: string): Promise<void> {

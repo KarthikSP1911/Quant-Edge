@@ -21,7 +21,7 @@ export default function AppTopbar() {
   const isActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`)
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[var(--color-border)] bg-[var(--color-page-bg)]/80 backdrop-blur-md">
+    <header className="border-b border-[var(--color-border)] bg-[var(--color-page-bg)]/80 backdrop-blur-md">
       <nav className="mx-auto flex h-16 max-w-7xl items-center gap-8 px-8 sm:px-12 lg:px-16">
         <Link href="/dashboard" aria-label="QuantEdge home" className="shrink-0">
           <Logo variant="full" size={26} />

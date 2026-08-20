@@ -92,7 +92,8 @@ class StockComparisonServiceTest {
     private void stubSymbol(String symbol, TwelveDataTimeSeriesResponse series) {
         when(companyRepository.findBySymbol(symbol)).thenReturn(Optional.of(company(symbol)));
         when(quoteService.getQuote(symbol)).thenReturn(quote(100.0));
-        when(chartCache.get(symbol, "1day", TwelveDataTimeSeriesResponse.class)).thenReturn(Optional.of(series));
+        when(chartCache.get(symbol, "1day", 90, TwelveDataTimeSeriesResponse.class))
+                .thenReturn(Optional.of(series));
         when(fundamentalsCache.get(symbol, FinnhubBasicFinancialsResponse.class))
                 .thenReturn(Optional.of(new FinnhubBasicFinancialsResponse(
                         new FinnhubBasicFinancialsResponse.Metric(3.0e12, 30.5, 250.0, 150.0))));
@@ -185,7 +186,7 @@ class StockComparisonServiceTest {
         when(companyRepository.findBySymbol("AAPL")).thenReturn(Optional.of(company("AAPL")));
         when(companyRepository.findBySymbol("MSFT")).thenReturn(Optional.of(company("MSFT")));
         when(quoteService.getQuote(anyString())).thenReturn(quote(100.0));
-        when(chartCache.get(anyString(), eq("1day"), eq(TwelveDataTimeSeriesResponse.class)))
+        when(chartCache.get(anyString(), eq("1day"), eq(90), eq(TwelveDataTimeSeriesResponse.class)))
                 .thenReturn(Optional.empty());
         when(fundamentalsCache.get(anyString(), eq(FinnhubBasicFinancialsResponse.class)))
                 .thenReturn(Optional.empty());
@@ -202,7 +203,7 @@ class StockComparisonServiceTest {
         verify(twelveDataClient, times(1)).getTimeSeries("MSFT", "1day", 90);
         verify(finnhubClient, times(1)).getBasicFinancials("AAPL");
         verify(finnhubClient, times(1)).getBasicFinancials("MSFT");
-        verify(chartCache).put(eq("AAPL"), eq("1day"), eq(aapl), any());
+        verify(chartCache).put(eq("AAPL"), eq("1day"), eq(90), eq(aapl), any());
         verify(fundamentalsCache).put(eq("AAPL"), any());
     }
 
@@ -211,7 +212,7 @@ class StockComparisonServiceTest {
         stubSymbol("AAPL", series("AAPL", "2026-08-06"));
         when(companyRepository.findBySymbol("MSFT")).thenReturn(Optional.of(company("MSFT")));
         when(quoteService.getQuote("MSFT")).thenReturn(quote(100.0));
-        when(chartCache.get("MSFT", "1day", TwelveDataTimeSeriesResponse.class))
+        when(chartCache.get("MSFT", "1day", 90, TwelveDataTimeSeriesResponse.class))
                 .thenReturn(Optional.of(series("MSFT", "2026-08-06")));
         // Finnhub gates some metrics behind paid tiers and omits others entirely.
         when(fundamentalsCache.get("MSFT", FinnhubBasicFinancialsResponse.class))
@@ -230,7 +231,7 @@ class StockComparisonServiceTest {
         stubSymbol("AAPL", series("AAPL", "2026-08-06"));
         when(companyRepository.findBySymbol("MSFT")).thenReturn(Optional.of(company("MSFT")));
         when(quoteService.getQuote("MSFT")).thenReturn(quote(100.0));
-        when(chartCache.get("MSFT", "1day", TwelveDataTimeSeriesResponse.class))
+        when(chartCache.get("MSFT", "1day", 90, TwelveDataTimeSeriesResponse.class))
                 .thenReturn(Optional.of(series("MSFT", "2026-08-06")));
         when(fundamentalsCache.get("MSFT", FinnhubBasicFinancialsResponse.class))
                 .thenReturn(Optional.of(new FinnhubBasicFinancialsResponse(null)));
