@@ -2,10 +2,10 @@ package com.quantedge.backend.resolver;
 
 import java.math.BigDecimal;
 
-import com.quantedge.backend.config.ChatTools;
 import com.quantedge.backend.dto.request.PlaceOrderRequest;
 import com.quantedge.backend.dto.response.PendingOrderResponse;
 import com.quantedge.backend.entity.User;
+import com.quantedge.backend.service.PendingOrderService;
 import com.quantedge.backend.service.QuoteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -16,12 +16,12 @@ import org.springframework.stereotype.Controller;
 @RequiredArgsConstructor
 public class PendingOrderResolver {
 
-    private final ChatTools chatTools;
+    private final PendingOrderService pendingOrderService;
     private final QuoteService quoteService;
 
     @QueryMapping
     public PendingOrderResponse pendingOrder(@AuthenticationPrincipal User user) {
-        PlaceOrderRequest pending = chatTools.peekPendingOrder(user.getId());
+        PlaceOrderRequest pending = pendingOrderService.peek(user.getId());
         if (pending == null) {
             return null;
         }

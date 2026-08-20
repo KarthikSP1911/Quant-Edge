@@ -21,6 +21,7 @@ import com.quantedge.backend.exception.CompanyNotFoundException;
 import com.quantedge.backend.exception.InsufficientBalanceException;
 import com.quantedge.backend.exception.InsufficientSharesException;
 import com.quantedge.backend.external.dto.FinnhubQuoteResponse;
+import com.quantedge.backend.mapper.CompanyMapper;
 import com.quantedge.backend.repository.CompanyRepository;
 import com.quantedge.backend.repository.OrderExecutionRepository;
 import com.quantedge.backend.repository.OrderRepository;
@@ -40,6 +41,9 @@ class OrderServiceTest {
 
     @Mock
     private CompanyRepository companyRepository;
+
+    @Mock
+    private CompanyMapper companyMapper;
 
     @Mock
     private PortfolioRepository portfolioRepository;
@@ -62,7 +66,12 @@ class OrderServiceTest {
         TradeExecutionService tradeExecutionService = new TradeExecutionService(
                 userRepository, portfolioRepository, orderRepository, orderExecutionRepository);
         orderService = new OrderService(
-                companyRepository, orderRepository, orderExecutionRepository, quoteService, tradeExecutionService);
+                companyRepository,
+                companyMapper,
+                orderRepository,
+                orderExecutionRepository,
+                quoteService,
+                tradeExecutionService);
     }
 
     private User userWithBalance(BigDecimal balance) {

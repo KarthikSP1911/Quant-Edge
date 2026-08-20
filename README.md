@@ -157,6 +157,109 @@ flowchart LR
     SAI -->|API Calls| OA
 ```
 
+## ✨ AI / Agentic Architecture
+
+QuantEdge has two distinct AI surfaces built on Spring AI + Groq (OpenAI-compatible client) +
+Qdrant. They are deliberately separate rather than one shared code path:
+
+- **Chat assistant** (`ChatService`, `ChatController` — `POST /api/v1/chat`): a single-turn
+  request/response over the user's full tool surface (`ChatTools`) — portfolio/dashboard/
+  watchlist reads, watchlist mutation, order history, RAG search, and staging a trade proposal.
+  Spring AI's built-in tool-calling loop handles this turn's back-and-forth internally.
+- **Research agent** (`ResearchAgentOrchestrator`, `ResearchAgentController` — `POST
+  /api/v1/agent/research/{symbol}` + SSE trace at `GET /api/v1/agent/trace/{sessionId}`): a
+  multi-step, explicitly-looped agent that plans its own research strategy for a stock symbol
+  instead of following a fixed script.
+
+### From a hardcoded pipeline to a plan/act/observe loop
+
+The research agent used to run five fixed steps in a fixed order — fetch profile, fetch news,
+fetch indicators, one LLM synthesis call, save — regardless of whether each source was actually
+useful for the symbol in question. `ResearchAgentOrchestrator` replaces that with an explicit
+loop: the model decides which of its tools to call, in what order, how many times, and when it
+has enough information to stop.
+
+```mermaid
+flowchart TB
+    Start([Goal: research a symbol]) --> Plan[Plan\nmodel decides next action]
+    Plan -->|no tool calls| Final[Final response\nMarkdown report]
+    Plan -->|tool call(s)| Execute[Execute\nResearchAgentTools, via RetryingToolExecutor]
+    Execute --> Observe[Observe\nresult or failure fed back as a message]
+    Observe -->|failure| Replan[Replan\nmodel reacts to the gap]
+    Observe -->|success| Plan
+    Replan --> Plan
+    Final --> Save[Deterministic save\nResearchNote, not an LLM tool]
+    Save --> Done([complete])
+
+    Plan -.max steps exceeded.-> Forced[Forced final synthesis\nno more tool calls allowed]
+    Forced --> Save
+```
+
+Each iteration is one of five explicit phases (`AgentStepPhase`: `PLAN`, `TOOL_CALL`,
+`OBSERVATION`, `REPLAN`, `FINAL`), persisted as an `AgentStep` row and streamed live over the
+existing SSE trace mechanism (`SseTraceService`, unchanged) as `planning` / `plan` / `tool_call` /
+`observation` / `replan` / `final` / `saving_report` / `complete` / `error` events. The frontend's
+`ResearchAgentBody` renders each phase distinctly instead of a flat step list.
+
+### State and memory
+
+Each run is a persisted `AgentRun` row (`agent_runs` table: goal, status, step count, final
+report link) with one `AgentStep` row per iteration (`agent_steps` table). This is the agent's
+task state and memory:
+
+- **Short-term**: within a run, the growing `List<Message>` conversation (including every past
+  tool call and its result) is replayed back to the model each iteration, so it "remembers" what
+  it already tried.
+- **Long-term**: once a run completes, its `AgentRun`/`AgentStep` rows and the saved
+  `ResearchNote` are durable and queryable — unlike the old `SseTraceService`-only trace, which
+  was in-memory and lost after ~2 hours or a server restart.
+
+### Tool selection and permission boundary
+
+The research agent's tools (`ResearchAgentTools`: `getCompanyProfile`, `getRecentNews`,
+`getMarketIndicator`, `queryKnowledgeBase`) are a **separate Spring bean** from the chat
+assistant's (`ChatTools`), and are all read-only. Wiring the orchestrator's `ChatClient` to only
+this bean is what stops the research agent from ever touching a trade, an order, or the
+watchlist — a permission boundary enforced by Java wiring, not a prompt instruction the model
+could be talked out of.
+
+`queryKnowledgeBase` is available to both surfaces as a normal tool call: the model decides for
+itself when it needs RAG (historical context, analyst commentary) versus when the raw
+profile/news/indicator data is enough — there's no mandatory retrieval step.
+
+### Guardrails and failure recovery
+
+`AgentGuardrailProperties` (`quantedge.ai.agent.*`) bounds the loop:
+
+| Property | Default | Purpose |
+|---|---|---|
+| `max-steps` | 8 | Hard cap on plan/act/observe iterations before a forced final synthesis |
+| `tool-timeout-seconds` | 15 | Per tool-call timeout before it's treated as a failed observation |
+| `tool-max-retries` | 2 | Retries for a single tool call after a transient failure (e.g. a 429) |
+| `run-timeout-seconds` | 120 | Wall-clock budget for the whole run, independent of step count |
+
+Every `ResearchAgentTools` method routes through `RetryingToolExecutor`, which applies the
+timeout/retry budget and always returns a result (an `"Error executing <tool>: ..."` string on
+exhausted retries) rather than throwing into the conversation. The orchestrator inspects each
+tool result: a failure is traced and persisted as a `REPLAN` step and fed back to the model as an
+observation, so the next `PLAN` iteration can react to it — try an alternative tool, retry with
+different arguments, or proceed with an explicit caveat — the same way the old pipeline's
+try/catch degradation worked, but as a model decision instead of hardcoded fallback text. If the
+model still hasn't produced a final answer at `max-steps`, the orchestrator forces one final
+tool-free call asking it to synthesize a report from whatever was gathered, and marks the run
+`MAX_STEPS_REACHED` rather than failing outright.
+
+### Deterministic trade authorization
+
+Trade execution is never gated by the LLM alone. `ChatTools#placeOrder` can only **stage** a
+proposal (`PendingOrderService`, in-memory, per-user); there is no tool the model can call to
+execute or discard it. The only way a staged trade is executed or discarded is a real
+authenticated HTTP request to `POST /api/v1/chat/pending-order/confirm` or `.../cancel`
+(`PendingOrderController`), triggered exclusively by the user clicking Accept/Reject on the
+`PendingOrderCard` in the UI — never by the model interpreting a "yes"/"no" chat message. This
+replaced the previous design, where a system-prompt instruction was the only thing stopping the
+model from confirming a trade on its own.
+
 ## ✨ Tech Stack
 
 <div align="center">

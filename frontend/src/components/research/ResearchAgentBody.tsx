@@ -13,6 +13,22 @@ interface TraceEvent {
   message: string
 }
 
+// Visual treatment per phase the agent orchestrator emits (planning/plan, tool_call, observation,
+// replan, final, saving_report, complete, error) - see ResearchAgentOrchestrator.TraceEvent.
+const STEP_STYLES: Record<string, { label: string; dotClass: string }> = {
+  planning: { label: 'Planning', dotClass: 'bg-[var(--color-accent-blue)]' },
+  plan: { label: 'Plan', dotClass: 'bg-[var(--color-accent-blue)]' },
+  tool_call: { label: 'Tool call', dotClass: 'bg-[var(--color-text-secondary)]' },
+  observation: { label: 'Observation', dotClass: 'bg-[var(--color-profit)]' },
+  replan: { label: 'Replanning', dotClass: 'bg-[var(--color-warning)]' },
+  final: { label: 'Final report', dotClass: 'bg-[var(--color-profit)]' },
+  saving_report: { label: 'Saving', dotClass: 'bg-[var(--color-accent-blue)]' },
+}
+
+function stepStyle(step: string) {
+  return STEP_STYLES[step] ?? { label: step.replace(/_/g, ' '), dotClass: 'bg-[var(--color-accent-blue)]' }
+}
+
 export default function ResearchAgentBody({ symbol }: ResearchAgentBodyProps) {
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [traces, setTraces] = useState<TraceEvent[]>([])
@@ -75,19 +91,28 @@ export default function ResearchAgentBody({ symbol }: ResearchAgentBodyProps) {
       )}
 
       <div className="space-y-4">
-        {traces.map((trace, i) => (
-          <div key={i} className="flex items-start gap-3">
-            <div className="mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[var(--color-accent-blue)]/20">
-              <div className="h-2 w-2 rounded-full bg-[var(--color-accent-blue)]" />
+        {traces.map((trace, i) => {
+          const { label, dotClass } = stepStyle(trace.step)
+          return (
+            <div key={i} className="flex items-start gap-3">
+              <div className="mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[var(--color-accent-blue)]/20">
+                <div className={`h-2 w-2 rounded-full ${dotClass}`} />
+              </div>
+              <div className="min-w-0">
+                <span className="block text-xs font-semibold uppercase text-[var(--color-accent-blue)]">
+                  {label}
+                </span>
+                {trace.step === 'final' ? (
+                  <span className="block whitespace-pre-wrap text-sm text-[var(--color-text-primary)]">
+                    {trace.message}
+                  </span>
+                ) : (
+                  <span className="text-sm text-[var(--color-text-primary)]">{trace.message}</span>
+                )}
+              </div>
             </div>
-            <div>
-              <span className="block text-xs font-semibold uppercase text-[var(--color-accent-blue)]">
-                {trace.step.replace('_', ' ')}
-              </span>
-              <span className="text-sm text-[var(--color-text-primary)]">{trace.message}</span>
-            </div>
-          </div>
-        ))}
+          )
+        })}
 
         {status === 'running' && (
           <div className="flex items-center gap-3">

@@ -1,7 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { graphqlRequest } from '@/lib/graphql/client'
 import { GET_CHAT_HISTORY, GET_PENDING_ORDER } from '@/lib/graphql/chat'
-import { sendChatMessage } from '@/lib/api/chat'
+import {
+  cancelPendingOrder,
+  clearChatHistory,
+  confirmPendingOrder,
+  sendChatMessage,
+} from '@/lib/api/chat'
 import type { PendingOrder } from '@/types/order'
 
 export interface ChatMessage {
@@ -64,6 +69,41 @@ export function useSendChatMessage() {
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: CHAT_HISTORY_KEY })
       void queryClient.invalidateQueries({ queryKey: PENDING_ORDER_KEY })
+    },
+  })
+}
+
+export function useConfirmPendingOrder() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: confirmPendingOrder,
+    onSuccess: () => {
+      queryClient.setQueryData<PendingOrder | null>(PENDING_ORDER_KEY, null)
+      void queryClient.invalidateQueries({ queryKey: CHAT_HISTORY_KEY })
+    },
+  })
+}
+
+export function useCancelPendingOrder() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: cancelPendingOrder,
+    onSuccess: () => {
+      queryClient.setQueryData<PendingOrder | null>(PENDING_ORDER_KEY, null)
+    },
+  })
+}
+
+export function useClearChatHistory() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: clearChatHistory,
+    onSuccess: () => {
+      queryClient.setQueryData<ChatMessage[]>(CHAT_HISTORY_KEY, [])
+      queryClient.setQueryData(PENDING_ORDER_KEY, null)
     },
   })
 }

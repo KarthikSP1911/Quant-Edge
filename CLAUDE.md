@@ -42,13 +42,15 @@ docker-compose.yml at root
 - Cache-first: ~90% of page loads must hit Redis/Postgres only. External APIs are called on cache miss only.
 - External API rate limits are hard constraints: Finnhub 60/min, Twelve Data 800/day, Alpha Vantage 25/day, Groq 30/min
 
-## Database — 12 tables
+## Database — 14 tables
 
-users, companies, portfolios, transactions, orders, order_executions, watchlists, audit_logs, research_notes, alerts, chat_history, wallet_transactions
+users, companies, portfolios, transactions, orders, order_executions, watchlists, audit_logs, research_notes, alerts, chat_history, wallet_transactions, agent_runs, agent_steps
 
 All schema changes go through Flyway migrations. Never hand-edit a migration that has already been applied — write a new one.
 
 `wallet_transactions` backs the Razorpay (Test Mode) wallet top-up feature (USD via Razorpay Checkout.js → virtual `users.balance` credits, at a fixed $1 = 10 credits rate; no real money is ever charged). The backend creates a Razorpay Order server-side, the frontend opens the Checkout.js modal client-side, and a JWT-authenticated verify-payment endpoint checks the HMAC-SHA256 payment signature before crediting — a `payment.captured` webhook (`X-Razorpay-Signature`-verified) backs that up idempotently in case the browser closes first. `RAZORPAY_WEBHOOK_SECRET` is optional — Test Mode only hands out a key ID and key secret up front, and getting a webhook secret requires a public HTTPS URL for Razorpay to call; without it, the webhook endpoint just refuses requests (503) instead of skipping verification, and the primary verify-payment flow still works standalone. It lives outside the 7-phase build plan below — it was added on its own `feature/stripe-wallet-topup` branch rather than a `phase-<n>/*` one, and commits use the `wallet` commitlint scope.
+
+`agent_runs`/`agent_steps` back the research agent's plan/act/observe loop (`ResearchAgentOrchestrator`) — durable task state and short/long-term memory for each run, replacing the old in-memory-only SSE trace as the source of truth for what the agent did. See README's "AI / Agentic Architecture" section for the full design.
 
 ## Branding / Design Tokens
 

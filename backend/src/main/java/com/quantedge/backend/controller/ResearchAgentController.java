@@ -4,8 +4,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.quantedge.backend.entity.User;
-import com.quantedge.backend.service.ResearchAgentService;
 import com.quantedge.backend.service.SseTraceService;
+import com.quantedge.backend.service.agent.ResearchAgentOrchestrator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,7 +21,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RequiredArgsConstructor
 public class ResearchAgentController {
 
-    private final ResearchAgentService researchAgentService;
+    private final ResearchAgentOrchestrator researchAgentOrchestrator;
     private final SseTraceService sseTraceService;
 
     @PostMapping("/research/{symbol}")
@@ -29,7 +29,7 @@ public class ResearchAgentController {
             @AuthenticationPrincipal User user, @PathVariable String symbol) {
         String sessionId = UUID.randomUUID().toString();
         // Run agent async
-        Thread.ofVirtual().start(() -> researchAgentService.runResearch(user, symbol, sessionId));
+        Thread.ofVirtual().start(() -> researchAgentOrchestrator.runResearch(user, symbol, sessionId));
         return ResponseEntity.ok(Map.of("sessionId", sessionId));
     }
 

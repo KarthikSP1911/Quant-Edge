@@ -3,7 +3,13 @@
 import { useEffect, useRef, useState } from 'react'
 import ChatMarkdown from '@/components/chat/ChatMarkdown'
 import PendingOrderCard from '@/components/chat/PendingOrderCard'
-import { useChatHistory, usePendingOrder, useSendChatMessage } from '@/hooks/useChat'
+import {
+  useCancelPendingOrder,
+  useChatHistory,
+  useConfirmPendingOrder,
+  usePendingOrder,
+  useSendChatMessage,
+} from '@/hooks/useChat'
 
 function ChatSkeleton() {
   return (
@@ -44,6 +50,8 @@ export default function ChatBody() {
     : rawMessages
   const sendMessage = useSendChatMessage()
   const { data: pendingOrder } = usePendingOrder()
+  const confirmOrder = useConfirmPendingOrder()
+  const cancelOrder = useCancelPendingOrder()
   const [input, setInput] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -118,9 +126,9 @@ export default function ChatBody() {
             {pendingOrder && !sendMessage.isPending && (
               <PendingOrderCard
                 order={pendingOrder}
-                onAccept={() => sendMessage.mutate('yes')}
-                onReject={() => sendMessage.mutate('no')}
-                isSubmitting={sendMessage.isPending}
+                onAccept={() => confirmOrder.mutate()}
+                onReject={() => cancelOrder.mutate()}
+                isSubmitting={confirmOrder.isPending || cancelOrder.isPending}
               />
             )}
           </div>

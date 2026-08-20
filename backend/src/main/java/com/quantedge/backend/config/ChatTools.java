@@ -1,9 +1,7 @@
 package com.quantedge.backend.config;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.quantedge.backend.dto.request.PlaceOrderRequest;
 import com.quantedge.backend.entity.User;
@@ -12,6 +10,7 @@ import com.quantedge.backend.rag.retrieval.KnowledgeBaseService;
 import com.quantedge.backend.rag.retrieval.KnowledgeChunkResult;
 import com.quantedge.backend.service.DashboardService;
 import com.quantedge.backend.service.OrderService;
+import com.quantedge.backend.service.PendingOrderService;
 import com.quantedge.backend.service.QuoteService;
 import com.quantedge.backend.service.StockDetailService;
 import com.quantedge.backend.service.WatchlistService;
@@ -31,13 +30,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class ChatTools {
 
-    private final Map<UUID, PlaceOrderRequest> pendingOrders = new ConcurrentHashMap<>();
-
     private final StockDetailService stockDetailService;
     private final QuoteService quoteService;
     private final DashboardService dashboardService;
     private final WatchlistService watchlistService;
     private final OrderService orderService;
+    private final PendingOrderService pendingOrderService;
     private final KnowledgeBaseService knowledgeBaseService;
     private final VectorStore knowledgeBaseVectorStore;
 
@@ -47,6 +45,7 @@ public class ChatTools {
             DashboardService dashboardService,
             WatchlistService watchlistService,
             OrderService orderService,
+            PendingOrderService pendingOrderService,
             KnowledgeBaseService knowledgeBaseService,
             @Lazy VectorStore knowledgeBaseVectorStore) {
         this.stockDetailService = stockDetailService;
@@ -54,6 +53,7 @@ public class ChatTools {
         this.dashboardService = dashboardService;
         this.watchlistService = watchlistService;
         this.orderService = orderService;
+        this.pendingOrderService = pendingOrderService;
         this.knowledgeBaseService = knowledgeBaseService;
         this.knowledgeBaseVectorStore = knowledgeBaseVectorStore;
     }
@@ -142,39 +142,20 @@ public class ChatTools {
     }
 
     @Tool(
-            description =
-                    "Stage a new market or limit order for a stock. Type must be MARKET, LIMIT, STOP_LOSS, or "
-                            + "STOP_LIMIT. Side must be BUY or SELL. This does not execute the order; it waits for user confirmation.")
+            description = "Propose a new market or limit order for a stock. Type must be MARKET, LIMIT, STOP_LOSS, or "
+                    + "STOP_LIMIT. Side must be BUY or SELL. This never executes the order - it only stages a "
+                    + "proposal for the user to review. The user must accept or reject it themselves via the "
+                    + "confirmation card shown in the UI; you have no way to execute or discard it yourself, so "
+                    + "do not claim you have placed the trade and do not ask the user to reply 'yes'/'no' in "
+                    + "chat - just tell them a confirmation card is ready for them to act on.")
     public Object placeOrder(PlaceOrderRequest request) {
         try {
             User user = getCurrentUser();
-            pendingOrders.put(user.getId(), request);
-            return "Order staged for " + request.getSide() + " " + request.getQuantity() + " of " + request.getSymbol()
-                    + ". Please ask the user to confirm by saying 'yes' to proceed, or 'no' to cancel.";
+            pendingOrderService.stage(user.getId(), request);
+            return "Order proposed: " + request.getSide() + " " + request.getQuantity() + " of " + request.getSymbol()
+                    + ". Waiting for the user to accept or reject it in the confirmation card.";
         } catch (Exception e) {
             return "Error staging order: " + e.getMessage();
-        }
-    }
-
-    @Tool(description = "Execute the pending order after the user has explicitly confirmed 'yes'.")
-    public Object confirmPendingOrder() {
-        try {
-            User user = getCurrentUser();
-            PlaceOrderRequest pending = pendingOrders.remove(user.getId());
-            if (pending == null) {
-                return "No pending order found to confirm.";
-            }
-            if ("MARKET".equals(pending.getType().name())) {
-                if ("BUY".equals(pending.getSide().name())) {
-                    return orderService.buy(user, pending.getSymbol(), pending.getQuantity());
-                } else {
-                    return orderService.sell(user, pending.getSymbol(), pending.getQuantity());
-                }
-            } else {
-                return orderService.placeOrder(user, pending);
-            }
-        } catch (Exception e) {
-            return "Error executing confirmed order: " + e.getMessage();
         }
     }
 
@@ -185,17 +166,6 @@ public class ChatTools {
         } catch (Exception e) {
             return "Error executing cancelOrder: " + e.getMessage();
         }
-    }
-
-    @Tool(description = "Discard the pending staged order after the user declines to confirm it (e.g. says 'no').")
-    public Object cancelPendingOrder() {
-        pendingOrders.remove(getCurrentUser().getId());
-        return "Pending order discarded.";
-    }
-
-    /** Read-only lookup for the GraphQL {@code pendingOrder} query - not exposed as a tool. */
-    public PlaceOrderRequest peekPendingOrder(UUID userId) {
-        return pendingOrders.get(userId);
     }
 
     @Tool(
