@@ -8,21 +8,25 @@
   <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" style="margin: 4px;" />
   <img src="https://img.shields.io/badge/Apache_Kafka-231F20?style=for-the-badge&logo=apache-kafka&logoColor=white" alt="Kafka" style="margin: 4px;" />
   <img src="https://img.shields.io/badge/Qdrant-000000?style=for-the-badge&logo=qdrant&logoColor=white" alt="Qdrant" style="margin: 4px;" />
-  <img src="https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white" alt="OpenAI" style="margin: 4px;" />
+  <img src="https://img.shields.io/badge/Groq-F55036?style=for-the-badge&logo=openai&logoColor=white" alt="Groq" style="margin: 4px;" />
 </p>
+
+<p align="center"><i>AI-powered stock research and simulated trading — quantified.</i></p>
 
 ## 🚀 Overview
 
-**Quant Edge** is an AI-powered financial and portfolio management platform. It leverages large language models (LLMs) and Retrieval-Augmented Generation (RAG) to provide intelligent insights, real-time market data integration, and comprehensive portfolio reporting. The platform features a highly scalable microservice-oriented architecture with event-driven data streaming.
+**Quant Edge** is an AI-powered stock research and simulated trading platform. It combines live market data, a limit/stop order matching engine, and two purpose-built LLM surfaces — a tool-calling chat assistant and a multi-step research agent with its own plan/act/observe loop — to help a user research a symbol, place simulated trades, and track a virtual portfolio. Reads go through GraphQL, writes go through REST, and fills/agent progress stream over SSE; Kafka carries order-matching events internally and is never touched by the frontend.
 
 ## ✨ Key Features
 
-- **AI-Driven Insights**: Powered by Spring AI and OpenAI for intelligent chat, financial analysis, and personalized insights.
-- **Market Data Integration**: Connects with leading financial APIs (Finnhub, Twelve Data, Alpha Vantage) for real-time and historical market data.
-- **Event-Driven Architecture**: Utilizes Apache Kafka for robust asynchronous event processing and message brokering.
-- **Advanced Semantic Search**: Employs Qdrant as a vector database for embedding storage, supporting high-performance RAG workflows.
-- **Secure Authentication**: Implements Spring Security with OAuth2 (Google) and JWT for stateless authentication.
-- **Comprehensive Reporting**: Generates downloadable portfolio and tax reports via iText7 (PDF) and trade histories via OpenCSV.
+- **Simulated trading & order matching** — market, limit, stop-loss, and stop-limit orders against a Kafka-backed matching engine, with live fill notifications pushed over SSE (`OrderStreamController`).
+- **AI chat assistant** — a single-turn, tool-calling assistant (`ChatService`) over the user's portfolio, watchlist, order history, and RAG search; it can _stage_ a trade proposal but never execute one — only an explicit Accept click on the `PendingOrderCard` confirms it.
+- **Research agent** — a multi-step plan/act/observe agent (`ResearchAgentOrchestrator`) that decides for itself which read-only tools to call (company profile, news, indicators, knowledge-base RAG search) for a given symbol, with guardrails on step count, per-tool timeout/retries, and wall-clock budget, and a live SSE reasoning trace.
+- **Retrieval-augmented knowledge base** — daily Finnhub news and company data embedded locally (ONNX MiniLM) and stored in Qdrant, queried by both AI surfaces as a normal tool call.
+- **Portfolio tools** — dashboard, watchlist with live quotes, stock comparison, an audit log (via AOP), a "time machine" portfolio replay, and PDF/CSV exports (iText7 / OpenCSV).
+- **Simulated wallet top-up** — Razorpay Checkout (Test Mode) funds a virtual balance at a fixed $1 = 10 credits rate; no real money ever moves. HMAC-verified server-side, backed by an idempotent webhook.
+- **Secure auth** — Spring Security with Google OAuth2 and JWT access/refresh tokens.
+- **Cache-first data layer** — Redis-backed caching (prices, charts, news, indicators, profiles) in front of Finnhub / Twelve Data / Alpha Vantage, so ~90% of page loads never hit an external API.
 
 ## 🛠️ Prerequisites
 
@@ -46,11 +50,30 @@ Create a `.env` file in the root directory (use `.env.example` as a template). Y
 
 - **Database:** `DATABASE_URL`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`
 - **Redis (Upstash/Local):** `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`
-- **External APIs:** `FINNHUB_API_KEY`, `TWELVE_DATA_API_KEY`, `ALPHA_VANTAGE_API_KEY`, `GROQ_API_KEY`
+- **External APIs:** `FINNHUB_API_KEY`, `TWELVE_DATA_API_KEY`, `ALPHA_VANTAGE_API_KEY`, `GROQ_API_KEY` (Groq, via Spring AI's OpenAI-compatible client — see [AI / Agentic Architecture](#-ai--agentic-architecture))
 - **Vector Store:** `QDRANT_URL`, `QDRANT_API_KEY`
 - **Auth:** `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `JWT_ACCESS_SECRET`
 
-### 3. Run the Application
+### 3. Repo Layout
+
+```
+/backend    → Spring Boot 3.x (Java 21), Maven — REST + GraphQL API, Kafka producer/consumer,
+              Flyway migrations, Spring AI (Groq) chat + research agent
+/frontend   → Next.js (App Router, TypeScript, Tailwind, shadcn/ui)
+docker-compose.yml at root — Postgres, Redis (+ Upstash-REST shim), Zookeeper, Kafka
+```
+
+### 4. API Surface
+
+| Style       | Used for | Examples                                                                                                                                      |
+| ----------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| **REST**    | writes   | auth, buy/sell, place/cancel orders, wallet top-up, export PDF/CSV, send chat, trigger research agent                                         |
+| **GraphQL** | reads    | company list/detail, portfolio, watchlist, transactions, dashboard, orders, audit log, comparison, time machine, chat history, research notes |
+| **SSE**     | push     | order fill notifications (`OrderStreamController`), research agent reasoning trace (`GET /api/v1/agent/trace/{sessionId}`)                    |
+
+Kafka is internal only — it carries order-matching events between the backend's own producer and consumer and is never exposed to the frontend.
+
+### 5. Run the Application
 
 #### Windows (Quick Start)
 
@@ -91,7 +114,7 @@ flowchart TB
     Kafka["Kafka<br/>(Message Queue)"]
     DB["PostgreSQL<br/>(Data JPA / Flyway)"]
     Qdrant["Qdrant<br/>(Vector Store)"]
-    LLM["OpenAI<br/>(Spring AI)"]
+    LLM["Groq<br/>(Spring AI)"]
 
     UI <--> API
     API <--> Kafka
@@ -143,7 +166,7 @@ flowchart LR
     end
 
     subgraph External["External Services"]
-        OA[OpenAI API]
+        OA[Groq API]
     end
 
     U -->|HTTPS / WSS| F
@@ -167,7 +190,7 @@ Qdrant. They are deliberately separate rather than one shared code path:
   watchlist reads, watchlist mutation, order history, RAG search, and staging a trade proposal.
   Spring AI's built-in tool-calling loop handles this turn's back-and-forth internally.
 - **Research agent** (`ResearchAgentOrchestrator`, `ResearchAgentController` — `POST
-  /api/v1/agent/research/{symbol}` + SSE trace at `GET /api/v1/agent/trace/{sessionId}`): a
+/api/v1/agent/research/{symbol}` + SSE trace at `GET /api/v1/agent/trace/{sessionId}`): a
   multi-step, explicitly-looped agent that plans its own research strategy for a stock symbol
   instead of following a fixed script.
 
@@ -231,12 +254,12 @@ profile/news/indicator data is enough — there's no mandatory retrieval step.
 
 `AgentGuardrailProperties` (`quantedge.ai.agent.*`) bounds the loop:
 
-| Property | Default | Purpose |
-|---|---|---|
-| `max-steps` | 8 | Hard cap on plan/act/observe iterations before a forced final synthesis |
-| `tool-timeout-seconds` | 15 | Per tool-call timeout before it's treated as a failed observation |
-| `tool-max-retries` | 2 | Retries for a single tool call after a transient failure (e.g. a 429) |
-| `run-timeout-seconds` | 120 | Wall-clock budget for the whole run, independent of step count |
+| Property               | Default | Purpose                                                                 |
+| ---------------------- | ------- | ----------------------------------------------------------------------- |
+| `max-steps`            | 8       | Hard cap on plan/act/observe iterations before a forced final synthesis |
+| `tool-timeout-seconds` | 15      | Per tool-call timeout before it's treated as a failed observation       |
+| `tool-max-retries`     | 2       | Retries for a single tool call after a transient failure (e.g. a 429)   |
+| `run-timeout-seconds`  | 120     | Wall-clock budget for the whole run, independent of step count          |
 
 Every `ResearchAgentTools` method routes through `RetryingToolExecutor`, which applies the
 timeout/retry budget and always returns a result (an `"Error executing <tool>: ..."` string on
@@ -342,7 +365,12 @@ model from confirming a trade on its own.
 
   <tr>
     <td><b>LLM Provider</b></td>
-    <td>OpenAI API</td>
+    <td>Groq (via Spring AI's OpenAI-compatible client)</td>
+  </tr>
+
+  <tr>
+    <td><b>Embeddings</b></td>
+    <td>Local ONNX (all-MiniLM-L6-v2) — Groq has no embeddings endpoint</td>
   </tr>
 
   <tr>
