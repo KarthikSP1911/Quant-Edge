@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import PendingOrderCard from '@/components/chat/PendingOrderCard'
 import { triggerResearch } from '@/lib/api/research'
 import { createSseConnection } from '@/lib/sse/client'
+import { useCancelPendingOrder, useConfirmPendingOrder, usePendingOrder } from '@/hooks/useChat'
 
 interface ResearchAgentBodyProps {
   symbol: string
@@ -14,19 +16,27 @@ interface TraceEvent {
 }
 
 // Visual treatment per phase the agent orchestrator emits (planning/plan, tool_call, observation,
-// replan, final, saving_report, complete, error) - see ResearchAgentOrchestrator.TraceEvent.
+// replan, validate, awaiting_approval, final, saving_report, complete, error) - see
+// ResearchAgentOrchestrator.TraceEvent.
 const STEP_STYLES: Record<string, { label: string; dotClass: string }> = {
   planning: { label: 'Planning', dotClass: 'bg-[var(--color-accent-blue)]' },
   plan: { label: 'Plan', dotClass: 'bg-[var(--color-accent-blue)]' },
   tool_call: { label: 'Tool call', dotClass: 'bg-[var(--color-text-secondary)]' },
   observation: { label: 'Observation', dotClass: 'bg-[var(--color-profit)]' },
   replan: { label: 'Replanning', dotClass: 'bg-[var(--color-warning)]' },
+  validate: { label: 'Validating', dotClass: 'bg-[var(--color-accent-blue)]' },
+  awaiting_approval: { label: 'Awaiting approval', dotClass: 'bg-[var(--color-warning)]' },
   final: { label: 'Final report', dotClass: 'bg-[var(--color-profit)]' },
   saving_report: { label: 'Saving', dotClass: 'bg-[var(--color-accent-blue)]' },
 }
 
 function stepStyle(step: string) {
-  return STEP_STYLES[step] ?? { label: step.replace(/_/g, ' '), dotClass: 'bg-[var(--color-accent-blue)]' }
+  return (
+    STEP_STYLES[step] ?? {
+      label: step.replace(/_/g, ' '),
+      dotClass: 'bg-[var(--color-accent-blue)]',
+    }
+  )
 }
 
 export default function ResearchAgentBody({ symbol }: ResearchAgentBodyProps) {
@@ -34,6 +44,11 @@ export default function ResearchAgentBody({ symbol }: ResearchAgentBodyProps) {
   const [traces, setTraces] = useState<TraceEvent[]>([])
   const [status, setStatus] = useState<'idle' | 'running' | 'completed' | 'error'>('idle')
   const [error, setError] = useState<string | null>(null)
+  const { data: pendingOrder } = usePendingOrder()
+  const confirmOrder = useConfirmPendingOrder()
+  const cancelOrder = useCancelPendingOrder()
+  const awaitingApproval =
+    traces.length > 0 && traces[traces.length - 1].step === 'awaiting_approval'
 
   useEffect(() => {
     const startResearch = async () => {
@@ -113,6 +128,15 @@ export default function ResearchAgentBody({ symbol }: ResearchAgentBodyProps) {
             </div>
           )
         })}
+
+        {awaitingApproval && pendingOrder && pendingOrder.source === 'AGENT' && (
+          <PendingOrderCard
+            order={pendingOrder}
+            onAccept={() => confirmOrder.mutate()}
+            onReject={() => cancelOrder.mutate()}
+            isSubmitting={confirmOrder.isPending || cancelOrder.isPending}
+          />
+        )}
 
         {status === 'running' && (
           <div className="flex items-center gap-3">

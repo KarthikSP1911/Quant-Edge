@@ -19,6 +19,8 @@ export const GET_PENDING_ORDER = `
       limitPrice
       stopPrice
       estimatedCost
+      source
+      agentRunId
     }
   }
 `

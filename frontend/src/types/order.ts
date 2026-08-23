@@ -69,7 +69,10 @@ export interface Order {
   expiresAt: string | null
 }
 
-// Mirrors the backend's GraphQL PendingOrder type (a chat-agent-staged order awaiting confirmation).
+export type PendingActionSource = 'CHAT' | 'AGENT'
+
+// Mirrors the backend's GraphQL PendingOrder type (a staged order awaiting confirmation, from
+// either the chat agent's placeOrder tool or the research agent's proposeTrade tool).
 export interface PendingOrder {
   symbol: string
   side: OrderSide
@@ -78,6 +81,8 @@ export interface PendingOrder {
   limitPrice: number | null
   stopPrice: number | null
   estimatedCost: number | null
+  source: PendingActionSource
+  agentRunId: string | null
 }
 
 // Mirrors the backend's TradeExecutedMessage, pushed on GET /api/orders/stream.

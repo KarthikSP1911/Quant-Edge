@@ -128,12 +128,13 @@ class ResearchAgentOrchestratorIT {
     @Test
     void runResearch_callsProposedToolThenSynthesizesAndSavesReport() {
         when(chatModel.call(any(Prompt.class)))
+                .thenReturn(new ChatResponse(List.of(new Generation(finalResponse("1. Fetch profile")))))
                 .thenReturn(new ChatResponse(
                         List.of(new Generation(toolCallResponse("getCompanyProfile", "{\"symbol\":\"NVDA\"}")))))
                 .thenReturn(new ChatResponse(List.of(new Generation(finalResponse("Mock AI Report")))));
 
         String sessionId = UUID.randomUUID().toString();
-        orchestrator.runResearch(testUser, "NVDA", sessionId);
+        orchestrator.runResearch(testUser, "NVDA", "Produce a research report for NVDA", sessionId);
 
         List<ResearchNote> notes = researchNoteRepository.findByUserOrderByCreatedAtDesc(testUser);
         assertThat(notes).hasSize(1);
@@ -157,13 +158,14 @@ class ResearchAgentOrchestratorIT {
         AssistantMessage repeatingToolCall = toolCallResponse("getRecentNews", "{\"symbol\":\"NVDA\"}");
         when(finnhubClient.getCompanyNews(anyString(), any(), any())).thenReturn(List.of());
         when(chatModel.call(any(Prompt.class)))
+                .thenReturn(new ChatResponse(List.of(new Generation(finalResponse("1. Fetch news")))))
                 .thenReturn(new ChatResponse(List.of(new Generation(repeatingToolCall))))
                 .thenReturn(new ChatResponse(List.of(new Generation(repeatingToolCall))))
                 .thenReturn(new ChatResponse(List.of(new Generation(repeatingToolCall))))
                 .thenReturn(new ChatResponse(List.of(new Generation(finalResponse("Forced final report")))));
 
         String sessionId = UUID.randomUUID().toString();
-        orchestrator.runResearch(testUser, "NVDA", sessionId);
+        orchestrator.runResearch(testUser, "NVDA", "Produce a research report for NVDA", sessionId);
 
         AgentRun run = agentRunRepository.findById(UUID.fromString(sessionId)).orElseThrow();
         assertThat(run.getStatus()).isEqualTo(AgentRunStatus.MAX_STEPS_REACHED);
@@ -178,13 +180,14 @@ class ResearchAgentOrchestratorIT {
     void runResearch_toolFailureIsObservedAsReplanAndRunStillCompletes() {
         when(alphaVantageClient.getIndicator(eq("NVDA"), anyString())).thenThrow(new RuntimeException("Rate limited"));
         when(chatModel.call(any(Prompt.class)))
+                .thenReturn(new ChatResponse(List.of(new Generation(finalResponse("1. Check indicators")))))
                 .thenReturn(new ChatResponse(List.of(new Generation(
                         toolCallResponse("getMarketIndicator", "{\"symbol\":\"NVDA\",\"indicator\":\"SMA\"}")))))
                 .thenReturn(
                         new ChatResponse(List.of(new Generation(finalResponse("Report noting missing indicator")))));
 
         String sessionId = UUID.randomUUID().toString();
-        orchestrator.runResearch(testUser, "NVDA", sessionId);
+        orchestrator.runResearch(testUser, "NVDA", "Produce a research report for NVDA", sessionId);
 
         AgentRun run = agentRunRepository.findById(UUID.fromString(sessionId)).orElseThrow();
         assertThat(run.getStatus()).isEqualTo(AgentRunStatus.COMPLETED);

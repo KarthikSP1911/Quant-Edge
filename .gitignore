@@ -18,3 +18,4 @@ Thumbs.db
 
 # start.sh log output
 .run/
+.claude/

@@ -24,6 +24,18 @@ public class AgentGuardrailProperties {
     /** Wall-clock budget for the whole run, in seconds, independent of step count. */
     private int runTimeoutSeconds = 120;
 
+    /** Base backoff, in milliseconds, before retrying a retryable tool failure (doubles per attempt). */
+    private int toolRetryBackoffMillis = 200;
+
+    /** Step count after which older tool observations are compacted out of the LLM context. */
+    private int contextSummarizeAfterSteps = 5;
+
+    /** Character budget for a compacted block of older tool observations. */
+    private int contextObservationCharBudget = 6000;
+
+    /** How long the loop waits for a human to confirm/reject a proposed trade before timing out. */
+    private int approvalTimeoutSeconds = 300;
+
     public int getMaxSteps() {
         return maxSteps;
     }
@@ -54,5 +66,37 @@ public class AgentGuardrailProperties {
 
     public void setRunTimeoutSeconds(int runTimeoutSeconds) {
         this.runTimeoutSeconds = runTimeoutSeconds;
+    }
+
+    public int getToolRetryBackoffMillis() {
+        return toolRetryBackoffMillis;
+    }
+
+    public void setToolRetryBackoffMillis(int toolRetryBackoffMillis) {
+        this.toolRetryBackoffMillis = toolRetryBackoffMillis;
+    }
+
+    public int getContextSummarizeAfterSteps() {
+        return contextSummarizeAfterSteps;
+    }
+
+    public void setContextSummarizeAfterSteps(int contextSummarizeAfterSteps) {
+        this.contextSummarizeAfterSteps = contextSummarizeAfterSteps;
+    }
+
+    public int getContextObservationCharBudget() {
+        return contextObservationCharBudget;
+    }
+
+    public void setContextObservationCharBudget(int contextObservationCharBudget) {
+        this.contextObservationCharBudget = contextObservationCharBudget;
+    }
+
+    public int getApprovalTimeoutSeconds() {
+        return approvalTimeoutSeconds;
+    }
+
+    public void setApprovalTimeoutSeconds(int approvalTimeoutSeconds) {
+        this.approvalTimeoutSeconds = approvalTimeoutSeconds;
     }
 }

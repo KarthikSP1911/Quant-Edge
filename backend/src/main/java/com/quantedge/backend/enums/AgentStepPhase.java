@@ -1,10 +1,12 @@
 package com.quantedge.backend.enums;
 
-/** The five phases the task explicitly asks the agent loop to distinguish. */
+/** The phases the agent loop distinguishes in its trace and persisted step log. */
 public enum AgentStepPhase {
     PLAN,
     TOOL_CALL,
     OBSERVATION,
     REPLAN,
+    VALIDATE,
+    AWAITING_APPROVAL,
     FINAL
 }
