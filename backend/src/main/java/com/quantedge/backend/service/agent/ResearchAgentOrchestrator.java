@@ -15,6 +15,7 @@ import com.quantedge.backend.config.AgentGuardrailProperties;
 import com.quantedge.backend.config.AgentProposalTools;
 import com.quantedge.backend.config.AgentToolRegistry;
 import com.quantedge.backend.config.AgentToolRegistry.ToolCategory;
+import com.quantedge.backend.config.ReasoningContentSupport;
 import com.quantedge.backend.entity.AgentRun;
 import com.quantedge.backend.entity.AgentStep;
 import com.quantedge.backend.entity.Company;
@@ -236,7 +237,8 @@ public class ResearchAgentOrchestrator {
                 .maxTokens(maxTokens)
                 .build();
         messages.add(new UserMessage("First, respond only with your numbered plan for this objective."));
-        ChatResponse planResponse = chatModel.call(new Prompt(messages, planOnlyOptions));
+        ChatResponse planResponse =
+                chatModel.call(new Prompt(ReasoningContentSupport.strip(messages), planOnlyOptions));
         String plan = planResponse.getResult().getOutput().getText();
         sendTrace(sessionId, "plan", plan);
         persistStep(run, 0, AgentStepPhase.PLAN, null, null, plan, AgentStepStatus.SUCCESS);
@@ -261,7 +263,7 @@ public class ResearchAgentOrchestrator {
             }
 
             sendTrace(sessionId, "planning", "Deciding next action (step " + step + ")...");
-            Prompt prompt = new Prompt(messages, toolOptions);
+            Prompt prompt = new Prompt(ReasoningContentSupport.strip(messages), toolOptions);
             ChatResponse response = chatModel.call(prompt);
             AssistantMessage assistantMessage = response.getResult().getOutput();
 
@@ -389,7 +391,8 @@ public class ResearchAgentOrchestrator {
                     .temperature(temperature)
                     .maxTokens(maxTokens)
                     .build();
-            ChatResponse forcedResponse = chatModel.call(new Prompt(messages, forcedOptions));
+            ChatResponse forcedResponse =
+                    chatModel.call(new Prompt(ReasoningContentSupport.strip(messages), forcedOptions));
             finalReport = forcedResponse.getResult().getOutput().getText();
             finalStatus = AgentRunStatus.MAX_STEPS_REACHED;
         } else {
@@ -414,7 +417,7 @@ public class ResearchAgentOrchestrator {
                         + " Please address this and " + "respond again with your final answer."));
                 stateMachine.transition(run, AgentRunStatus.RUNNING);
                 ChatResponse retryResponse = chatModel.call(new Prompt(
-                        messages,
+                        ReasoningContentSupport.strip(messages),
                         OpenAiChatOptions.builder()
                                 .model(model)
                                 .temperature(temperature)
