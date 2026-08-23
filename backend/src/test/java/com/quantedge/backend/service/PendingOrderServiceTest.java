@@ -2,47 +2,67 @@ package com.quantedge.backend.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.UUID;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.quantedge.backend.dto.request.PlaceOrderRequest;
 import com.quantedge.backend.dto.response.OrderResponse;
 import com.quantedge.backend.entity.User;
+import com.quantedge.backend.enums.AuthProvider;
 import com.quantedge.backend.enums.OrderSide;
 import com.quantedge.backend.enums.OrderStatus;
 import com.quantedge.backend.enums.OrderType;
+import com.quantedge.backend.enums.Role;
 import com.quantedge.backend.enums.TimeInForce;
 import com.quantedge.backend.exception.InvalidOrderRequestException;
+import com.quantedge.backend.repository.PendingActionRepository;
+import com.quantedge.backend.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 
 /**
- * {@link PendingOrderService} is the sole path by which a chat-agent-staged trade is executed or
- * discarded - the LLM's {@code placeOrder} tool can only reach {@link PendingOrderService#stage},
- * never {@link PendingOrderService#confirm}. These tests pin down that a staged order only
- * executes when {@code confirm} is called directly (i.e. from the deterministic REST endpoint,
- * never from tool-calling), that confirming twice or confirming nothing fails loudly instead of
- * silently double-executing, and that cancel discards without ever touching OrderService.
+ * {@link PendingOrderService} is the sole path by which a staged trade - from the chat agent's
+ * {@code placeOrder} tool or the research agent's {@code proposeTrade} tool - is executed or
+ * discarded - the LLM can only reach {@link PendingOrderService#stage}, never
+ * {@link PendingOrderService#confirm}. These tests pin down that a staged order only executes
+ * when {@code confirm} is called directly (i.e. from the deterministic REST endpoint, never from
+ * tool-calling), that confirming twice or confirming nothing fails loudly instead of silently
+ * double-executing, and that cancel discards without ever touching OrderService. Runs against a
+ * real (H2) {@link PendingActionRepository} via {@code @DataJpaTest} since the service is now
+ * persistence-backed rather than an in-memory map.
  */
-@ExtendWith(MockitoExtension.class)
+@DataJpaTest
 class PendingOrderServiceTest {
 
-    @Mock
-    private OrderService orderService;
+    @Autowired
+    private PendingActionRepository pendingActionRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    private final OrderService orderService = mock(OrderService.class);
 
     private PendingOrderService pendingOrderService;
     private User user;
 
     @BeforeEach
     void setUp() {
-        pendingOrderService = new PendingOrderService(orderService);
-        user = User.builder().id(UUID.randomUUID()).build();
+        pendingOrderService =
+                new PendingOrderService(pendingActionRepository, userRepository, orderService, new ObjectMapper());
+        user = userRepository.save(User.builder()
+                .email("pending-order-" + UUID.randomUUID() + "@example.com")
+                .passwordHash("hash")
+                .name("Test User")
+                .role(Role.USER)
+                .authProvider(AuthProvider.LOCAL)
+                .build());
     }
 
     private PlaceOrderRequest marketOrder() {
@@ -90,10 +110,32 @@ class PendingOrderServiceTest {
 
     @Test
     void peek_reflectsTheMostRecentlyStagedOrderForThatUserOnly() {
-        User otherUser = User.builder().id(UUID.randomUUID()).build();
+        User otherUser = userRepository.save(User.builder()
+                .email("pending-order-other-" + UUID.randomUUID() + "@example.com")
+                .passwordHash("hash")
+                .name("Other User")
+                .role(Role.USER)
+                .authProvider(AuthProvider.LOCAL)
+                .build());
         pendingOrderService.stage(user.getId(), marketOrder());
 
         assertThat(pendingOrderService.peek(user.getId())).isNotNull();
         assertThat(pendingOrderService.peek(otherUser.getId())).isNull();
+    }
+
+    @Test
+    void staging_expiresAnyPreviousPendingProposalForThatUser() {
+        pendingOrderService.stage(user.getId(), marketOrder());
+        PlaceOrderRequest second = PlaceOrderRequest.builder()
+                .symbol("MSFT")
+                .side(OrderSide.SELL)
+                .type(OrderType.MARKET)
+                .quantity(2)
+                .timeInForce(TimeInForce.DAY)
+                .build();
+
+        pendingOrderService.stage(user.getId(), second);
+
+        assertThat(pendingOrderService.peek(user.getId()).getSymbol()).isEqualTo("MSFT");
     }
 }

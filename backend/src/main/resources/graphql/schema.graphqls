@@ -77,7 +77,8 @@ type Order {
     expiresAt: String
 }
 
-# A chat-agent-staged order awaiting the user's explicit confirmation (see ChatTools#placeOrder).
+# A staged order awaiting the user's explicit confirmation - either from the chat agent's
+# placeOrder tool or the research agent's proposeTrade tool (see PendingOrderService).
 type PendingOrder {
     symbol: String!
     side: OrderSide!
@@ -86,6 +87,13 @@ type PendingOrder {
     limitPrice: Float
     stopPrice: Float
     estimatedCost: Float
+    source: PendingActionSource!
+    agentRunId: ID
+}
+
+enum PendingActionSource {
+    CHAT
+    AGENT
 }
 
 type PortfolioPosition {
