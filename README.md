@@ -1,4 +1,8 @@
-# Quant Edge
+# <img src="frontend/public/logo/logo-mark.svg" alt="" width="28" height="28" align="center" /> Quant Edge
+
+<p align="center">
+  <img src="docs/images/hero-preview.png" alt="Quant Edge hero preview" width="900" />
+</p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js" style="margin: 4px;" />
