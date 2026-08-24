@@ -112,7 +112,7 @@ export default function Hero() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               whileHover={{ y: -4 }}
               transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-              className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-card-bg)] p-6 shadow-xl shadow-slate-900/5 transition-shadow hover:shadow-2xl"
+              className="p-6"
             >
               <div className="flex items-start justify-between">
                 <div>
@@ -197,7 +197,7 @@ export default function Hero() {
                 x: { duration: 0.6, delay: 0.55, ease: [0.22, 1, 0.36, 1] },
                 y: { duration: 3.2, delay: 1.2, repeat: Infinity, ease: 'easeInOut' },
               }}
-              className="absolute -top-6 -left-6 hidden cursor-default items-center gap-3 rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 shadow-lg shadow-slate-900/10 sm:flex"
+              className="absolute -top-6 -left-6 -z-10 hidden cursor-default items-center gap-3 rounded-xl border border-[var(--color-border)] bg-white px-4 py-3 shadow-lg shadow-slate-900/10 sm:flex"
             >
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-accent-light)] text-xs font-bold text-[var(--color-accent-blue)]">
                 AA
