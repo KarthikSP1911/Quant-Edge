@@ -721,7 +721,7 @@ enough information to stop.
 flowchart TB
     Start([Goal: research a symbol]) --> Plan["Plan<br/>model decides next action"]
     Plan -->|no tool calls| Final["Final response<br/>Markdown report"]
-    Plan -->|tool call(s)| Execute["Execute<br/>ResearchAgentTools, via RetryingToolExecutor"]
+    Plan -->|tool calls| Execute["Execute<br/>ResearchAgentTools, via RetryingToolExecutor"]
     Execute --> Observe["Observe<br/>result or failure fed back as a message"]
     Observe -->|failure| Replan["Replan<br/>model reacts to the gap"]
     Observe -->|success| Plan
@@ -729,7 +729,7 @@ flowchart TB
     Final --> Save["Deterministic save<br/>ResearchNote, not an LLM tool"]
     Save --> Done([complete])
 
-    Plan -.max steps exceeded.-> Forced["Forced final synthesis<br/>no more tool calls allowed"]
+    Plan -. max steps exceeded .-> Forced["Forced final synthesis<br/>no more tool calls allowed"]
     Forced --> Save
 ```
 
