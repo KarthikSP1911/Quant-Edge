@@ -127,49 +127,74 @@ flowchart TB
 ### Layered Design
 
 ```mermaid
-flowchart LR
-    U[User / Client]
+flowchart TB
+    U["User / Client"]
 
-    subgraph F["Next.js Frontend App"]
-        UI[UI Components & Dashboards]
-        Charts[Lightweight Charts]
+    subgraph F["Next.js Frontend"]
+        UI["Dashboards, Trading & Chat UI"]
+        Charts["Lightweight Charts"]
     end
 
     subgraph B["Spring Boot Backend"]
-        direction TB
-        SM[OAuth2 & JWT Security]
-        API[GraphQL & REST APIs]
-        SAI[Spring AI Service]
-        EXP[PDF / CSV Exporter]
-        KFP[Kafka Producer]
-        KFC[Kafka Consumer]
+        SEC["OAuth2 & JWT Security"]
 
-        SM --> API
-        API --> SAI
-        API --> EXP
-        API --> KFP
-        KFC --> SAI
+        subgraph API["API Layer"]
+            REST["REST Controllers - writes"]
+            GQL["GraphQL Resolvers - reads"]
+            SSE["SSE Controllers - push"]
+        end
+
+        ORD["OrderService & OrderMatcherService"]
+        AI["ChatService & ResearchAgentOrchestrator"]
+        EXP["PDF / CSV Exporter"]
+        WAL["Wallet Service"]
+        SCHED["PriceSyncScheduler"]
+        KFP["Kafka Producer"]
+        KFC["Kafka Consumer"]
+
+        SEC --> REST
+        SEC --> GQL
+        REST --> ORD
+        REST --> AI
+        REST --> EXP
+        REST --> WAL
+        GQL --> ORD
+        SCHED --> KFP
+        KFC --> ORD
+        ORD --> SSE
+        AI --> SSE
     end
 
     subgraph D["Data Layer"]
-        P[(PostgreSQL)]
-        Q[(Qdrant Vector Store)]
-        K[(Kafka Event Streaming)]
+        PG[("PostgreSQL")]
+        RD[("Redis Cache")]
+        QD[("Qdrant Vector Store")]
+        KT[("Kafka: stock-prices topic")]
     end
 
-    subgraph External["External Services"]
-        OA[Groq API]
+    subgraph Ext["External Services"]
+        MKT["Finnhub / Twelve Data / Alpha Vantage"]
+        GROQ["Groq LLM"]
+        RZP["Razorpay"]
     end
 
-    U -->|HTTPS / WSS| F
-    F -->|GraphQL / REST| B
+    U -->|"HTTPS"| F
+    F -->|"REST / GraphQL"| API
+    SSE -->|"SSE stream"| F
 
-    B -->|Read / Write| P
-    B -->|Semantic Search| Q
-    KFP -->|Publish Events| K
-    K -->|Consume Events| KFC
-
-    SAI -->|API Calls| OA
+    ORD --> PG
+    ORD --> RD
+    GQL --> PG
+    GQL --> RD
+    EXP --> PG
+    WAL --> PG
+    AI --> QD
+    AI --> GROQ
+    WAL --> RZP
+    SCHED --> MKT
+    SCHED --> RD
+    KFP --> KT
+    KT --> KFC
 ```
 
 ## Domain Model
