@@ -3,7 +3,12 @@ package com.quantedge.backend.service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
+import com.quantedge.backend.entity.Company;
 import com.quantedge.backend.entity.Order;
 import com.quantedge.backend.entity.OrderExecution;
 import com.quantedge.backend.enums.OrderStatus;
@@ -57,13 +62,39 @@ public class OrderMatcherService {
         companyRepository
                 .findBySymbol(symbol)
                 .ifPresentOrElse(
-                        company -> {
-                            List<Order> openOrders = orderRepository.findByCompanyAndStatus(company, OrderStatus.OPEN);
-                            for (Order order : openOrders) {
-                                self.getObject().attemptFill(order.getId(), syncedPrice);
-                            }
-                        },
+                        company -> matchOpenOrders(company, syncedPrice),
                         () -> log.warn("Ignoring price event for unknown symbol={}", symbol));
+    }
+
+    /**
+     * Each order fills under its own row lock and its own transaction (see {@link #attemptFill}),
+     * so orders competing for the same price event are independent of one another - safe to
+     * evaluate concurrently on virtual threads rather than one at a time. The Kafka consumer
+     * driving this is still single-threaded per topic, so this only parallelizes work within one
+     * price tick, not across ticks.
+     */
+    private void matchOpenOrders(Company company, BigDecimal syncedPrice) {
+        List<Order> openOrders = orderRepository.findByCompanyAndStatus(company, OrderStatus.OPEN);
+        if (openOrders.isEmpty()) {
+            return;
+        }
+
+        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            List<Future<?>> fills = openOrders.stream()
+                    .map(order -> executor.submit(() -> self.getObject().attemptFill(order.getId(), syncedPrice)))
+                    .toList();
+            for (Future<?> fill : fills) {
+                try {
+                    fill.get();
+                } catch (ExecutionException ex) {
+                    log.error("Order fill failed for symbol={}", company.getSymbol(), ex.getCause());
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                    log.warn("Interrupted while matching orders for symbol={}", company.getSymbol());
+                    break;
+                }
+            }
+        }
     }
 
     @Transactional
