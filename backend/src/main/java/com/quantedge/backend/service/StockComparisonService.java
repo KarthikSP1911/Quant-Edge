@@ -9,6 +9,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import com.quantedge.backend.cache.ChartCache;
@@ -16,6 +20,7 @@ import com.quantedge.backend.cache.FundamentalsCache;
 import com.quantedge.backend.dto.response.CandleResponse;
 import com.quantedge.backend.dto.response.ComparisonEntryResponse;
 import com.quantedge.backend.dto.response.FundamentalsResponse;
+import com.quantedge.backend.dto.response.QuoteResponse;
 import com.quantedge.backend.dto.response.StockComparisonResponse;
 import com.quantedge.backend.entity.Company;
 import com.quantedge.backend.exception.CompanyNotFoundException;
@@ -60,24 +65,67 @@ public class StockComparisonService {
         List<String> requested = normalize(symbols);
         List<Company> companies = requested.stream().map(this::requireCompany).toList();
 
+        List<CompanyComparisonData> data = fetchConcurrently(companies, interval, outputSize);
+
         Map<String, List<CandleResponse>> candlesBySymbol = new LinkedHashMap<>();
-        for (Company company : companies) {
-            candlesBySymbol.put(
-                    company.getSymbol(),
-                    marketDataMapper.toCandleResponses(resolveTimeSeries(company.getSymbol(), interval, outputSize)));
+        for (CompanyComparisonData entry : data) {
+            candlesBySymbol.put(entry.company().getSymbol(), entry.candles());
         }
         Set<String> sharedAxis = sharedDatetimes(candlesBySymbol.values());
 
-        List<ComparisonEntryResponse> entries = companies.stream()
-                .map(company -> new ComparisonEntryResponse(
-                        companyMapper.toResponse(company),
-                        marketDataMapper.toQuoteResponse(quoteService.getQuote(company.getSymbol())),
-                        resolveFundamentals(company.getSymbol()),
-                        alignToAxis(candlesBySymbol.get(company.getSymbol()), sharedAxis)))
+        List<ComparisonEntryResponse> entries = data.stream()
+                .map(entry -> new ComparisonEntryResponse(
+                        companyMapper.toResponse(entry.company()),
+                        entry.quote(),
+                        entry.fundamentals(),
+                        alignToAxis(entry.candles(), sharedAxis)))
                 .toList();
 
         return new StockComparisonResponse(entries);
     }
+
+    /**
+     * Each company's candles/quote/fundamentals are independent, cache-first lookups - a cache
+     * miss is the only thing that reaches Twelve Data or Finnhub. Fanning them out across virtual
+     * threads instead of fetching one company at a time bounds a 2-3 symbol comparison by its
+     * slowest single fetch rather than the sum of all of them.
+     */
+    private List<CompanyComparisonData> fetchConcurrently(List<Company> companies, String interval, int outputSize) {
+        try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+            List<Future<CompanyComparisonData>> futures = companies.stream()
+                    .map(company -> executor.submit(() -> fetchCompanyData(company, interval, outputSize)))
+                    .toList();
+            List<CompanyComparisonData> results = new ArrayList<>(futures.size());
+            for (Future<CompanyComparisonData> future : futures) {
+                results.add(future.get());
+            }
+            return results;
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Interrupted while fetching comparison data", ex);
+        } catch (ExecutionException ex) {
+            throw unwrapExecutionException(ex);
+        }
+    }
+
+    private CompanyComparisonData fetchCompanyData(Company company, String interval, int outputSize) {
+        List<CandleResponse> candles =
+                marketDataMapper.toCandleResponses(resolveTimeSeries(company.getSymbol(), interval, outputSize));
+        QuoteResponse quote = marketDataMapper.toQuoteResponse(quoteService.getQuote(company.getSymbol()));
+        FundamentalsResponse fundamentals = resolveFundamentals(company.getSymbol());
+        return new CompanyComparisonData(company, candles, quote, fundamentals);
+    }
+
+    private static RuntimeException unwrapExecutionException(ExecutionException ex) {
+        Throwable cause = ex.getCause();
+        if (cause instanceof RuntimeException runtimeException) {
+            return runtimeException;
+        }
+        return new IllegalStateException("Failed to fetch comparison data", cause);
+    }
+
+    private record CompanyComparisonData(
+            Company company, List<CandleResponse> candles, QuoteResponse quote, FundamentalsResponse fundamentals) {}
 
     /**
      * Upper-cases, trims and de-duplicates the requested symbols while preserving request order —
