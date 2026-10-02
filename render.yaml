@@ -1,0 +1,92 @@
+# Render Blueprint: https://render.com/docs/blueprint-spec
+# Postgres (Neon), Redis (Upstash) and Kafka (Aiven) stay external - see docs/deploy.md.
+# Values marked `sync: false` are prompted for on first deploy (and never stored in git).
+services:
+  - type: web
+    name: quantedge-backend
+    runtime: docker
+    dockerContext: ./backend
+    dockerfilePath: ./backend/Dockerfile
+    # Free instances sleep after 15 minutes idle, which drops the SSE streams and stalls the Kafka
+    # consumer, and 512MB is tight for Spring Boot. Use at least Starter.
+    plan: starter
+    healthCheckPath: /actuator/health/liveness
+    envVars:
+      - key: DATABASE_URL # jdbc:postgresql://<host>/<db>?sslmode=require
+        sync: false
+      - key: DATABASE_USERNAME
+        sync: false
+      - key: DATABASE_PASSWORD
+        sync: false
+      - key: UPSTASH_REDIS_REST_URL
+        sync: false
+      - key: UPSTASH_REDIS_REST_TOKEN
+        sync: false
+      - key: KAFKA_BOOTSTRAP_SERVERS
+        sync: false
+      - key: KAFKA_SECURITY_PROTOCOL
+        value: SASL_SSL
+      - key: KAFKA_SASL_USERNAME
+        sync: false
+      - key: KAFKA_SASL_PASSWORD
+        sync: false
+      - key: KAFKA_SSL_BUNDLE
+        value: aiven-kafka
+      - key: KAFKA_SSL_TRUSTSTORE_LOCATION
+        value: classpath:aiven-ca.pem
+      - key: GROQ_API_KEY
+        sync: false
+      - key: FINNHUB_API_KEY
+        sync: false
+      - key: TWELVE_DATA_API_KEY
+        sync: false
+      - key: ALPHA_VANTAGE_API_KEY
+        sync: false
+      - key: QDRANT_URL
+        sync: false
+      - key: QDRANT_API_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_WEBHOOK_SECRET
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      # Public URL of the frontend service, e.g. https://quantedge-frontend.onrender.com (no
+      # trailing slash). Used for CORS, the post-login redirect and the OAuth2 flow.
+      - key: FRONTEND_URL
+        sync: false
+      - key: COOKIE_SECURE
+        value: "true"
+      # Lax is correct because the Next.js proxy keeps the cookie first-party. Only switch to None
+      # if you remove the proxy and call the backend cross-site.
+      - key: COOKIE_SAMESITE
+        value: Lax
+
+  - type: web
+    name: quantedge-frontend
+    runtime: docker
+    dockerContext: ./frontend
+    dockerfilePath: ./frontend/Dockerfile
+    plan: free
+    healthCheckPath: /login
+    envVars:
+      # Public URL of the backend service, e.g. https://quantedge-backend.onrender.com. Next.js
+      # proxies /api and /graphql to it. Baked in at build time, so changing it
+      # needs a redeploy.
+      - key: BACKEND_URL
+        sync: false
+      # Same URL again. The browser uses it for SSE (proxies can buffer long-lived streams) and to
+      # start Google sign-in, which must begin and end on the backend host.
+      - key: NEXT_PUBLIC_DIRECT_BACKEND_URL
+        sync: false
+      - key: NEXT_PUBLIC_RAZORPAY_KEY_ID
+        sync: false

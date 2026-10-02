@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '@/lib/config'
+import { API_BASE_URL, DIRECT_BACKEND_URL } from '@/lib/config'
 import type { AccessTokenResponse, AuthUser, LoginPayload, RegisterPayload } from './types'
 
 export class ApiError extends Error {
@@ -92,5 +92,5 @@ export function getCurrentUser(accessToken: string) {
 }
 
 export function googleLoginUrl() {
-  return `${API_BASE_URL}/oauth2/authorization/google`
+  return `${DIRECT_BACKEND_URL}/oauth2/authorization/google`
 }
