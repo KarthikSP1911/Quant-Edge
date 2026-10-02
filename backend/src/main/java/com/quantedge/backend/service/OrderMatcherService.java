@@ -1,7 +1,10 @@
 package com.quantedge.backend.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -67,11 +70,13 @@ public class OrderMatcherService {
     }
 
     /**
-     * Each order fills under its own row lock and its own transaction (see {@link #attemptFill}),
-     * so orders competing for the same price event are independent of one another - safe to
-     * evaluate concurrently on virtual threads rather than one at a time. The Kafka consumer
-     * driving this is still single-threaded per topic, so this only parallelizes work within one
-     * price tick, not across ticks.
+     * Each order fills in its own transaction under a row lock on the order (see {@link
+     * #attemptFill}), but that lock does not cover the user's balance or portfolio row, which a
+     * fill reads, modifies and writes back. Two orders from the same user filled at once would
+     * therefore lose a balance update. So orders are grouped by user: different users' groups run
+     * concurrently on virtual threads, while one user's orders run one after another inside their
+     * group. The Kafka consumer driving this is still single-threaded per topic, so this only
+     * parallelizes work within one price tick, not across ticks.
      */
     private void matchOpenOrders(Company company, BigDecimal syncedPrice) {
         List<Order> openOrders = orderRepository.findByCompanyAndStatus(company, OrderStatus.OPEN);
@@ -79,20 +84,38 @@ public class OrderMatcherService {
             return;
         }
 
+        Map<UUID, List<Order>> ordersByUser = new LinkedHashMap<>();
+        for (Order order : openOrders) {
+            ordersByUser
+                    .computeIfAbsent(order.getUser().getId(), id -> new ArrayList<>())
+                    .add(order);
+        }
+
         try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
-            List<Future<?>> fills = openOrders.stream()
-                    .map(order -> executor.submit(() -> self.getObject().attemptFill(order.getId(), syncedPrice)))
+            List<Future<?>> groups = ordersByUser.values().stream()
+                    .<Future<?>>map(userOrders -> executor.submit(() -> fillSequentially(userOrders, syncedPrice)))
                     .toList();
-            for (Future<?> fill : fills) {
+            for (Future<?> group : groups) {
                 try {
-                    fill.get();
+                    group.get();
                 } catch (ExecutionException ex) {
-                    log.error("Order fill failed for symbol={}", company.getSymbol(), ex.getCause());
+                    log.error("Order matching failed for symbol={}", company.getSymbol(), ex.getCause());
                 } catch (InterruptedException ex) {
                     Thread.currentThread().interrupt();
                     log.warn("Interrupted while matching orders for symbol={}", company.getSymbol());
                     break;
                 }
+            }
+        }
+    }
+
+    /** One failing order must not stop the same user's remaining orders from being evaluated. */
+    private void fillSequentially(List<Order> userOrders, BigDecimal syncedPrice) {
+        for (Order order : userOrders) {
+            try {
+                self.getObject().attemptFill(order.getId(), syncedPrice);
+            } catch (RuntimeException ex) {
+                log.error("Order fill failed for order={}", order.getId(), ex);
             }
         }
     }
