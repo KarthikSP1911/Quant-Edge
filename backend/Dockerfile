@@ -8,6 +8,13 @@ RUN mvn -B -q package -DskipTests
 
 FROM eclipse-temurin:21-jre-alpine AS run
 WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
+RUN addgroup -S app && adduser -S app -G app && mkdir -p /app/exports && chown app:app /app/exports
+COPY --from=build --chown=app:app /app/target/*.jar app.jar
+USER app
+
+# Hosts like Render inject $PORT (application.properties reads it, default 8080).
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Size the heap from the container's memory limit instead of the host's, so small instances
+# (512MB) are not OOM-killed. Override with JAVA_OPTS if needed.
+ENV JAVA_OPTS="-XX:MaxRAMPercentage=70 -XX:+ExitOnOutOfMemoryError"
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar app.jar"]
