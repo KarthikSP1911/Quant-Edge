@@ -12,8 +12,30 @@ Starts everything: `postgres`, `redis` + `redis-http` (a REST-protocol sidecar â
 `zookeeper` + `kafka`, `backend`, `frontend`. No `.env` required; every backend env var has a
 Docker-friendly default (see `backend/src/main/resources/application.properties`).
 
+- App (via nginx): http://localhost (set `NGINX_PORT` to use another host port)
 - Backend: http://localhost:8080 (health: http://localhost:8080/actuator/health)
 - Frontend: http://localhost:3000
+
+## nginx reverse proxy
+
+`nginx` (`nginx/nginx.conf`) is the single entry point. `/api/*`, `/graphql` and the Google
+OAuth2 paths go to the backend; everything else goes to the Next.js frontend. Because the browser
+sees one origin, the auth cookies stay first-party and there are no CORS preflights.
+
+- The frontend image is built with an empty `NEXT_PUBLIC_API_URL`, so it calls relative URLs.
+  That value is inlined into the browser bundle at build time; rebuild with `--build` after
+  changing it.
+- SSE routes (`/api/orders/stream`, `/api/v1/agent/trace/*`) have buffering off and a 31-minute
+  read timeout to cover the backend's 30-minute emitters. Chat and agent routes allow 180s for
+  Groq. Other API routes use 60s.
+- `server.forward-headers-strategy=native` makes Spring trust `X-Forwarded-*`, so audit logs record
+  the client IP and OAuth2 redirect URIs use the public host.
+- Google sign-in: add `http://localhost/login/oauth2/code/google` to the OAuth client's
+  authorized redirect URIs (port 80 only; include `:<NGINX_PORT>` otherwise).
+- `FRONTEND_URL` defaults to `http://localhost`. It must equal the public origin, since it is the
+  backend's CORS allow-list and the post-login redirect target.
+- nginx serves plain HTTP only. For a real deployment, terminate TLS in front of it (or extend the
+  config) and set `COOKIE_SECURE=true`.
 
 **Redis note**: `RedisCacheClient` always speaks Upstash's REST protocol
 (`GET /get/{key}`, `POST /set/{key}`), never the native Redis wire protocol â€” that's how the app
