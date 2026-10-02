@@ -73,7 +73,8 @@ Flyway migrations run on backend startup.
   API origin, and add the frontend origin to `CORS_ALLOWED_ORIGINS`.
 - **Fully cross-site, no proxy:** set `COOKIE_SAMESITE=None` and `COOKIE_SECURE=true`. Browsers that
   block third-party cookies will still break login, so prefer the proxy.
-- **nginx single origin** (`docker-compose.yml`): see `docs/docker.md`.
+- **Single VPS with Docker Compose:** use the bundled nginx single-origin proxy, see
+  [nginx.md](nginx.md) and [docker.md](docker.md).
 
 ## Things to know
 
