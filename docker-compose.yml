@@ -100,6 +100,8 @@ services:
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
       COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      COOKIE_SAMESITE: ${COOKIE_SAMESITE:-Lax}
+      DB_POOL_SIZE: ${DB_POOL_SIZE:-10}
     ports:
       - "8080:8080"
 

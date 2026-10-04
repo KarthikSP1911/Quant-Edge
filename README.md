@@ -17,6 +17,10 @@
 
 <p align="center"><i>AI-powered stock research and simulated trading — quantified.</i></p>
 
+<p align="center"><img src="docs/images/hld.svg" alt="Architecture: a user reaches an nginx gateway that routes to the Next.js frontend and a Spring Boot backend (market data, orders, AI assistant, wallet) backed by Redis, Kafka, PostgreSQL, Qdrant, Groq and Razorpay" width="900"></p>
+
+<p align="center"><sub>Market Data, Orders &amp; Portfolio, AI Assistant, Wallet and the Order Matcher are modules of one Spring Boot process, not separate services; all of them persist to the same PostgreSQL. nginx is the single-host proxy (Render uses Next.js rewrites instead), and JWT is verified inside the backend.</sub></p>
+
 ## Contents
 
 - [Overview](#overview)
@@ -28,6 +32,7 @@
 - [AI / Agentic Architecture](#ai--agentic-architecture)
 - [API Surface](#api-surface)
 - [Getting Started](#getting-started)
+- [Deployment](#deployment)
 - [Testing](#testing)
 
 ## Overview
@@ -92,7 +97,7 @@ carries order-matching events internally and is never touched by the frontend.
   <tr><td><b>Payments</b></td><td>Razorpay Checkout.js (Test Mode, wallet top-up only)</td></tr>
   <tr><td><b>File Exports</b></td><td>iText7 (PDF), OpenCSV (CSV)</td></tr>
   <tr><td><b>Testing</b></td><td>JUnit, Mockito, Testcontainers, Jacoco</td></tr>
-  <tr><td><b>DevOps</b></td><td>Docker Compose</td></tr>
+  <tr><td><b>DevOps</b></td><td>Docker Compose, nginx reverse proxy, Render Blueprint</td></tr>
 </table>
 
 </div>
@@ -878,7 +883,9 @@ works standalone.
 /backend    → Spring Boot 3.x (Java 21), Maven — REST + GraphQL API, Kafka producer/consumer,
               Flyway migrations, Spring AI (Groq) chat + research agent
 /frontend   → Next.js (App Router, TypeScript, Tailwind, shadcn/ui)
-docker-compose.yml at root — Postgres, Redis (+ Upstash-REST shim), Zookeeper, Kafka
+docker-compose.yml at root — Postgres, Redis (+ Upstash-REST shim), Zookeeper, Kafka, nginx
+/nginx      → single-origin reverse proxy config (see docs/nginx.md)
+render.yaml at root — Render Blueprint for the backend and frontend services
 ```
 
 ### 4. Run the Application
@@ -909,6 +916,29 @@ cd frontend
 npm install
 npm run dev
 ```
+
+**Whole stack through one URL** — runs everything, including the nginx reverse proxy, in Docker:
+
+```bash
+docker compose --profile local up --build   # app at http://localhost
+```
+
+See [docs/docker.md](docs/docker.md) and [docs/nginx.md](docs/nginx.md).
+
+## Deployment
+
+QuantEdge runs as two stateless containers (Spring Boot backend, Next.js frontend) plus external
+managed services: Neon (Postgres), Upstash (Redis), Aiven (Kafka), Groq, and Qdrant.
+
+| Target                                       | How                                                                              | Guide                            |
+| -------------------------------------------- | -------------------------------------------------------------------------------- | -------------------------------- |
+| Render                                       | Import `render.yaml` as a Blueprint; set the service URLs after the first deploy | [docs/deploy.md](docs/deploy.md) |
+| Any Docker host (Railway, Fly.io, Cloud Run) | Build `backend/` and `frontend/`; the images honour `$PORT`                      | [docs/deploy.md](docs/deploy.md) |
+| One VPS                                      | Docker Compose with the bundled nginx proxy                                      | [docs/nginx.md](docs/nginx.md)   |
+
+On split hosts the frontend proxies `/api` and `/graphql` to the backend so the refresh cookie stays
+first-party; SSE and Google sign-in connect directly to the backend. Both are explained in the
+deployment guide, along with the one Google redirect URI you must register.
 
 ## Testing
 

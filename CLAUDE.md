@@ -16,7 +16,7 @@ Building from scratch. No existing codebase to migrate or reference.
 - **GenAI:** Groq via Spring AI (openai/gpt-oss-120b, OpenAI-compatible client)
 - **Charts:** TradingView lightweight-charts
 - **Testing:** JUnit 5, Mockito, Testcontainers
-- **DevOps:** Docker Compose
+- **DevOps:** Docker Compose, nginx (single-origin reverse proxy, `nginx/nginx.conf`), Render Blueprint (`render.yaml`)
 
 ## API Design Rules
 
@@ -115,3 +115,15 @@ Phase 6.
 - Never commit secrets. All keys go in `.env`, which is gitignored. Keep `.env.example` updated.
 - Prefer editing existing files over creating new ones.
 - When something in this file becomes stale, update CLAUDE.md as part of the same commit.
+
+## Deployment
+
+- Two deploy shapes, both in `docs/`: nginx single origin for one host (`docs/nginx.md`), and split
+  services on Render or similar (`docs/deploy.md`, `render.yaml`). Keep them working together.
+- The refresh cookie is `SameSite=Lax`, so the browser must reach the API on the frontend's site:
+  nginx, or Next.js rewrites when `BACKEND_URL` is set. SSE and Google OAuth2 are the exceptions and
+  go straight to the backend (`NEXT_PUBLIC_DIRECT_BACKEND_URL`).
+- `NEXT_PUBLIC_*` and `BACKEND_URL` are baked into the frontend at build time; a change needs a
+  rebuild.
+- A new env var must be added to `.env.example`, `docker-compose.yml` (backend service) and
+  `render.yaml` in the same commit. Commit scope for this work is `docker`.

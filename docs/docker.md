@@ -18,24 +18,10 @@ Docker-friendly default (see `backend/src/main/resources/application.properties`
 
 ## nginx reverse proxy
 
-`nginx` (`nginx/nginx.conf`) is the single entry point. `/api/*`, `/graphql` and the Google
-OAuth2 paths go to the backend; everything else goes to the Next.js frontend. Because the browser
-sees one origin, the auth cookies stay first-party and there are no CORS preflights.
-
-- The frontend image is built with an empty `NEXT_PUBLIC_API_URL`, so it calls relative URLs.
-  That value is inlined into the browser bundle at build time; rebuild with `--build` after
-  changing it.
-- SSE routes (`/api/orders/stream`, `/api/v1/agent/trace/*`) have buffering off and a 31-minute
-  read timeout to cover the backend's 30-minute emitters. Chat and agent routes allow 180s for
-  Groq. Other API routes use 60s.
-- `server.forward-headers-strategy=native` makes Spring trust `X-Forwarded-*`, so audit logs record
-  the client IP and OAuth2 redirect URIs use the public host.
-- Google sign-in: add `http://localhost/login/oauth2/code/google` to the OAuth client's
-  authorized redirect URIs (port 80 only; include `:<NGINX_PORT>` otherwise).
-- `FRONTEND_URL` defaults to `http://localhost`. It must equal the public origin, since it is the
-  backend's CORS allow-list and the post-login redirect target.
-- nginx serves plain HTTP only. For a real deployment, terminate TLS in front of it (or extend the
-  config) and set `COOKIE_SECURE=true`.
+`nginx` is the single entry point at http://localhost: `/api/*` and `/graphql` go to the backend,
+everything else to the frontend, so the browser sees one origin. Routing, timeouts, SSE handling
+and TLS notes are in [nginx.md](nginx.md). `FRONTEND_URL` defaults to `http://localhost` to match,
+and the frontend image is built with an empty `NEXT_PUBLIC_API_URL`.
 
 **Redis note**: `RedisCacheClient` always speaks Upstash's REST protocol
 (`GET /get/{key}`, `POST /set/{key}`), never the native Redis wire protocol — that's how the app
@@ -54,7 +40,7 @@ Provide a `.env` at the repo root with hosted connection details (Neon Postgres,
 Aiven Kafka — see `.env.example`), then:
 
 ```bash
-docker compose up backend frontend --build
+docker compose up nginx backend frontend --build
 ```
 
 The `postgres`/`redis`/`redis-http`/`zookeeper`/`kafka` services are gated behind the `local`
@@ -68,3 +54,8 @@ profile, so they don't start; `backend` reads connection details straight from `
 picks up whichever security protocol is active). `/actuator/health/readiness` and
 `/actuator/health/liveness` are exposed via Boot's health probe groups for use as Docker/K8s
 readiness and liveness checks.
+
+## Deploying to a host
+
+Compose is for local and single-host use. For Render and other managed platforms (separate
+services, no Compose) see [deploy.md](deploy.md).
