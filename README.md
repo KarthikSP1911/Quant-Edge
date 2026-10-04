@@ -1,4 +1,12 @@
-# <img src="frontend/public/logo/logo-mark.svg" alt="" width="28" height="28" align="center" /> Quant Edge
+<p align="center">
+  <img src="frontend/public/logo/logo-mark.svg" alt="Quant Edge logo" width="120">
+</p>
+
+<h1 align="center">Quant Edge</h1>
+
+<p align="center">
+  An AI-powered stock research and simulated trading platform. Research a symbol, place simulated trades against a Kafka-backed matching engine, and ask an AI assistant or research agent, all quantified.
+</p>
 
 <p align="center">
   <img src="docs/images/hero-preview.png" alt="Quant Edge hero preview" width="900" />
@@ -13,27 +21,28 @@
   <img src="https://img.shields.io/badge/Apache_Kafka-231F20?style=for-the-badge&logo=apache-kafka&logoColor=white" alt="Kafka" />
   <img src="https://img.shields.io/badge/Qdrant-000000?style=for-the-badge&logo=qdrant&logoColor=white" alt="Qdrant" />
   <img src="https://img.shields.io/badge/Groq-F55036?style=for-the-badge&logo=openai&logoColor=white" alt="Groq" />
+  <img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white" alt="Redis" />
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
+  <img src="https://img.shields.io/badge/Razorpay-0C2451?style=for-the-badge&logo=razorpay&logoColor=white" alt="Razorpay" />
 </p>
 
-<p align="center"><i>AI-powered stock research and simulated trading — quantified.</i></p>
+<p align="center">
+  <a href="#overview">Overview</a> &middot;
+  <a href="#key-features">Features</a> &middot;
+  <a href="#tech-stack">Tech stack</a> &middot;
+  <a href="#architecture">Architecture</a> &middot;
+  <a href="#domain-model">Domain model</a> &middot;
+  <a href="#key-data-flows">Data flows</a> &middot;
+  <a href="#ai--agentic-architecture">AI</a> &middot;
+  <a href="#api-surface">API</a> &middot;
+  <a href="#getting-started">Quickstart</a> &middot;
+  <a href="#deployment">Deployment</a> &middot;
+  <a href="#testing">Testing</a>
+</p>
 
 <p align="center"><img src="docs/images/hld.svg" alt="Architecture: a user reaches an nginx gateway that routes to the Next.js frontend and a Spring Boot backend (market data, orders, AI assistant, wallet) backed by Redis, Kafka, PostgreSQL, Qdrant, Groq and Razorpay" width="900"></p>
 
 <p align="center"><sub>Market Data, Orders &amp; Portfolio, AI Assistant, Wallet and the Order Matcher are modules of one Spring Boot process, not separate services; all of them persist to the same PostgreSQL. nginx is the single-host proxy (Render uses Next.js rewrites instead), and JWT is verified inside the backend.</sub></p>
-
-## Contents
-
-- [Overview](#overview)
-- [Key Features](#key-features)
-- [Tech Stack](#tech-stack)
-- [Architecture](#architecture)
-- [Domain Model](#domain-model)
-- [Key Data Flows](#key-data-flows)
-- [AI / Agentic Architecture](#ai--agentic-architecture)
-- [API Surface](#api-surface)
-- [Getting Started](#getting-started)
-- [Deployment](#deployment)
-- [Testing](#testing)
 
 ## Overview
 
