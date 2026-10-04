@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1720 1080" width="1720" height="1080" role="img" aria-labelledby="t d">
+<title id="t">Quant Edge high-level architecture</title>
+<desc id="d">A user reaches an nginx gateway over HTTP. The gateway routes to the Next.js frontend and to four Spring Boot backend modules: market data, orders and portfolio, AI assistant and wallet. Market data uses Redis and Finnhub, Twelve Data and Alpha Vantage, and publishes price events to Kafka, where the order matcher consumes them and writes fills to PostgreSQL. The AI assistant uses Qdrant and Groq. The wallet uses Razorpay. Auth is Google OAuth2 and JWT.</desc>
+<defs><marker id="ah" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="12" markerHeight="12" orient="auto"><path d="M2 2 L10 6 L2 10" fill="none" stroke="#1b2540" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></marker>
+<style>text{font-family:Inter,"Segoe UI",Arial,sans-serif;text-anchor:middle}.l{font-size:20px;font-weight:700;fill:#1b2540}.s{font-size:14px;fill:#6b7388}.a{font-size:14px;fill:#1b2540}</style></defs>
+<rect x="0" y="0" width="1720" height="1080" rx="24" fill="#fcfcfd"/>
+<rect x="40" y="470" width="200" height="130" rx="14" fill="#cde8ff" stroke="#1b2540" stroke-width="2"/>
+<text x="140.0" y="542.0" class="l"></text>
+<rect x="44" y="474" width="192" height="46" fill="#cde8ff"/><text x="140" y="504" class="l">User</text>
+<circle cx="140" cy="545" r="9" fill="none" stroke="#1b2540" stroke-width="2"/><path d="M122 578 C122 560 158 560 158 578 Z" fill="none" stroke="#1b2540" stroke-width="2" stroke-linejoin="round"/>
+<rect x="300" y="40" width="160" height="1000" rx="14" fill="#c8f0d4" stroke="#1b2540" stroke-width="2"/>
+<text x="380.0" y="547.0" class="l">nginx</text>
+<text x="380.0" y="562" class="s">reverse proxy</text>
+<path d="M240 515 L300 515" fill="none" stroke="#1b2540" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ah)"/>
+<text x="270" y="502" class="a">HTTP</text>
+<path d="M300 565 L240 565" fill="none" stroke="#1b2540" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="8 7" marker-end="url(#ah)"/>
+<text x="270" y="588" class="a">SSE</text>
+<rect x="40" y="760" width="200" height="100" rx="14" fill="#ffe9a8" stroke="#1b2540" stroke-width="2"/>
+<text x="140.0" y="806.0" class="l">Auth</text>
+<text x="140.0" y="830.0" class="s">Google OAuth2 + JWT</text>
+<path d="M240 810 L300 810" fill="none" stroke="#1b2540" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="8 7" marker-end="url(#ah)"/>
+<text x="270" y="798" class="a">JWT</text>
+<rect x="660" y="40" width="260" height="100" rx="14" fill="#cde8ff" stroke="#1b2540" stroke-width="2"/>
+<text x="790.0" y="86.0" class="l">Next.js</text>
+<text x="790.0" y="110.0" class="s">frontend</text>
+<rect x="660" y="180" width="260" height="210" rx="14" fill="#fff1b8" stroke="#1b2540" stroke-width="2"/>
+<text x="790.0" y="281.0" class="l">Market Data</text>
+<text x="790.0" y="305.0" class="s">price sync + quotes</text>
+<rect x="660" y="480" width="260" height="100" rx="14" fill="#ffd3d3" stroke="#1b2540" stroke-width="2"/>
+<text x="790.0" y="526.0" class="l">Orders &amp; Portfolio</text>
+<text x="790.0" y="550.0" class="s">orders, GraphQL reads</text>
+<rect x="660" y="650" width="260" height="200" rx="14" fill="#ffe1c2" stroke="#1b2540" stroke-width="2"/>
+<text x="790.0" y="746.0" class="l">AI Assistant</text>
+<text x="790.0" y="770.0" class="s">chat + research agent</text>
+<rect x="660" y="920" width="260" height="100" rx="14" fill="#d6f3e2" stroke="#1b2540" stroke-width="2"/>
+<text x="790.0" y="966.0" class="l">Wallet</text>
+<text x="790.0" y="990.0" class="s">Razorpay top-up</text>
+<path d="M460 160 C560.0 160 560.0 90 660 90" fill="none" stroke="#1b2540" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ah)"/>
+<path d="M460 300 C560.0 300 560.0 285 660 285" fill="none" stroke="#1b2540" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ah)"/>
+<path d="M460 530 C560.0 530 560.0 530 660 530" fill="none" stroke="#1b2540" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ah)"/>
+<path d="M460 760 C560.0 760 560.0 750 660 750" fill="none" stroke="#1b2540" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ah)"/>
+<path d="M460 900 C560.0 900 560.0 970 660 970" fill="none" stroke="#1b2540" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ah)"/>
+<path d="M1030 189 V281 A95.0 14 0 0 0 1220 281 V189 Z" fill="#e2d4fb" stroke="#1b2540" stroke-width="2"/>
+<ellipse cx="1125.0" cy="189" rx="95.0" ry="14" fill="#e2d4fb" stroke="#1b2540" stroke-width="2"/>
+<text x="1125.0" y="243.0" class="l">Redis</text>
+<text x="1125.0" y="265.0" class="s">cache</text>
+<rect x="1030" y="315" width="190" height="90" rx="14" fill="#dcdcff" stroke="#1b2540" stroke-width="2"/>
+<text x="1125.0" y="356.0" class="l">Kafka</text>
+<text x="1125.0" y="380.0" class="s">stock-prices</text>
+<path d="M920 235 L1030 235" fill="none" stroke="#1b2540" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ah)"/>
+<path d="M920 360 L1030 360" fill="none" stroke="#1b2540" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ah)"/>
+<rect x="1360" y="180" width="300" height="110" rx="14" fill="#c9f0ef" stroke="#1b2540" stroke-width="2"/>
+<text x="1510.0" y="231.0" class="l">Market data APIs</text>
+<text x="1510.0" y="255.0" class="s">Finnhub · Twelve Data · Alpha Vantage</text>
+<path d="M1220 235 L1360 235" fill="none" stroke="#1b2540" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="8 7" marker-end="url(#ah)"/>
+<text x="1290" y="222" class="a">cache miss</text>
+<rect x="1360" y="305" width="300" height="110" rx="14" fill="#c8f0d4" stroke="#1b2540" stroke-width="2"/>
+<text x="1510.0" y="356.0" class="l">Order Matcher</text>
+<text x="1510.0" y="380.0" class="s">Kafka consumer</text>
+<path d="M1220 360 L1360 360" fill="none" stroke="#1b2540" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ah)"/>
+<path d="M1030 479 V581 A95.0 14 0 0 0 1220 581 V479 Z" fill="#e2d4fb" stroke="#1b2540" stroke-width="2"/>
+<ellipse cx="1125.0" cy="479" rx="95.0" ry="14" fill="#e2d4fb" stroke="#1b2540" stroke-width="2"/>
+<text x="1125.0" y="538.0" class="l">PostgreSQL</text>
+<text x="1125.0" y="560.0" class="s">database</text>
+<path d="M920 530 L1030 530" fill="none" stroke="#1b2540" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ah)"/>
+<path d="M1510.0 415 V530 H1220" fill="none" stroke="#1b2540" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ah)"/>
+<text x="1450" y="520" class="a">fills</text>
+<path d="M1030 654 V726 A95.0 14 0 0 0 1220 726 V654 Z" fill="#e2d4fb" stroke="#1b2540" stroke-width="2"/>
+<ellipse cx="1125.0" cy="654" rx="95.0" ry="14" fill="#e2d4fb" stroke="#1b2540" stroke-width="2"/>
+<text x="1125.0" y="698.0" class="l">Qdrant</text>
+<text x="1125.0" y="720.0" class="s">vectors</text>
+<rect x="1030" y="765" width="190" height="90" rx="14" fill="#f9d6ec" stroke="#1b2540" stroke-width="2"/>
+<text x="1125.0" y="806.0" class="l">Groq</text>
+<text x="1125.0" y="830.0" class="s">LLM</text>
+<path d="M920 690 L1030 690" fill="none" stroke="#1b2540" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ah)"/>
+<path d="M920 810 L1030 810" fill="none" stroke="#1b2540" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ah)"/>
+<rect x="1030" y="925" width="190" height="90" rx="14" fill="#e6f2c2" stroke="#1b2540" stroke-width="2"/>
+<text x="1125.0" y="966.0" class="l">Razorpay</text>
+<text x="1125.0" y="990.0" class="s">Test Mode</text>
+<path d="M920 970 L1030 970" fill="none" stroke="#1b2540" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#ah)"/>
+</svg>

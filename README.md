@@ -17,6 +17,10 @@
 
 <p align="center"><i>AI-powered stock research and simulated trading — quantified.</i></p>
 
+<p align="center"><img src="docs/images/hld.svg" alt="Architecture: a user reaches an nginx gateway that routes to the Next.js frontend and a Spring Boot backend (market data, orders, AI assistant, wallet) backed by Redis, Kafka, PostgreSQL, Qdrant, Groq and Razorpay" width="900"></p>
+
+<p align="center"><sub>Market Data, Orders &amp; Portfolio, AI Assistant, Wallet and the Order Matcher are modules of one Spring Boot process, not separate services; all of them persist to the same PostgreSQL. nginx is the single-host proxy (Render uses Next.js rewrites instead), and JWT is verified inside the backend.</sub></p>
+
 ## Contents
 
 - [Overview](#overview)
